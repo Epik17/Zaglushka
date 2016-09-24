@@ -1,12 +1,12 @@
 unit frmInterface;
           //TODO
-{ защита от дурака:
+{ foolproof:
 - ...
 
-- подсветка выделенного маневра (возможно, нужно ввести массив маневров)
-- реализовать изометрию нормально (для этого нужно сделать отрисовку по осям в равном масштабе с определением размаха картинки по х и у)
-- вывод информации о маневре
-- добавить торможение
+- highlight of the selected manoeuvre  (may need manoeuvres array)
+- reliable isometric projection (equal axis scales, min/max X and Z, range, etc.)
+- manoeuvre information
+- add Desceleration
 }
 
 
@@ -120,11 +120,11 @@ var
  g_nxVisited : Boolean = False;
 
 const
-Tmin = -40; //минимальная забортная температура
-Tmax = 40;  //максимальная забортная температура
-Tdefault = 15; //забортная температура по умолчанию
-deltaH0 = 25; //шаг ползунка начальной высоты, м
-g_Vmax = 360; //используется для отрисовки графиков
+Tmin = -40; //minimal outboard temperature
+Tmax = 40;  //maximal outboard temperature
+Tdefault = 15; //default outboard temperature
+deltaH0 = 25; //H0 increment
+g_Vmax = 360; //used for plotting
 
 
 function ManevrTypeToNumber (aType : string) : Integer;
@@ -179,7 +179,7 @@ begin
 
    HelicoptersInitialization;
 
-   cbb_HelicopterType.ItemIndex :=4; //выбираем Ми-8
+   cbb_HelicopterType.ItemIndex :=4; // choosing Mi-8
    cbb_HelicopterTypeSelect(Self);
 
 
@@ -218,17 +218,7 @@ var
   tempManevr : TManevr;
   ParamArray : TParametersArray;
   SelectedIndex, i : Integer;
-  {
- procedure AppendTempManevrFromTrackBars (tempManevr : TManevr);
- begin
-    case tempManevr.pType of
-        mtHorizFlight : AppendManevr(g_FlightData,HorizFlight(g_FlightData[High(g_FlightData)],ParamArray[1]));
-        mtGorka : AppendManevr(g_FlightData,Gorka(g_Helicopter, g_FlightData[High(g_FlightData)],g_G,g_T,ParamArray[2],ParamArray[3],ParamArray[4],ParamArray[5]));
-        mtPikirovanie : AppendManevr(g_FlightData,Pikirovanie(g_Helicopter, g_FlightData[High(g_FlightData)],g_G,g_T,ParamArray[2],ParamArray[3],-ParamArray[4],ParamArray[5]));
-        mtVirage : AppendManevr(g_FlightData,Virage(g_Helicopter,g_FlightData[High(g_FlightData)], g_G, g_T,ParamArray[6], ParamArray[7]));
-    end;
- end;
-    }
+
 begin
  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горизонтальный полет')  then
    begin
@@ -280,7 +270,7 @@ begin
    begin
        tempManevr := TManevr.Create(ConvertManevrType(cbb_Manevry.Items[cbb_Manevry.ItemIndex]),ParamArray);
 
-    //рассчитываем маневр и подстыковываем
+    //calculating task and appending it
       if g_ManevrList.Count =0 then
         SetLength(g_FlightData,1);
 
@@ -313,7 +303,7 @@ begin
             g_ManevrList[SelectedIndex].fParameters[8] := g_Multipliers[0]*g_TrackBars[0].Position;
        end;
 
-       SetLength(g_FlightData,1); // при обновлении маневра пересчитываем все маневры в задании
+       SetLength(g_FlightData,1); // if manoeuvre is updated, recalculate all manoeuvres in the flight task
 
        for i:=0 to g_ManevrList.Count - 1 do
         AppendTempManevr(g_ManevrList[i]);
@@ -343,14 +333,14 @@ begin
 
   if (tempindex = 0) and (lst_Manevry.Count > 0) then
     begin
-     lst_Manevry.ItemIndex := tempindex; //выделяем следующий маневр и его параметры
+     lst_Manevry.ItemIndex := tempindex; //selecting the next manoeuvre and its parameters
      UpdateValuesFromTManevr
     end
   else
-   if (tempindex = 0) and (lst_Manevry.Count = 0) then  //если остался один
+   if (tempindex = 0) and (lst_Manevry.Count = 0) then  //if only one is left
     begin
       cbb_Manevry.ItemIndex :=-1;
-      for i:=0 to High(g_TrackBars) do //удаляем параметры
+      for i:=0 to High(g_TrackBars) do //deleting parameters
       begin
        g_TrackBars[i].Visible :=False;
        g_NameLabels[i].Visible :=False;
@@ -360,7 +350,7 @@ begin
       end;
      end
    else
-   lst_Manevry.ItemIndex := tempindex-1; //выделяем предыдущий маневр и его параметры
+   lst_Manevry.ItemIndex := tempindex-1; //selecting the next manoeuvre and its parameters
 
    UpdateValuesFromTManevr;
 
@@ -389,13 +379,14 @@ if dlgOpenFile.Execute then
       Memo1.Lines.LoadFromFile(dlgOpenFile.FileName);
       try  // run the executable to see effect!
          begin
-          //начальные условия
+          //reading initial conditions
           cbb_HelicopterType.ItemIndex := HelicopterTypeToNumber(Memo1.Lines[0]);
           trckbr_G.Position := StrToInt(Memo1.Lines[1]);
           trckbr_H0.Position := Round(StrToFloat(Memo1.Lines[2])/deltaH0);
           trckbr_T.Position := StrToInt(Memo1.Lines[3]);
           trckbrV0.Position := StrToInt(Memo1.Lines[4]);
 
+          //reading manoeuvres info
           g_ManevrList.Clear;
           g_ManevrList.Free;
 
@@ -403,12 +394,12 @@ if dlgOpenFile.Execute then
 
           SetLength(ManevrsLines,Memo1.Lines.Count-manevrInfoStartLineIndex);
 
-          for i:=manevrInfoStartLineIndex to Memo1.Lines.Count-1 do  //далее начинается про маневры; до этого — тип вертолета и начальные условия
+          for i:=manevrInfoStartLineIndex to Memo1.Lines.Count-1 do
             ManevrsLines[i-manevrInfoStartLineIndex] :=Memo1.Lines[i];
 
 
 
-          g_ManevrList := TManevrList.Create(ManevrsLines{Memo1.Lines});
+          g_ManevrList := TManevrList.Create(ManevrsLines);
 
           for i:=0 to g_ManevrList.Count-1 do
            lst_Manevry.Items.Add(ConvertManevrType(g_ManevrList[i].pType));
@@ -623,17 +614,16 @@ end;
 procedure Tfrm_Interface.UpdateValuesFromTManevr;
  var
   SelectedManevr : TManevr;
-  SelectedIndex, i : Integer; //номер выбранного маневра в списке на форме и в списке TManevrList
+  SelectedIndex, i : Integer; //number of the selected manoeuvre in the cbb and in a TManevrList object
 begin
 if lst_Manevry.ItemIndex <>-1 then
  begin
    SelectedIndex := lst_Manevry.ItemIndex;
 
-   cbb_Manevry.ItemIndex := ManevrTypeToNumber(lst_Manevry.Items[SelectedIndex]); //выставляем соотв. маневр в выпадающем списке
+   cbb_Manevry.ItemIndex := ManevrTypeToNumber(lst_Manevry.Items[SelectedIndex]); //selecting the corresponding manoeuvre in the cbb
 
-   CreateLabeledScrollbars(ConvertManevrType(lst_Manevry.Items[SelectedIndex]));  //отображаем соотв. ползунки
+   CreateLabeledScrollbars(ConvertManevrType(lst_Manevry.Items[SelectedIndex]));  // making the corresponding trackbars visible
 
-   //задаем соответствующие маневру значения
        SelectedManevr := g_ManevrList[SelectedIndex];
 
        if (SelectedManevr.pType = mtHorizFlight) then
@@ -688,14 +678,14 @@ end;
 
 procedure Tfrm_Interface.DynamicallyUpdateLabelValues(Sender: TObject);  //обновление параметров на основе положения ползунков
  var
-  i : Integer; //номер выбранного маневра в списке на форме
+  i : Integer; //number of the selected manoeuvre in the form list
 begin
   DynamicFoolProtection;
-      //обновляем значения меток
+
+      //refreshing labels' values
   for i:=0 to High(g_TrackBars) do
    g_ValueLabels[i].Caption := FloatToStr(g_Multipliers[i]*g_TrackBars[i].Position);
 
- // DynamicFoolProtection;
 end;
 
 procedure HelicoptersInitialization;
@@ -707,8 +697,8 @@ end;
 
 procedure Tfrm_Interface.cbb_HelicopterTypeSelect(Sender: TObject);
 begin
-  if cbb_HelicopterType.ItemIndex = 4 then g_Helicopter := g_HelicopterDatabase[1];  //Ми-8
-  if cbb_HelicopterType.ItemIndex = 5 then g_Helicopter := g_HelicopterDatabase[2];  //измененный Ми-8
+  if cbb_HelicopterType.ItemIndex = 4 then g_Helicopter := g_HelicopterDatabase[1];  //Mi-8
+  if cbb_HelicopterType.ItemIndex = 5 then g_Helicopter := g_HelicopterDatabase[2];  //Mi-8 clone
 
   SetInitialConditionsTrackbars;
   DynamicallyUpdateICLabelValuesAndPlots(Self);
@@ -722,14 +712,14 @@ begin
    Max := Round(amax);
    Position := Round(aposition);
    OnChange := DynamicallyUpdateICLabelValuesAndPlots;
-   Min := Round(amin); //это обязательно в конце, иначе не сработывает для trckbr_G (и только для него!). Кажется, это глюк делфи
+   Min := Round(amin); //this has to be at the end, otherwise it doesn't work for trckbr_G (delphi's bug?)
   end;
 end;
 
 procedure Tfrm_Interface.SetInitialConditionsTrackbars;
 
 begin
- SetICTrackbar(trckbr_H0,50{метров}/deltaH0,g_Helicopter.Hdyn/deltaH0,400/deltaH0);
+ SetICTrackbar(trckbr_H0,50{meters}/deltaH0,g_Helicopter.Hdyn/deltaH0,400/deltaH0);
  SetICTrackbar(trckbrV0,50,0.95*g_Helicopter.Vmax-1,100);
  SetICTrackbar(trckbr_G,g_Helicopter.Gmin,g_Helicopter.Gmax,g_Helicopter.Gmax);
  SetICTrackbar(trckbr_T,Tmin,Tmax,Tdefault);
@@ -851,7 +841,7 @@ begin
 
     chopped := TMatrix.Create(xyz1s);
 
-    if rg_view.ItemIndex = 2 then //изометрия
+    if rg_view.ItemIndex = 2 then //isometric
      begin
        cht.LeftAxis.Visible := False;
        cht.BottomAxis.Visible := False;
@@ -859,7 +849,7 @@ begin
      end
     else
       begin
-       rotated := chopped;  //не поворачиваем
+       rotated := chopped;  //not rotated
        cht.LeftAxis.Visible := True;
        cht.BottomAxis.Visible := True;
       end;
@@ -1065,7 +1055,7 @@ begin
         cosTheta := RoundTo(Cos(DegToRad(g_TrackBars[2].Position)),-2);
 
         cosThetaRounded := Round(100*(cosTheta-cosCorrection));
-        //cosCorrection позволяет избежать случайных превышений перегрузки из-за округлений и неточного расчетного значения угла наклона
+        //cosCorrection allows avoiding accidental exceeding of the overload caused by inexact values of the slope angle
 
         if g_TrackBars[trckbarNo].Position > cosThetaRounded then
          g_TrackBars[trckbarNo].Position := cosThetaRounded;
