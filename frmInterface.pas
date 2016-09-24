@@ -128,6 +128,7 @@ g_Vmax = 360; //используется для отрисовки графиков
 
 
 function ManevrTypeToNumber (aType : string) : Integer;
+function HelicopterTypeToNumber (aType : string) : Integer;
 procedure HelicoptersInitialization;
 
 
@@ -380,20 +381,29 @@ procedure Tfrm_Interface.btn_ImportFlightTaskClick(Sender: TObject);
 var
   i:Integer;
   ManevrsLines : TArrayOfString;
+const
+  manevrInfoStartLineIndex = 5;
 begin
 if dlgOpenFile.Execute then
     begin
       Memo1.Lines.LoadFromFile(dlgOpenFile.FileName);
+
+      //начальные условия
+      cbb_HelicopterType.ItemIndex := HelicopterTypeToNumber(Memo1.Lines[0]);
+      trckbr_G.Position := StrToInt(Memo1.Lines[1]);
+      trckbr_H0.Position := Round(StrToFloat(Memo1.Lines[2])/deltaH0);
+      trckbr_T.Position := StrToInt(Memo1.Lines[3]);
+      trckbrV0.Position := StrToInt(Memo1.Lines[4]);
 
       g_ManevrList.Clear;
       g_ManevrList.Free;
 
       lst_Manevry.Clear;
 
-      SetLength(ManevrsLines,Memo1.Lines.Count-4);
+      SetLength(ManevrsLines,Memo1.Lines.Count-manevrInfoStartLineIndex);
 
-      for i:=4 to Memo1.Lines.Count-1 do  //далее начинается про маневры; до этого — тип вертолета и начальные условия
-        ManevrsLines[i-4] :=Memo1.Lines[i];
+      for i:=manevrInfoStartLineIndex to Memo1.Lines.Count-1 do  //далее начинается про маневры; до этого — тип вертолета и начальные условия
+        ManevrsLines[i-manevrInfoStartLineIndex] :=Memo1.Lines[i];
 
 
 
@@ -658,6 +668,17 @@ begin
     if aType = 'Разгон в горизонте' then Result := 5;
 end;
 
+function HelicopterTypeToNumber (aType : string) : Integer;
+begin
+  Result := -1;
+  if aType = 'Ансат-У' then Result := 0;
+  if aType = 'Ми-26' then Result := 1;
+  if aType = 'Ка-226' then Result := 2;
+  if aType = 'Ми-28Н' then Result := 3;
+  if aType = 'Ми-8МТВ-5' then Result := 4;
+  if aType = 'Ми-8АМТШ' then Result := 5;
+end;
+
 
 procedure Tfrm_Interface.DynamicallyUpdateLabelValues(Sender: TObject);  //обновление параметров на основе положения ползунков
  var
@@ -734,6 +755,7 @@ begin
  Writeln(f,FloatToStr(g_G));
  Writeln(f,FloatToStr(g_H0));
  Writeln(f,FloatToStr(g_T));
+ Writeln(f,FloatToStr(g_V0));
 
  Writeln(f, manevrlist.Count);
 
