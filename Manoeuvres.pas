@@ -118,6 +118,7 @@ var
  nyslope,tempa,dnxa : Real;
  tempstate : TStateVector;
  tempomega : TVector3D;
+ failed : Boolean;
 
 procedure SetOmegaAndAcceleration(var omega : TVector3D; var a : Real; tempstate: TStateVector; ny,nx,dnxa,nxOtXvr : Real);
 
@@ -152,30 +153,42 @@ begin
    tempstate := initialstate;
 
    dnxa := nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*mps);  //переводим скорость в км/ч
-   
+
+   failed := False;
+
  //ввод
    SetLength(vvod,0);
 
+ if (tempstate.V > 0) and not failed then
   while not ((RadToDeg(tempstate.theta)>=thetaSlope) xor Pikirovanie) do
- //  Etape(vvod,nyvvoda);
    begin
     SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyvvoda,nx(helicopter, nyvvoda, icG, icT,tempstate.y,mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,mps*tempstate.V)); //переводим скорость в км/ч
     g_Etape(vvod,tempstate, helicopter, nyvvoda,tempa, tempomega);
-   end;
+   end
+ else
+  failed := True;
 
  //наклонный участок
    SetLength(nakl,0);
 
    nyslope := Cos(tempstate.theta);
 
+ if (tempstate.V > 0) and not failed then
   while not ((mps*tempstate.V <= Vvyvoda) xor Pikirovanie) do
-    Etape(nakl,nyslope);
+    Etape(nakl,nyslope)
+ else
+  failed := True;
 
  //вывод  
    SetLength(vyvod,0);
 
+ if (tempstate.V > 0) and not failed then
   while not ((RadToDeg(tempstate.theta)<=0) xor Pikirovanie) do
-    Etape(vyvod,nyvyvoda);
+    Etape(vyvod,nyvyvoda)
+ else
+  failed := True;
+
+  if failed then ShowMessage('Падение скорости до нуля!');
 
  //стыкуем
   SetLength(Result,0);
