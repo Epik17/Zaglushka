@@ -98,6 +98,7 @@ type
     procedure ExportFlightTask(manevrlist : TManevrList);
     procedure ExportCalculatedFlightTask (FlightData : TFlightData);
     function g_H0 () : Real;
+    function g_V0 () : Real;
     function g_T () : Real;
     function g_G () : Real;
     procedure AppendTempManevr (tempManevr : TManevr);
@@ -151,7 +152,7 @@ begin
       theta :=0;
       gamma := 0;
       psi :=DegToRad(45);
-      V := 45/3.6;
+      V := g_V0/3.6;
       ny :=1;
       t :=0;
      end
@@ -703,6 +704,7 @@ procedure Tfrm_Interface.SetInitialConditionsTrackbars;
 
 begin
  SetICTrackbar(trckbr_H0,50{метров}/deltaH0,g_Helicopter.Hdyn/deltaH0,400/deltaH0);
+ SetICTrackbar(trckbrV0,50,0.95*g_Helicopter.Vmax-1,100);
  SetICTrackbar(trckbr_G,g_Helicopter.Gmin,g_Helicopter.Gmax,g_Helicopter.Gmax);
  SetICTrackbar(trckbr_T,Tmin,Tmax,Tdefault);
 end;
@@ -712,6 +714,7 @@ begin
  lbl_H0value.Caption := FloatToStr(g_H0);
  lbl_Gvalue.Caption := FloatToStr(g_G);
  lbl_Tvalue.Caption := FloatToStr(g_T);
+ lblV0value.Caption := FloatToStr(g_V0);
 
  DrawCharacs(cht_DiapNXNY,g_Helicopter,g_G,g_T,g_H0);
 
@@ -749,6 +752,12 @@ function Tfrm_Interface.g_H0 () : Real;
 begin
   Result :=deltaH0*trckbr_H0.Position;
 end;
+
+function Tfrm_Interface.g_V0 () : Real;
+begin
+  Result :=trckbrV0.Position;
+end;
+
 
 function Tfrm_Interface.g_T () : Real;
 begin
