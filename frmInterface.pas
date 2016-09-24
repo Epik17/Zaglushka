@@ -50,6 +50,9 @@ type
     rg_view: TRadioGroup;
     rg_xarak: TRadioGroup;
     btn_ExportCalculatedTask: TButton;
+    lblV0: TLabel;
+    lblV0value: TLabel;
+    trckbrV0: TTrackBar;
     procedure FormCreate(Sender: TObject);
     procedure cbb_ManevryChange(Sender: TObject);
     procedure btn_AddManevrClick(Sender: TObject);

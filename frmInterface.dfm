@@ -16,42 +16,56 @@ object frm_Interface: Tfrm_Interface
   TextHeight = 13
   object lbl_H0name: TLabel
     Left = 16
-    Top = 96
+    Top = 88
     Width = 26
     Height = 13
     Caption = 'H0, '#1084
   end
   object lbl_H0value: TLabel
     Left = 152
-    Top = 96
+    Top = 88
     Width = 27
     Height = 13
     Caption = #1079#1085#1072#1095'.'
   end
   object lbl_Gname: TLabel
     Left = 16
-    Top = 128
+    Top = 120
     Width = 25
     Height = 13
     Caption = 'G, '#1082#1075
   end
   object lbl_Gvalue: TLabel
     Left = 152
-    Top = 128
+    Top = 120
     Width = 27
     Height = 13
     Caption = #1079#1085#1072#1095'.'
   end
   object lbl_Tname: TLabel
     Left = 8
-    Top = 160
+    Top = 152
     Width = 37
     Height = 13
     Caption = 'T, '#1075#1088#1072#1076
   end
   object lbl_Tvalue: TLabel
     Left = 152
-    Top = 160
+    Top = 152
+    Width = 27
+    Height = 13
+    Caption = #1079#1085#1072#1095'.'
+  end
+  object lblV0: TLabel
+    Left = 4
+    Top = 183
+    Width = 41
+    Height = 13
+    Caption = 'V0, '#1082#1084'/'#1095
+  end
+  object lblV0value: TLabel
+    Left = 152
+    Top = 184
     Width = 27
     Height = 13
     Caption = #1079#1085#1072#1095'.'
@@ -60,7 +74,7 @@ object frm_Interface: Tfrm_Interface
     Left = 656
     Top = 8
     Width = 177
-    Height = 113
+    Height = 121
     ItemHeight = 13
     PopupMenu = pm_Manevry
     TabOrder = 0
@@ -81,7 +95,7 @@ object frm_Interface: Tfrm_Interface
   end
   object btn_AddManevr: TButton
     Left = 432
-    Top = 160
+    Top = 168
     Width = 177
     Height = 25
     Caption = #1044#1086#1073#1072#1074#1080#1090#1100'/'#1086#1073#1085#1086#1074#1080#1090#1100' '#1084#1072#1085#1077#1074#1088
@@ -104,7 +118,7 @@ object frm_Interface: Tfrm_Interface
   end
   object btn_ExportFlightTask: TButton
     Left = 656
-    Top = 128
+    Top = 136
     Width = 177
     Height = 25
     Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1087#1086#1083#1077#1090#1085#1086#1077' '#1079#1072#1076#1072#1085#1080#1077
@@ -135,7 +149,7 @@ object frm_Interface: Tfrm_Interface
   end
   object trckbr_H0: TTrackBar
     Left = 48
-    Top = 96
+    Top = 88
     Width = 97
     Height = 17
     Position = 5
@@ -145,7 +159,7 @@ object frm_Interface: Tfrm_Interface
   end
   object trckbr_G: TTrackBar
     Left = 48
-    Top = 128
+    Top = 120
     Width = 97
     Height = 17
     Position = 5
@@ -155,7 +169,7 @@ object frm_Interface: Tfrm_Interface
   end
   object trckbr_T: TTrackBar
     Left = 48
-    Top = 160
+    Top = 152
     Width = 97
     Height = 17
     Position = 5
@@ -165,7 +179,7 @@ object frm_Interface: Tfrm_Interface
   end
   object btn_Calcutate: TButton
     Left = 656
-    Top = 160
+    Top = 168
     Width = 177
     Height = 25
     Caption = #1056#1072#1089#1095#1077#1090
@@ -176,7 +190,7 @@ object frm_Interface: Tfrm_Interface
     Left = 192
     Top = 8
     Width = 209
-    Height = 145
+    Height = 153
     BackWall.Brush.Color = clWhite
     BackWall.Brush.Style = bsClear
     Title.Text.Strings = (
@@ -219,9 +233,9 @@ object frm_Interface: Tfrm_Interface
   end
   object cht_traj: TChart
     Left = 8
-    Top = 200
+    Top = 208
     Width = 641
-    Height = 385
+    Height = 377
     BackWall.Brush.Color = clWhite
     BackWall.Brush.Style = bsClear
     Title.AdjustFrame = False
@@ -273,7 +287,7 @@ object frm_Interface: Tfrm_Interface
   end
   object rg_xarak: TRadioGroup
     Left = 235
-    Top = 154
+    Top = 162
     Width = 129
     Height = 33
     Columns = 3
@@ -293,6 +307,16 @@ object frm_Interface: Tfrm_Interface
     Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1088#1077#1079#1091#1083#1100#1090#1072#1090#1099
     TabOrder = 15
     OnClick = btn_ExportCalculatedTaskClick
+  end
+  object trckbrV0: TTrackBar
+    Left = 48
+    Top = 184
+    Width = 97
+    Height = 17
+    Position = 5
+    TabOrder = 16
+    ThumbLength = 10
+    TickStyle = tsNone
   end
   object pm_Manevry: TPopupMenu
     AutoPopup = False
