@@ -29,7 +29,7 @@ begin
    MyFloatToStrF(y)+' '+
    MyFloatToStrF(z)+' '+
    MyFloatToStrF(RadToDeg(theta))+' '+
-   MyFloatToStrF(RadToDeg(gamma))+' '+
+   MyFloatToStrF(-{for Blitz3D}RadToDeg(gamma))+' '+
    MyFloatToStrF(RadToDeg(psi))+' '+
    MyFloatToStrF(V*3.6)+' '+
    MyFloatToStrF(ny)+' '+
