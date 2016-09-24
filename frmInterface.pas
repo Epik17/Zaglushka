@@ -963,7 +963,7 @@ begin
  Rewrite(f);
 
  Writeln(f,cbb_HelicopterType.Items[cbb_Helicoptertype.ItemIndex]+' G = '+FloatToStr(g_G)+' H0 = ' + FloatToStr(g_H0) +' T = '+FloatToStr(g_T) );
- ShowMessage(FloatToStr(Length(FlightData)));
+ //ShowMessage(FloatToStr(Length(FlightData)));
 
  for i:=0 to Length(g_FlightData) -1 do
  begin
