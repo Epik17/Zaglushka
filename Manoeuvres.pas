@@ -168,6 +168,8 @@ begin
  else
   failed := True;
 
+  vvod[High(vvod)].theta := DegToRad(thetaSlope);
+
  //наклонный участок
    SetLength(nakl,0);
 
@@ -187,6 +189,8 @@ begin
     Etape(vyvod,nyvyvoda)
  else
   failed := True;
+
+  vyvod[High(vyvod)].theta := 0.;
 
   if failed then ShowMessage('Падение скорости до нуля!');
 
@@ -286,6 +290,11 @@ begin
     g_Etape(vvod,tempstate, helicopter, tempny,tempa, tempomega);
    end;
 
+  if vvod[High(vvod)].gamma >= 0 then
+   vvod[High(vvod)].gamma := DegToRad(kren)
+  else
+   vvod[High(vvod)].gamma := -DegToRad(kren);
+
  //участок c постоянным креном
    SetLength(constgammaUchastok,0);
    tempomega.x := 0;
@@ -359,7 +368,10 @@ begin
     g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
     localTime := localTime + dt;
    end;
- //ShowMessage(FloatToStr(localTime));
+
+  tempstate.V := Vfinal/mps;
+
+  //ShowMessage(FloatToStr(localTime));
 end;
 
 function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TFlightData;
