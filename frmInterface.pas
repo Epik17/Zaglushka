@@ -1,7 +1,7 @@
 unit frmInterface;
           //TODO
 { защита от дурака:
-- проверка корректности загружаемого файла  (видимо, нужно использовать try except finally)
+- ...
 
 - подсветка выделенного маневра (возможно, нужно ввести массив маневров)
 - реализовать изометрию нормально (для этого нужно сделать отрисовку по осям в равном масштабе с определением размаха картинки по х и у)
@@ -387,38 +387,44 @@ begin
 if dlgOpenFile.Execute then
     begin
       Memo1.Lines.LoadFromFile(dlgOpenFile.FileName);
+      try  // run the executable to see effect!
+         begin
+          //начальные условия
+          cbb_HelicopterType.ItemIndex := HelicopterTypeToNumber(Memo1.Lines[0]);
+          trckbr_G.Position := StrToInt(Memo1.Lines[1]);
+          trckbr_H0.Position := Round(StrToFloat(Memo1.Lines[2])/deltaH0);
+          trckbr_T.Position := StrToInt(Memo1.Lines[3]);
+          trckbrV0.Position := StrToInt(Memo1.Lines[4]);
 
-      //начальные условия
-      cbb_HelicopterType.ItemIndex := HelicopterTypeToNumber(Memo1.Lines[0]);
-      trckbr_G.Position := StrToInt(Memo1.Lines[1]);
-      trckbr_H0.Position := Round(StrToFloat(Memo1.Lines[2])/deltaH0);
-      trckbr_T.Position := StrToInt(Memo1.Lines[3]);
-      trckbrV0.Position := StrToInt(Memo1.Lines[4]);
+          g_ManevrList.Clear;
+          g_ManevrList.Free;
 
-      g_ManevrList.Clear;
-      g_ManevrList.Free;
+          lst_Manevry.Clear;
 
-      lst_Manevry.Clear;
+          SetLength(ManevrsLines,Memo1.Lines.Count-manevrInfoStartLineIndex);
 
-      SetLength(ManevrsLines,Memo1.Lines.Count-manevrInfoStartLineIndex);
-
-      for i:=manevrInfoStartLineIndex to Memo1.Lines.Count-1 do  //далее начинается про маневры; до этого — тип вертолета и начальные условия
-        ManevrsLines[i-manevrInfoStartLineIndex] :=Memo1.Lines[i];
-
-
-
-      g_ManevrList := TManevrList.Create(ManevrsLines{Memo1.Lines});
-
-      for i:=0 to g_ManevrList.Count-1 do
-       lst_Manevry.Items.Add(ConvertManevrType(g_ManevrList[i].pType));
+          for i:=manevrInfoStartLineIndex to Memo1.Lines.Count-1 do  //далее начинается про маневры; до этого — тип вертолета и начальные условия
+            ManevrsLines[i-manevrInfoStartLineIndex] :=Memo1.Lines[i];
 
 
-     lst_Manevry.ItemIndex := 0;
-     pm_Manevry.AutoPopup := True;
 
-     UpdateValuesFromTManevr;
+          g_ManevrList := TManevrList.Create(ManevrsLines{Memo1.Lines});
 
-     RecalculateRedrawFromManevrList;         
+          for i:=0 to g_ManevrList.Count-1 do
+           lst_Manevry.Items.Add(ConvertManevrType(g_ManevrList[i].pType));
+
+
+         lst_Manevry.ItemIndex := 0;
+         pm_Manevry.AutoPopup := True;
+
+         UpdateValuesFromTManevr;
+
+         RecalculateRedrawFromManevrList;
+         end;
+      except
+        ShowMessage('Некорректная структура файла');
+      end
+
     end;
 
 end;
