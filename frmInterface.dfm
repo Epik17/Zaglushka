@@ -234,7 +234,7 @@ object frm_Interface: Tfrm_Interface
   object cht_traj: TChart
     Left = 8
     Top = 208
-    Width = 641
+    Width = 377
     Height = 377
     BackWall.Brush.Color = clWhite
     BackWall.Brush.Style = bsClear
