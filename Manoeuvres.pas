@@ -296,9 +296,11 @@ begin
   else
    failed:= True;
 
+ if (tempstate.V > 0) and not failed then
   if vvod[High(vvod)].gamma >= 0 then
    vvod[High(vvod)].gamma := DegToRad(kren)
   else
+ if (tempstate.V > 0) and not failed then 
    vvod[High(vvod)].gamma := -DegToRad(kren);
 
  //участок c постоянным креном
