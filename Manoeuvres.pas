@@ -382,15 +382,15 @@ begin
  SetLength(Result,0);
 
  if (tempstate.V > 0) and not failed then
-   while not (mps*tempstate.V >=Vfinal) do
-    begin
+   begin
+    while not (mps*tempstate.V >=Vfinal) do
      begin
       SetAcceleration(a,tempstate, tempny);
       g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
       localTime := localTime + dt;
      end;
       tempstate.V := Vfinal/mps;
-    end
+   end
  else
   failed := True;
 
