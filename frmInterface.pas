@@ -4,9 +4,11 @@ unit frmInterface;
 - ...
 
 - highlight of the selected manoeuvre  (may need manoeuvres array)
-- reliable isometric projection (equal axis scales, min/max X and Z, range, etc.)
+- reliable isometric projection (equal axis scales, min/max X and Z, range, etc. !! )
 - manoeuvre information
 - add Desceleration
+- Razgon must use Diapazon for offer reasonable Vfin on given height
+
 }
 
 
@@ -861,7 +863,7 @@ procedure Tfrm_Interface.DrawTrajectory(var cht: TChart;
 begin
   cht.Series[0].Clear;
   
-  if Length(g_FlightData) >1 then
+  if Length(FlightData) >1 then
   begin
        xyz1 := ToXYZ1Array(FlightData);
     SetLength(xyz1s,Length(xyz1));
@@ -889,7 +891,14 @@ begin
        cht.BottomAxis.Visible := True;
       end;
 
-
+   if (rg_view.ItemIndex = 1) then
+     begin
+      cht.LeftAxis.Automatic := False;
+      cht.LeftAxis.Minimum := 0;
+      cht.LeftAxis.Maximum := Round(1.1*g_H0);
+     end
+   else
+    cht.LeftAxis.Automatic := True;
 
     for i :=0 to rotated.RowCount -1 do
      if (rg_view.ItemIndex = 1) or (rg_view.ItemIndex = 2) then
