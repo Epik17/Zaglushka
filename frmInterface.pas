@@ -225,15 +225,8 @@ end;
 
    if Length(TempManevrData) > 0 then
     //if there were no errors during the calculation of TempManevrData
-    begin
      AppendManevr(g_FlightData,TempManevrData,g_Helicopter);
 
-     g_ManevrList.Add(tempManevr);
-
-     lst_Manevry.Items.Add(ConvertManevrType(tempManevr.pType));
-
-     lst_Manevry.ItemIndex := lst_Manevry.Count-1;
-    end;
 
  end;
 
@@ -241,7 +234,7 @@ procedure Tfrm_Interface.btn_AddManevrClick(Sender: TObject);
 var
   tempManevr : TManevr;
   ParamArray : TParametersArray;
-  SelectedIndex, i : Integer;
+  SelectedIndex, i, temp_g_FlightDataLength : Integer;
 
 begin
  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горизонтальный полет')  then
@@ -298,8 +291,18 @@ begin
       if g_ManevrList.Count =0 then
         SetLength(g_FlightData,1);
 
+     temp_g_FlightDataLength := Length(g_FlightData);
+
      AppendTempManevr(tempManevr);
 
+     if Length(g_FlightData) <> temp_g_FlightDataLength then
+      begin
+        g_ManevrList.Add(tempManevr);
+
+        lst_Manevry.Items.Add(ConvertManevrType(tempManevr.pType));
+
+        lst_Manevry.ItemIndex := lst_Manevry.Count-1;
+      end;
 
    end;
 
