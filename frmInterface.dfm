@@ -2,7 +2,7 @@ object frm_Interface: Tfrm_Interface
   Left = 447
   Top = 271
   Width = 855
-  Height = 670
+  Height = 699
   Caption = #1055#1088#1086#1075#1088#1072#1084#1084#1072' '#1076#1083#1103' '#1084#1086#1076#1077#1083#1080#1088#1086#1074#1072#1085#1080#1103' '#1087#1086#1083#1077#1090#1085#1086#1075#1086' '#1079#1072#1076#1072#1085#1080#1103
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -70,11 +70,18 @@ object frm_Interface: Tfrm_Interface
     Height = 13
     Caption = #1079#1085#1072#1095'.'
   end
+  object lbl_RecalcNeeded: TLabel
+    Left = 147
+    Top = 212
+    Width = 280
+    Height = 13
+    Caption = #1058#1088#1077#1073#1091#1077#1090#1089#1103' '#1087#1086#1083#1085#1099#1081' '#1087#1077#1088#1077#1089#1095#1077#1090' '#1074#1089#1077#1075#1086' '#1087#1086#1083#1077#1090#1085#1086#1075#1086' '#1079#1072#1076#1072#1085#1080#1103'.'
+  end
   object lst_Manevry: TListBox
     Left = 656
     Top = 8
     Width = 177
-    Height = 121
+    Height = 153
     ItemHeight = 13
     PopupMenu = pm_Manevry
     TabOrder = 0
@@ -118,7 +125,7 @@ object frm_Interface: Tfrm_Interface
   end
   object btn_ExportFlightTask: TButton
     Left = 656
-    Top = 136
+    Top = 168
     Width = 177
     Height = 25
     Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1087#1086#1083#1077#1090#1085#1086#1077' '#1079#1072#1076#1072#1085#1080#1077
@@ -178,11 +185,11 @@ object frm_Interface: Tfrm_Interface
     TickStyle = tsNone
   end
   object btn_Calcutate: TButton
-    Left = 656
-    Top = 168
+    Left = 432
+    Top = 210
     Width = 177
-    Height = 25
-    Caption = #1056#1072#1089#1095#1077#1090
+    Height = 17
+    Caption = #1042#1099#1087#1086#1083#1085#1080#1090#1100' '#1087#1077#1088#1077#1089#1095#1077#1090
     TabOrder = 10
     OnClick = btn_CalcutateClick
   end
@@ -233,7 +240,7 @@ object frm_Interface: Tfrm_Interface
   end
   object cht_traj: TChart
     Left = 8
-    Top = 208
+    Top = 240
     Width = 377
     Height = 377
     BackWall.Brush.Color = clWhite
@@ -271,8 +278,8 @@ object frm_Interface: Tfrm_Interface
     end
   end
   object rg_view: TRadioGroup
-    Left = 216
-    Top = 592
+    Left = 96
+    Top = 619
     Width = 225
     Height = 33
     Caption = #1042#1080#1076

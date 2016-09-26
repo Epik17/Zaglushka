@@ -52,6 +52,7 @@ type
     lblV0: TLabel;
     lblV0value: TLabel;
     trckbrV0: TTrackBar;
+    lbl_RecalcNeeded: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure cbb_ManevryChange(Sender: TObject);
     procedure btn_AddManevrClick(Sender: TObject);
@@ -80,9 +81,6 @@ type
 
 
 
-
-
-
   private
     { Private declarations }
   public
@@ -104,6 +102,9 @@ type
     procedure RecalculateRedrawFromManevrList;
     procedure FlightDataInitialization;
     procedure DynamicFoolProtection;
+    procedure FullRecalculate(Sender: TObject);
+    procedure DisableCalculateButton;
+    procedure EnableCalculateButton;
   end;
 
 var
@@ -186,6 +187,8 @@ begin
 
    FlightDataInitialization;
 
+   DisableCalculateButton;
+
 end;
 
 procedure Tfrm_Interface.cbb_ManevryChange(Sender: TObject);
@@ -237,6 +240,7 @@ var
   SelectedIndex, i, temp_g_FlightDataLength : Integer;
 
 begin
+
  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горизонтальный полет')  then
    begin
      ParamArray[1] := g_Multipliers[0]*g_TrackBars[0].Position;
@@ -306,10 +310,11 @@ begin
 
    end;
 
- if g_ButtonMode = bmUpdate then
+ if (g_ButtonMode = bmUpdate) and (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = lst_Manevry.Items[lst_Manevry.ItemIndex]) then
     begin
-          SelectedIndex := lst_Manevry.ItemIndex;
-    if SelectedIndex <>-1 then
+     SelectedIndex := lst_Manevry.ItemIndex;
+     
+     if SelectedIndex <>-1 then
        begin
          if (g_ManevrList[SelectedIndex].pType = mtHorizFlight) then
             g_ManevrList[SelectedIndex].fParameters[1] := g_Multipliers[0]*g_TrackBars[0].Position;
@@ -703,6 +708,7 @@ procedure Tfrm_Interface.DynamicallyUpdateLabelValues(Sender: TObject);  //обнов
  var
   i : Integer; //number of the selected manoeuvre in the form list
 begin
+
   DynamicFoolProtection;
 
       //refreshing labels' values
@@ -725,6 +731,9 @@ begin
 
   SetInitialConditionsTrackbars;
   DynamicallyUpdateICLabelValuesAndPlots(Self);
+
+ if g_ManevrList.Count > 0 then
+  EnableCalculateButton;
 
 end;
 
@@ -758,6 +767,9 @@ begin
  DrawCharacs(cht_DiapNXNY,g_Helicopter,g_G,g_T,g_H0);
 
  FlightDataInitialization;
+
+ if g_ManevrList.Count > 0 then
+  EnableCalculateButton
 end;
 
 procedure Tfrm_Interface.ExportFlightTask(manevrlist : TManevrList);
@@ -1038,7 +1050,7 @@ begin
  btn_AddManevr.Enabled := True;
 end;
 
-procedure Tfrm_Interface.btn_CalcutateClick(Sender: TObject);
+procedure Tfrm_Interface.FullRecalculate;
 begin
  if g_ManevrList.Count > 0 then
    begin
@@ -1046,6 +1058,25 @@ begin
 
     RecalculateRedrawFromManevrList;
    end;
+end;
+
+procedure Tfrm_Interface.DisableCalculateButton;
+begin
+  btn_Calcutate.Visible := False;
+  lbl_RecalcNeeded.Visible := False;
+end;
+
+procedure Tfrm_Interface.EnableCalculateButton;
+begin
+  btn_Calcutate.Visible := True;
+  lbl_RecalcNeeded.Visible := True;
+end;
+
+procedure Tfrm_Interface.btn_CalcutateClick(Sender: TObject);
+begin
+ FullRecalculate(Self);
+
+ DisableCalculateButton;
 end;
 
 procedure Tfrm_Interface.DynamicFoolProtection;
@@ -1087,5 +1118,6 @@ begin
     end;
 
 end;
+
 
 end.
