@@ -322,6 +322,7 @@ begin
       end;
    end;
 
+ if lst_Manevry.Count > 0 then
  if (g_ButtonMode = bmUpdate) and (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = lst_Manevry.Items[lst_Manevry.ItemIndex]) then
     begin
      SelectedIndex := lst_Manevry.ItemIndex;
@@ -380,15 +381,18 @@ begin
    if (tempindex = 0) and (lst_Manevry.Count = 0) then  //if only one is left
     begin
       cbb_Manevry.ItemIndex :=-1;
+      btn_AddManevr.Enabled := False;
+
+      
       for i:=0 to High(g_TrackBars) do //deleting parameters
       begin
        g_TrackBars[i].Visible :=False;
        g_NameLabels[i].Visible :=False;
        g_ValueLabels[i].Visible :=False;
-       
+
        pm_Manevry.AutoPopup := False;
       end;
-     end
+    end
    else
    lst_Manevry.ItemIndex := tempindex-1; //selecting the next manoeuvre and its parameters
 
@@ -1081,7 +1085,8 @@ begin
 
  DrawTrajectory(cht_traj,g_FlightData);
 
- btn_AddManevr.Enabled := True;
+ if g_ManevrList.Count > 0 then
+  btn_AddManevr.Enabled := True;
 end;
 
 procedure Tfrm_Interface.FullRecalculate;
