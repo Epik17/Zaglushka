@@ -253,9 +253,12 @@ var
   vvod, constgammaUchastok,vyvod : TFlightData;
   tempstate : TStateVector;
   tempomega : TVector3D;
+  failed:Boolean;
 procedure SetOmegaAndAcceleration(var omega : TVector3D; var a : Real; tempstate: TStateVector; ny : Real; Left: Boolean);
 
 begin
+     failed := False;
+
      omega.x:=DegToRad(10);  //скорость ввода в крен (вывода из крена), градусов в секунду
      if Left then omega.x := -omega.x;
 
@@ -282,13 +285,16 @@ begin
  tempny :=1;
 
  //ввод
- SetLength(vvod,0);
- while not (Abs(RadToDeg(tempstate.gamma)) >=Abs(kren)) do
-   begin
-    tempny := 1/Cos(tempstate.gamma);
-    SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny, Left);
-    g_Etape(vvod,tempstate, helicopter, tempny,tempa, tempomega);
-   end;
+   SetLength(vvod,0);
+  if (tempstate.V > 0) and not failed then
+   while not (Abs(RadToDeg(tempstate.gamma)) >=Abs(kren)) do
+     begin
+      tempny := 1/Cos(tempstate.gamma);
+      SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny, Left);
+      g_Etape(vvod,tempstate, helicopter, tempny,tempa, tempomega);
+     end
+  else
+   failed:= True;
 
   if vvod[High(vvod)].gamma >= 0 then
    vvod[High(vvod)].gamma := DegToRad(kren)
@@ -300,14 +306,17 @@ begin
    tempomega.x := 0;
    dpsiVvod := tempstate.psi-initialstate.psi;
 
-  while not (Abs(tempstate.psi-initialstate.psi) >= Abs((DegToRad(deltaPsi))-Abs(dpsiVvod))) do
-    g_Etape(constgammaUchastok,tempstate, helicopter, tempny,tempa, tempomega);
-
+  if (tempstate.V > 0) and not failed then
+    while not (Abs(tempstate.psi-initialstate.psi) >= Abs((DegToRad(deltaPsi))-Abs(dpsiVvod))) do
+      g_Etape(constgammaUchastok,tempstate, helicopter, tempny,tempa, tempomega)
+  else
+   failed:= True;
 
  //вывод  
    SetLength(vyvod,0);
    prevgamma :=0;
 
+ if (tempstate.V > 0) and not failed then
   while not (tempstate.gamma*prevgamma < 0) do
    begin
     tempny := 1/Cos(tempstate.gamma);
@@ -316,6 +325,10 @@ begin
     prevgamma := tempstate.gamma;
     g_Etape(vyvod,tempstate, helicopter, tempny,tempa, tempomega); 
    end;
+  else
+   failed:= True;
+
+  if failed then ShowMessage('Падение скорости до нуля!');
 
   SetLength(Result,0);
   AppendManevr(Result,vvod,helicopter);
@@ -342,8 +355,10 @@ var
   localTime,tempny,a : Real;
   tempstate : TStateVector;
   tempomega : TVector3D;
+  failed : Boolean;
+
  procedure SetAcceleration(var a : Real; tempstate: TStateVector; ny : Real);
- const
+  const
    timeBeforeFullNX = 10{секунд}; //на достижение максимально возможной nx уходит время
 begin
       a := g*nx(helicopter,tempny,icG, icT,tempstate.y,mps*tempstate.V);
@@ -361,15 +376,21 @@ begin
  tempomega.y:=0;
  tempomega.z:=0;
  SetLength(Result,0);
- 
- while not (mps*tempstate.V >=Vfinal) do
-   begin
-    SetAcceleration(a,tempstate, tempny);
-    g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
-    localTime := localTime + dt;
-   end;
 
-  tempstate.V := Vfinal/mps;
+ if (tempstate.V > 0) and not failed then
+   while not (mps*tempstate.V >=Vfinal) do
+    begin
+     begin
+      SetAcceleration(a,tempstate, tempny);
+      g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
+      localTime := localTime + dt;
+     end;
+      tempstate.V := Vfinal/mps;
+    end
+ else
+  failed := True;
+
+  if failed then ShowMessage('Падение скорости до нуля!');
 
   //ShowMessage(FloatToStr(localTime));
 end;
