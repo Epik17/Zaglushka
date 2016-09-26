@@ -202,8 +202,10 @@ begin
 end;
 
  procedure Tfrm_Interface.AppendTempManevr (tempManevr : TManevr);
+ var
+   TempManevrData : TFlightData;
  begin
-    case tempManevr.pType of
+  {  case tempManevr.pType of
         mtHorizFlight : AppendManevr(g_FlightData,HorizFlight(g_FlightData[High(g_FlightData)],tempManevr.fParameters[1]),g_Helicopter);
         mtGorka : AppendManevr(g_FlightData,Gorka(g_Helicopter, g_FlightData[High(g_FlightData)],g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],tempManevr.fParameters[4],tempManevr.fParameters[5]),g_Helicopter);
         mtPikirovanie : AppendManevr(g_FlightData,Pikirovanie(g_Helicopter, g_FlightData[High(g_FlightData)],g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[5]),g_Helicopter);
@@ -211,6 +213,28 @@ end;
         mtRightVirage : AppendManevr(g_FlightData,Virage(g_Helicopter,g_FlightData[High(g_FlightData)], g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7]),g_Helicopter);
         mtHorizRazgon : AppendManevr(g_FlightData,HorizRazgonInputCheck(g_Helicopter,g_FlightData[High(g_FlightData)],g_G, g_T,tempManevr.fParameters[8]),g_Helicopter);
     end;
+    }
+   case tempManevr.pType of
+        mtHorizFlight : TempManevrData:=HorizFlight(g_FlightData[High(g_FlightData)],tempManevr.fParameters[1]);
+        mtGorka : TempManevrData:=Gorka(g_Helicopter, g_FlightData[High(g_FlightData)],g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],tempManevr.fParameters[4],tempManevr.fParameters[5]);
+        mtPikirovanie : TempManevrData:=Pikirovanie(g_Helicopter, g_FlightData[High(g_FlightData)],g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[5]);
+        mtLeftVirage : TempManevrData:=Virage(g_Helicopter,g_FlightData[High(g_FlightData)], g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[7]);
+        mtRightVirage : TempManevrData:=Virage(g_Helicopter,g_FlightData[High(g_FlightData)], g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7]);
+        mtHorizRazgon : TempManevrData:=HorizRazgonInputCheck(g_Helicopter,g_FlightData[High(g_FlightData)],g_G, g_T,tempManevr.fParameters[8]);
+    end;
+
+   if Length(TempManevrData) > 0 then
+    //if there were no errors during the calculation of TempManevrData
+    begin
+     AppendManevr(g_FlightData,TempManevrData,g_Helicopter);
+
+     g_ManevrList.Add(tempManevr);
+
+     lst_Manevry.Items.Add(ConvertManevrType(tempManevr.pType));
+
+     lst_Manevry.ItemIndex := lst_Manevry.Count-1;
+    end;
+
  end;
 
 procedure Tfrm_Interface.btn_AddManevrClick(Sender: TObject);
@@ -274,13 +298,9 @@ begin
       if g_ManevrList.Count =0 then
         SetLength(g_FlightData,1);
 
-       g_ManevrList.Add(tempManevr);
+     AppendTempManevr(tempManevr);
 
-       lst_Manevry.Items.Add(ConvertManevrType(tempManevr.pType)); 
 
-      AppendTempManevr(tempManevr);
-
-      lst_Manevry.ItemIndex := lst_Manevry.Count-1;
    end;
 
  if g_ButtonMode = bmUpdate then
