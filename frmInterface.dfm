@@ -307,11 +307,11 @@ object frm_Interface: Tfrm_Interface
     OnClick = rg_xarakClick
   end
   object btn_ExportCalculatedTask: TButton
-    Left = 656
-    Top = 592
-    Width = 177
+    Left = 440
+    Top = 624
+    Width = 393
     Height = 33
-    Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1088#1077#1079#1091#1083#1100#1090#1072#1090#1099
+    Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1084#1072#1089#1089#1080#1074' '#1087#1086#1083#1086#1078#1077#1085#1080#1081' '#1074#1077#1088#1090#1086#1083#1077#1090#1072
     TabOrder = 15
     OnClick = btn_ExportCalculatedTaskClick
   end

@@ -792,25 +792,31 @@ i,j : Byte;
 currentdir : string;
 begin
  currentdir := GetCurrentDir;
- AssignFile(f, currentdir+'\FlightTask.txt');
- Rewrite(f);
+ try
+   AssignFile(f, currentdir+'\FlightTask.txt');
+   Rewrite(f);
 
- Writeln(f,cbb_HelicopterType.Items[cbb_Helicoptertype.ItemIndex]);
- Writeln(f,FloatToStr(g_G));
- Writeln(f,FloatToStr(g_H0));
- Writeln(f,FloatToStr(g_T));
- Writeln(f,FloatToStr(g_V0));
+   Writeln(f,cbb_HelicopterType.Items[cbb_Helicoptertype.ItemIndex]);
+   Writeln(f,FloatToStr(g_G));
+   Writeln(f,FloatToStr(g_H0));
+   Writeln(f,FloatToStr(g_T));
+   Writeln(f,FloatToStr(g_V0));
 
- Writeln(f, manevrlist.Count);
+   Writeln(f, manevrlist.Count);
 
- for i:=0 to manevrlist.Count -1 do
- begin
-  Writeln(f, ConvertManevrType(manevrlist[i].pType));
+   for i:=0 to manevrlist.Count -1 do
+   begin
+    Writeln(f, ConvertManevrType(manevrlist[i].pType));
 
-  for j:=1 to Length(manevrlist[i].fParameters) do
-   Writeln(f, manevrlist[i].fParameters[j]:7:6);
- end;
- CloseFile(f);
+    for j:=1 to Length(manevrlist[i].fParameters) do
+     Writeln(f, manevrlist[i].fParameters[j]:7:6);
+   end;
+   CloseFile(f);
+   ShowMessage('Полетное задание успешно сохранено в файл '+currentdir+'\FlightTask.txt');
+ except
+   ShowMessage('Ошибка при сохранении полетного задания');
+ end; 
+
 end;
 
 function Tfrm_Interface.g_H0 () : Real;
@@ -1033,17 +1039,24 @@ i : Integer;
 currentdir : string;
 begin
  currentdir := GetCurrentDir;
- AssignFile(f, currentdir+'\blitz\lib\massivw.txt');
- Rewrite(f);
+ try
+   begin
+     AssignFile(f, currentdir+'\blitz\lib\massivw.txt');
+     Rewrite(f);
 
- Writeln(f,cbb_HelicopterType.Items[cbb_Helicoptertype.ItemIndex]+' G = '+FloatToStr(g_G)+' H0 = ' + FloatToStr(g_H0) +' T = '+FloatToStr(g_T) );
- //ShowMessage(FloatToStr(Length(FlightData)));
+     Writeln(f,cbb_HelicopterType.Items[cbb_Helicoptertype.ItemIndex]+' G = '+FloatToStr(g_G)+' H0 = ' + FloatToStr(g_H0) +' T = '+FloatToStr(g_T) );
 
- for i:=0 to Length(g_FlightData) -1 do
- begin
-  Writeln(f, StateVectorString(FlightData[i]));
+     for i:=0 to Length(g_FlightData) -1 do
+     begin
+      Writeln(f, StateVectorString(FlightData[i]));
+     end;
+     CloseFile(f);
+     ShowMessage('Массив положений вертолета успешно сохранен в файл '+currentdir+'\blitz\lib\massivw.txt');
+   end;
+ except
+   ShowMessage('Ошибка при сохранении массива положений вертолета');
  end;
- CloseFile(f);
+
 end;
 
 procedure Tfrm_Interface.btn_ExportCalculatedTaskClick(Sender: TObject);
