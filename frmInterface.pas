@@ -239,7 +239,7 @@ procedure Tfrm_Interface.btn_AddManevrClick(Sender: TObject);
 var
   tempManevr : TManevr;
   ParamArray : TParametersArray;
-  SelectedIndex, i, temp_g_FlightDataLength : Integer;
+  SelectedIndex, i{, temp_g_FlightDataLength} : Integer;
 
 begin
 
@@ -297,11 +297,11 @@ begin
       if g_ManevrList.Count =0 then
         SetLength(g_FlightData,1);
 
-     temp_g_FlightDataLength := Length(g_FlightData);
+   //  temp_g_FlightDataLength := Length(g_FlightData);
 
      AppendTempManevr(tempManevr);
 
-     if Length(g_FlightData) <> temp_g_FlightDataLength then
+    // if Length(g_FlightData) <> temp_g_FlightDataLength then
       begin
         g_ManevrList.Add(tempManevr);
 
@@ -309,7 +309,6 @@ begin
 
         lst_Manevry.ItemIndex := lst_Manevry.Count-1;
       end;
-
    end;
 
  if (g_ButtonMode = bmUpdate) and (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = lst_Manevry.Items[lst_Manevry.ItemIndex]) then
