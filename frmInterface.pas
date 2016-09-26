@@ -3,10 +3,14 @@ unit frmInterface;
 { foolproof:
 - ...
 
-- highlight of the selected manoeuvre  (may need manoeuvres array)
-- reliable isometric projection (equal axis scales, min/max X and Z, range, etc. !! )
+- highlight of the selected manoeuvre  (may need manoeuvres array) 
 - manoeuvre information
+
 - add Desceleration
+
+- reliable isometric projection (equal axis scales, min/max X and Z, range, etc. !! )
+
+- Hmax have to be less than Hst!
 - Razgon must use Diapazon for offer reasonable Vfin on given height
 
 }
@@ -239,7 +243,7 @@ procedure Tfrm_Interface.btn_AddManevrClick(Sender: TObject);
 var
   tempManevr : TManevr;
   ParamArray : TParametersArray;
-  SelectedIndex, i{, temp_g_FlightDataLength} : Integer;
+  SelectedIndex, i, temp_g_FlightDataLength : Integer;
 
 begin
 
@@ -297,11 +301,13 @@ begin
       if g_ManevrList.Count =0 then
         SetLength(g_FlightData,1);
 
-   //  temp_g_FlightDataLength := Length(g_FlightData);
+     temp_g_FlightDataLength := Length(g_FlightData);
 
      AppendTempManevr(tempManevr);
 
-    // if Length(g_FlightData) <> temp_g_FlightDataLength then
+    if Length(g_FlightData) = temp_g_FlightDataLength then
+     ShowMessage('Уточните исходные данные либо удалите маневр из списка');
+
       begin
         g_ManevrList.Add(tempManevr);
 
