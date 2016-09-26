@@ -95,9 +95,14 @@ var
 begin
   diap := Diapason(helicopter, icG, icT);
 
+  Result := 0;
+
   for i:=0 to 360 do
    if diap[i] > h then
     Result := i;
+
+  if Result = 0 then
+   ShowMessage('¬ыход за пределы диапазона высот и скоростей');
 end;
 
 end.
