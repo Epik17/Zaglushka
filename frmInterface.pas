@@ -858,7 +858,8 @@ begin
 
  for i := Low(diap) to High(diap) do
   if diap[i] > 0 then
-   cht.Series[0].AddXY(i,diap[i]/1000)
+   cht.Series[0].AddXY(i,diap[i]/1000);
+
 end;
 
 procedure Tfrm_Interface.DrawTrajectory(var cht: TChart;

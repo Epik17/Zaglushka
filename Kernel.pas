@@ -15,6 +15,7 @@ function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent,hManevraIniti
          //вторая функция nx не рекомендуется к использованию; лучше посчитать поправку один раз и потом вычитать ее
 function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real;
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real):Real;
+function Vmax(helicopter : THelicopter; icG, icT, h : Real) : Integer;//на высоте h c точностью до 1 км/ч
 
 implementation
 
@@ -85,6 +86,18 @@ function ny(helicopter : THelicopter;icG, icT,icH0,V : Real): Real;
 begin
   with helicopter do
    Result:= (TraspUZemli/ctgTotH-icH0)/(TraspUZemli-HotV(helicopter,icG, icT,V)*ctgTotH)
+end;
+
+function Vmax(helicopter : THelicopter; icG, icT, h : Real) : Integer;//c точностью до 1 км/ч
+var
+  i : Integer;
+  diap : TDiapason;
+begin
+  diap := Diapason(helicopter, icG, icT);
+
+  for i:=0 to 360 do
+   if diap[i] > h then
+    Result := i;
 end;
 
 end.
