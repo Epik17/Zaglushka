@@ -895,7 +895,7 @@ begin
      begin
       cht.LeftAxis.Automatic := False;
       cht.LeftAxis.Minimum := 0;
-      cht.LeftAxis.Maximum := Round(1.1*g_H0);
+      cht.LeftAxis.Maximum := Round(1.4*g_H0);
      end
    else
     cht.LeftAxis.Automatic := True;
