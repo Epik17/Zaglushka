@@ -1021,7 +1021,7 @@ var
   i:Integer;
 begin
  SetLength(g_FlightData,1);
-
+ 
  for i:=0 to g_ManevrList.Count - 1 do
   AppendTempManevr(g_ManevrList[i]);
 

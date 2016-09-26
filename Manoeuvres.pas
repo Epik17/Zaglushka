@@ -263,7 +263,7 @@ var
 procedure SetOmegaAndAcceleration(var omega : TVector3D; var a : Real; tempstate: TStateVector; ny : Real; Left: Boolean);
 
 begin
-     failed := False;
+
 
      omega.x:=DegToRad(10);  //скорость ввода в крен (вывода из крена), градусов в секунду
      if Left then omega.x := -omega.x;
@@ -286,6 +286,8 @@ begin
 end;
 
 begin
+ failed := False;
+
    //инициализируем
  tempstate := initialstate;
  tempny :=1;
