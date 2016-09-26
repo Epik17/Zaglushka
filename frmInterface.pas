@@ -584,7 +584,7 @@ begin
   maxes[1]:=720;
 
   multipliers[0]:=1;
-  mins[0]:=1;
+  mins[0]:=10;
   names[0]:='Крен';
   maxes[0]:=45;
  end;
