@@ -159,7 +159,8 @@ begin
  //ввод
    SetLength(vvod,0);
 
- if (tempstate.V > 0) and not failed then
+if not failed then
+ if (tempstate.V > 0) then
   while not ((RadToDeg(tempstate.theta)>=thetaSlope) xor Pikirovanie) do
    begin
     SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyvvoda,nx(helicopter, nyvvoda, icG, icT,tempstate.y,mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,mps*tempstate.V)); //переводим скорость в км/ч
@@ -175,7 +176,8 @@ begin
 
    nyslope := Cos(tempstate.theta);
 
- if (tempstate.V > 0) and not failed then
+if not failed then
+ if (tempstate.V > 0)  then
   while not ((mps*tempstate.V <= Vvyvoda) xor Pikirovanie) do
     Etape(nakl,nyslope)
  else
@@ -184,7 +186,8 @@ begin
  //вывод  
    SetLength(vyvod,0);
 
- if (tempstate.V > 0) and not failed then
+if not failed then
+ if (tempstate.V > 0) then
   while not ((RadToDeg(tempstate.theta)<=0) xor Pikirovanie) do
     Etape(vyvod,nyvyvoda)
  else
@@ -294,7 +297,8 @@ begin
 
  //ввод
    SetLength(vvod,0);
-  if (tempstate.V > 0) and not failed then
+ if not failed then
+  if (tempstate.V > 0)  then
    while not (Abs(RadToDeg(tempstate.gamma)) >=Abs(kren)) do
      begin
       tempny := 1/Cos(tempstate.gamma);
@@ -304,7 +308,8 @@ begin
   else
    failed:= True;
 
- if (tempstate.V > 0) and not failed then
+if not failed then
+ if (tempstate.V > 0) then
   if vvod[High(vvod)].gamma >= 0 then
    vvod[High(vvod)].gamma := DegToRad(kren)
   else
@@ -316,7 +321,8 @@ begin
    tempomega.x := 0;
    dpsiVvod := tempstate.psi-initialstate.psi;
 
-  if (tempstate.V > 0) and not failed then
+ if not failed then
+  if (tempstate.V > 0) then
     while not (Abs(tempstate.psi-initialstate.psi) >= Abs((DegToRad(deltaPsi))-Abs(dpsiVvod))) do
       g_Etape(constgammaUchastok,tempstate, helicopter, tempny,tempa, tempomega)
   else
@@ -389,18 +395,21 @@ begin
  tempomega.z:=0;
  SetLength(Result,0);
 
- if (tempstate.V > 0) and not failed then
-   begin
-    while not (mps*tempstate.V >=Vfinal) do
-     begin
-      SetAcceleration(a,tempstate, tempny);
-      g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
-      localTime := localTime + dt;
-     end;
+
+
+    while (not (mps*tempstate.V >=Vfinal)) and (not failed) do
+      if (tempstate.V > 0) then
+        begin
+         begin
+          SetAcceleration(a,tempstate, tempny);
+          g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
+          localTime := localTime + dt;
+         end;
+        end
+      else
+        failed := True;
+
       tempstate.V := Vfinal/mps;
-   end
- else
-  failed := True;
 
   if failed then ShowMessage('Падение скорости до нуля!');
 
