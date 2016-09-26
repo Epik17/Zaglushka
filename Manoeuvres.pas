@@ -24,7 +24,7 @@ procedure ExtendArray(var myarray: TFlightData);overload;
 procedure ExtendArray(var myarray: TFlightData; count: Integer);overload;
 procedure MyIntegrate(var tempstate : TStateVector; dt,a : Real;omega : TVector3D);
 procedure g_Etape(var TempFlightData : TFlightData; var tempstate : TStateVector; helicopter : THelicopter; ny,a : Real; omega : TVector3D);
-procedure VErrorMessage(temp,min,max: Real);
+procedure VErrorMessage(temp,min,max: Real; Pikirovanie : boolean);
 function GorkaPikirovanieInputheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,Vmin,Vmax : Real; Pikirovanie : Boolean) : TFlightData;
 function VmaxNotReached(helicopter : THelicopter;flightdata : TFlightData) : Boolean;
 
@@ -206,9 +206,15 @@ begin
   SetLength(vyvod,0);
 end;
 
-procedure VErrorMessage(temp,min,max: Real);
+procedure VErrorMessage(temp,min,max: Real; Pikirovanie : boolean);
+var
+  manevr : string;
 begin
-  ShowMessage('Скорость ввода составила ' + FloatToStr(Round(temp)) + ' км/ч. Эта скорость должна лежать в диапазоне от '+FloatToStr(min) + ' до '+FloatToStr(max) +' км/ч');
+  if Pikirovanie then
+   manevr := 'пикирование'
+  else
+   manevr := 'горку';
+  ShowMessage('Скорость ввода в '+manevr +' составила ' + FloatToStr(Round(temp)) + ' км/ч. Эта скорость должна лежать в диапазоне от '+FloatToStr(min) + ' до '+FloatToStr(max) +' км/ч');
 end;
 
 
@@ -223,7 +229,7 @@ begin
   else
    begin
      SetLength(Result,0);
-     VErrorMessage(Vtemp,Vmin,Vmax)
+     VErrorMessage(Vtemp,Vmin,Vmax,Pikirovanie)
    end;
 end;
 
