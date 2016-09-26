@@ -637,7 +637,7 @@ begin
   multipliers[0]:=1;
   mins[0]:=Round(1.05*g_FlightData[0].V*mps);
   names[0]:='Макс. скор., км/ч';
-  maxes[0]:=Round(0.95*g_Helicopter.Vmax);
+  maxes[0]:=Round(0.95*g_Helicopter.Vmax)-1;
  end;
 
   CreateLabeledScrollbars(names, multipliers, mins, maxes);
