@@ -324,7 +324,7 @@ begin
     tempomega.x := -tempomega.x;
     prevgamma := tempstate.gamma;
     g_Etape(vyvod,tempstate, helicopter, tempny,tempa, tempomega); 
-   end;
+   end
   else
    failed:= True;
 
@@ -369,6 +369,8 @@ end;
 
 begin
     //инициализируем
+ failed := False;
+
  tempstate := initialstate;
  tempny :=1;
  localTime :=0;
