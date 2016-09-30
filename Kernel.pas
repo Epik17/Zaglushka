@@ -4,7 +4,10 @@ interface
 
 uses HelicoptersDatabase, Dialogs,Sysutils,World;
 
-type TDiapason = array [0..360] of Real;
+const
+  maxV=360;
+
+type TDiapason = array [0..maxV] of Real;
 
 function HotV(helicopter : THelicopter; V: Real) : Real; overload; //характеризует диапазон высот и скоростей для нормальных условий
 function HotV(helicopter : THelicopter; icG, icT,V: Real) : Real; overload; //характеризует диапазон высот и скоростей с учетом полетного веса и температуры
@@ -15,7 +18,9 @@ function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent,hManevraIniti
          //вторая функция nx не рекомендуется к использованию; лучше посчитать поправку один раз и потом вычитать ее
 function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real;
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real):Real;
-function Vmax(helicopter : THelicopter; icG, icT, h : Real) : Integer;//на высоте h c точностью до 1 км/ч
+function VmaxOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;//на высоте h c точностью до 1 км/ч
+function VminOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;
+function RealHst(helicopter : THelicopter; icG, icT : Real): Real;
 
 implementation
 
@@ -28,7 +33,7 @@ function Diapason (helicopter : THelicopter) : TDiapason;
 var
   i : Integer;
 begin
- for i:=0 to 360 do
+ for i:=0 to maxV do
      Result[i] :=  HotV(helicopter, i)
 end;
 
@@ -53,7 +58,7 @@ function Diapason (helicopter : THelicopter; icG, icT : Real) : TDiapason;overlo
 var
  i : Integer;
 begin
-  for i:=0 to 360 do
+  for i:=0 to maxV do
    Result[i] := HotV(helicopter,icG, icT,i)
 end;
 
@@ -88,7 +93,7 @@ begin
    Result:= (TraspUZemli/ctgTotH-icH0)/(TraspUZemli-HotV(helicopter,icG, icT,V)*ctgTotH)
 end;
 
-function Vmax(helicopter : THelicopter; icG, icT, h : Real) : Integer;//c точностью до 1 км/ч
+function VmaxOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;//c точностью до 1 км/ч
 var
   i : Integer;
   diap : TDiapason;
@@ -97,12 +102,41 @@ begin
 
   Result := 0;
 
-  for i:=0 to 360 do
+  for i:=0 to maxV do
    if diap[i] > h then
     Result := i;
+end;
 
-  if Result = 0 then
-   ShowMessage('Выход за пределы диапазона высот и скоростей');
+
+function VminOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;//c точностью до 1 км/ч
+var
+  i : Integer;
+  diap : TDiapason;
+begin
+  diap := Diapason(helicopter, icG, icT);
+
+  Result := 0;
+
+  for i:=0 to maxV do
+   if diap[i] > h then
+    begin
+     Result := i-1;
+     Break;
+    end;
+end;
+
+function RealHst(helicopter : THelicopter; icG, icT : Real): Real;
+var
+  i : Integer;
+  diap : TDiapason;
+begin
+  diap := Diapason(helicopter, icG, icT);
+
+  Result := -100500;
+
+  for i:=0 to maxV do
+   if diap[i] > Result then
+    Result := diap[i];
 end;
 
 end.

@@ -12,12 +12,8 @@ unit frmInterface;
 
 - reliable isometric projection (equal axis scales, min/max X and Z, range, etc. !! )
 
-- Hmax have to be less than Hst!
-- Razgon must use Diapazon for offer reasonable Vfin on given height (we get infinite calculation otherwise)
-
 - first V<0 message must stop all posterior calculations and appending of manoeuvres! We apparently need g_failed in appending
 
-- fix V<0 in GorkaPikirovanie and Virage (see how failed is used in Razgon)
 }
 
 
@@ -116,6 +112,9 @@ type
     procedure FullRecalculate(Sender: TObject);
     procedure DisableCalculateButton;
     procedure EnableCalculateButton;
+    procedure CollectTrackBarsData(var ParamArray : TParametersArray);
+    procedure UpdateManevrList(var manevrlist: TManevrList);
+    procedure DynamicallyChangeV0max;
   end;
 
 var
@@ -248,59 +247,16 @@ procedure Tfrm_Interface.btn_AddManevrClick(Sender: TObject);
 var
   tempManevr : TManevr;
   ParamArray : TParametersArray;
-  SelectedIndex, i, temp_g_FlightDataLength : Integer;
+  temp_g_FlightDataLength : Integer;
 
 begin
 
- if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горизонтальный полет')  then
-   begin
-     ParamArray[1] := g_Multipliers[0]*g_TrackBars[0].Position;
-     ParamArray[2] :=0;
-     ParamArray[3] :=0;
-     ParamArray[4] :=0;
-     ParamArray[5] :=0;
-     ParamArray[6] :=0;
-     ParamArray[7] :=0;
-     ParamArray[8] :=0;
-   end;
-  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] ='Пикирование') then
-   begin
-     ParamArray[1] := 0;
-     ParamArray[2] :=g_Multipliers[0]*g_TrackBars[0].Position;
-     ParamArray[3] :=g_Multipliers[1]*g_TrackBars[1].Position;
-     ParamArray[4] :=g_Multipliers[2]*g_TrackBars[2].Position;
-     ParamArray[5] :=g_Multipliers[3]*g_TrackBars[3].Position;
-     ParamArray[6] :=0;
-     ParamArray[7] :=0;
-     ParamArray[8] :=0;
-   end;
-  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый вираж') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый вираж') then
-     begin
-     ParamArray[1] :=0;
-     ParamArray[2] :=0;
-     ParamArray[3] :=0;
-     ParamArray[4] :=0;
-     ParamArray[5] :=0;
-     ParamArray[6] :=g_Multipliers[0]*g_TrackBars[0].Position;
-     ParamArray[7] :=g_Multipliers[1]*g_TrackBars[1].Position;
-     ParamArray[8] :=0;
-   end;
-
-    if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте')  then
-   begin
-     ParamArray[1] :=0;
-     ParamArray[2] :=0;
-     ParamArray[3] :=0;
-     ParamArray[4] :=0;
-     ParamArray[5] :=0;
-     ParamArray[6] :=0;
-     ParamArray[7] :=0;
-     ParamArray[8] :=g_Multipliers[0]*g_TrackBars[0].Position;
-   end;
-
+//adding
  if g_ButtonMode = bmAdd then
    begin
-       tempManevr := TManevr.Create(ConvertManevrType(cbb_Manevry.Items[cbb_Manevry.ItemIndex]),ParamArray);
+     CollectTrackBarsData(ParamArray);
+
+     tempManevr := TManevr.Create(ConvertManevrType(cbb_Manevry.Items[cbb_Manevry.ItemIndex]),ParamArray);
 
     //calculating task and appending it
       if g_ManevrList.Count =0 then
@@ -313,41 +269,26 @@ begin
     if Length(g_FlightData) = temp_g_FlightDataLength then
      ShowMessage('Уточните исходные данные либо удалите маневр из списка');
 
-      begin
-        g_ManevrList.Add(tempManevr);
 
-        lst_Manevry.Items.Add(ConvertManevrType(tempManevr.pType));
+      g_ManevrList.Add(tempManevr);
 
-        lst_Manevry.ItemIndex := lst_Manevry.Count-1;
-      end;
+      lst_Manevry.Items.Add(ConvertManevrType(tempManevr.pType));
+
+      lst_Manevry.ItemIndex := lst_Manevry.Count-1;
+
    end;
 
+   
+//updating
  if lst_Manevry.Count > 0 then
  if (g_ButtonMode = bmUpdate) and (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = lst_Manevry.Items[lst_Manevry.ItemIndex]) then
     begin
-     SelectedIndex := lst_Manevry.ItemIndex;
-     
-     if SelectedIndex <>-1 then
-       begin
-         if (g_ManevrList[SelectedIndex].pType = mtHorizFlight) then
-            g_ManevrList[SelectedIndex].fParameters[1] := g_Multipliers[0]*g_TrackBars[0].Position;
+      // updating parameters of SELECTED manoeuvre
+      UpdateManevrList(g_ManevrList);
 
-         if (g_ManevrList[SelectedIndex].pType = mtGorka) or (g_ManevrList[SelectedIndex].pType = mtPikirovanie) then
-          for i:=0 to Length(g_TrackBars)-1 do
-           g_ManevrList[SelectedIndex].fParameters[i+2] := g_Multipliers[i]*g_TrackBars[i].Position;
+      // since one manoeuvre is updated we need to recalculate all manoeuvres in the flight task
 
-         if (g_ManevrList[SelectedIndex].pType = mtLeftVirage) or (g_ManevrList[SelectedIndex].pType = mtRightVirage) then
-          for i:=0 to Length(g_TrackBars)-1 do
-           g_ManevrList[SelectedIndex].fParameters[i+6] := g_Multipliers[i]*g_TrackBars[i].Position;
-
-         if  (g_ManevrList[SelectedIndex].pType = mtHorizRazgon) then
-            g_ManevrList[SelectedIndex].fParameters[8] := g_Multipliers[0]*g_TrackBars[0].Position;
-       end;
-
-       SetLength(g_FlightData,1); // if manoeuvre is updated, recalculate all manoeuvres in the flight task
-
-       for i:=0 to g_ManevrList.Count - 1 do
-        AppendTempManevr(g_ManevrList[i]);
+      RecalculateRedrawFromManevrList;
     end;
 
 
@@ -728,9 +669,12 @@ begin
 
   DynamicFoolProtection;
 
-      //refreshing labels' values
+ //refreshing labels' values
   for i:=0 to High(g_TrackBars) do
    g_ValueLabels[i].Caption := FloatToStr(g_Multipliers[i]*g_TrackBars[i].Position);
+
+
+ //UpdateManevrList(g_ManevrList);
 
 end;
 
@@ -768,7 +712,7 @@ end;
 procedure Tfrm_Interface.SetInitialConditionsTrackbars;
 
 begin
- SetICTrackbar(trckbr_H0,50{meters}/deltaH0,g_Helicopter.Hdyn/deltaH0,400/deltaH0);
+ SetICTrackbar(trckbr_H0,50{meters}/deltaH0,0.9*g_Helicopter.Hdyn/deltaH0,400/deltaH0);
  SetICTrackbar(trckbrV0,50,0.95*g_Helicopter.Vmax-1,100);
  SetICTrackbar(trckbr_G,g_Helicopter.Gmin,g_Helicopter.Gmax,g_Helicopter.Gmax);
  SetICTrackbar(trckbr_T,Tmin,Tmax,Tdefault);
@@ -776,6 +720,8 @@ end;
 
 procedure Tfrm_Interface.DynamicallyUpdateICLabelValuesAndPlots(Sender: TObject);
 begin
+ DynamicallyChangeV0max;
+
  lbl_H0value.Caption := FloatToStr(g_H0);
  lbl_Gvalue.Caption := FloatToStr(g_G);
  lbl_Tvalue.Caption := FloatToStr(g_T);
@@ -786,7 +732,9 @@ begin
  FlightDataInitialization;
 
  if g_ManevrList.Count > 0 then
-  EnableCalculateButton
+  EnableCalculateButton;
+
+ DynamicallyUpdateLabelValues(Self);
 end;
 
 procedure Tfrm_Interface.ExportFlightTask(manevrlist : TManevrList);
@@ -1074,7 +1022,14 @@ var
   i:Integer;
 begin
  SetLength(g_FlightData,1);
- 
+
+  for i:=0 to lst_Manevry.Count - 1 do
+     begin
+       lst_Manevry.ItemIndex := i;
+       UpdateValuesFromTManevr;   //setting ALL trackbars to the right positions according to g_ManevrList
+       UpdateManevrList(g_ManevrList);  //little update g_ManevrList of from MODIFIED trackbars
+     end;
+
  for i:=0 to g_ManevrList.Count - 1 do
   AppendTempManevr(g_ManevrList[i]);
 
@@ -1087,6 +1042,8 @@ begin
 
  if g_ManevrList.Count > 0 then
   btn_AddManevr.Enabled := True;
+
+ DisableCalculateButton; 
 end;
 
 procedure Tfrm_Interface.FullRecalculate;
@@ -1120,8 +1077,8 @@ end;
 
 procedure Tfrm_Interface.DynamicFoolProtection;
 var
-  cosTheta : Real;
-  cosThetaRounded, trckbarNo : Integer;
+  cosTheta  : Real;
+  cosThetaRounded, trckbarNo,Vmax : Integer;
 const
   cosCorrection = 0.02;
 
@@ -1137,7 +1094,7 @@ begin
       multipliers[2]:=1;
       multipliers[3]:=10;
  }
- 
+
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Пикирование') then
     begin
        if cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка' then
@@ -1156,7 +1113,130 @@ begin
         g_TrackBars[trckbarNo].Max := cosThetaRounded;
     end;
 
+  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте') then
+   begin
+     Vmax := VmaxOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0)-1;
+     if g_TrackBars[0].Position > Vmax then
+      g_TrackBars[0].Position := Vmax;
+     g_TrackBars[0].Max := Vmax;
+   end;
+
+
 end;
 
+
+
+procedure Tfrm_Interface.CollectTrackBarsData(var ParamArray : TParametersArray);
+begin
+ if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горизонтальный полет')  then
+   begin
+     ParamArray[1] := g_Multipliers[0]*g_TrackBars[0].Position;
+     ParamArray[2] :=0;
+     ParamArray[3] :=0;
+     ParamArray[4] :=0;
+     ParamArray[5] :=0;
+     ParamArray[6] :=0;
+     ParamArray[7] :=0;
+     ParamArray[8] :=0;
+   end;
+  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] ='Пикирование') then
+   begin
+     ParamArray[1] := 0;
+     ParamArray[2] :=g_Multipliers[0]*g_TrackBars[0].Position;
+     ParamArray[3] :=g_Multipliers[1]*g_TrackBars[1].Position;
+     ParamArray[4] :=g_Multipliers[2]*g_TrackBars[2].Position;
+     ParamArray[5] :=g_Multipliers[3]*g_TrackBars[3].Position;
+     ParamArray[6] :=0;
+     ParamArray[7] :=0;
+     ParamArray[8] :=0;
+   end;
+  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый вираж') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый вираж') then
+     begin
+     ParamArray[1] :=0;
+     ParamArray[2] :=0;
+     ParamArray[3] :=0;
+     ParamArray[4] :=0;
+     ParamArray[5] :=0;
+     ParamArray[6] :=g_Multipliers[0]*g_TrackBars[0].Position;
+     ParamArray[7] :=g_Multipliers[1]*g_TrackBars[1].Position;
+     ParamArray[8] :=0;
+   end;
+
+    if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте')  then
+   begin
+     ParamArray[1] :=0;
+     ParamArray[2] :=0;
+     ParamArray[3] :=0;
+     ParamArray[4] :=0;
+     ParamArray[5] :=0;
+     ParamArray[6] :=0;
+     ParamArray[7] :=0;
+     ParamArray[8] :=g_Multipliers[0]*g_TrackBars[0].Position;
+   end;
+end;
+
+procedure Tfrm_Interface.UpdateManevrList(var manevrlist: TManevrList);
+var
+SelectedIndex, i : Integer;
+begin
+        SelectedIndex := lst_Manevry.ItemIndex;
+
+     if SelectedIndex <>-1 then
+       begin
+         if (manevrlist[SelectedIndex].pType = mtHorizFlight) then
+            manevrlist[SelectedIndex].fParameters[1] := g_Multipliers[0]*g_TrackBars[0].Position;
+
+         if (manevrlist[SelectedIndex].pType = mtGorka) or (manevrlist[SelectedIndex].pType = mtPikirovanie) then
+          for i:=0 to Length(g_TrackBars)-1 do
+           manevrlist[SelectedIndex].fParameters[i+2] := g_Multipliers[i]*g_TrackBars[i].Position;
+
+         if (manevrlist[SelectedIndex].pType = mtLeftVirage) or (manevrlist[SelectedIndex].pType = mtRightVirage) then
+          for i:=0 to Length(g_TrackBars)-1 do
+           manevrlist[SelectedIndex].fParameters[i+6] := g_Multipliers[i]*g_TrackBars[i].Position;
+
+         if  (manevrlist[SelectedIndex].pType = mtHorizRazgon) then
+            manevrlist[SelectedIndex].fParameters[8] := g_Multipliers[0]*g_TrackBars[0].Position;
+       end;
+end;
+
+procedure Tfrm_Interface.DynamicallyChangeV0max;
+var
+  maxV0, minV0, realHstat  : Integer;
+
+const
+ defaultMin = 50;
+begin
+ // updating Hst
+  realHstat := Round(RealHst(g_Helicopter,g_G,g_T));
+
+  if realHstat < deltaH0*trckbr_H0.Position then
+   trckbr_H0.Position := Round(0.9*realHstat/deltaH0);
+
+  trckbr_H0.Max := Round(0.9*realHstat/deltaH0);
+
+
+ // updating maxV0
+  maxV0 := VmaxOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0);
+
+  if maxV0 > 0.85*g_Helicopter.Vmax then
+   maxV0 := Round(0.85*g_Helicopter.Vmax);
+
+  if trckbrV0.Position > maxV0 then
+    trckbrV0.Position := maxV0;
+
+  trckbrV0.Max := maxV0;
+
+
+ // updating minV0
+  minV0 := VminOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0);
+
+ if minV0 < defaultMin then
+  trckbrV0.Min := defaultMin
+ else
+  trckbrV0.Min := minV0;
+
+  if trckbrV0.Position < defaultMin then
+    trckbrV0.Position := defaultMin;
+end;
 
 end.
