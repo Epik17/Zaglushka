@@ -116,6 +116,8 @@ type
     procedure FullRecalculate(Sender: TObject);
     procedure DisableCalculateButton;
     procedure EnableCalculateButton;
+    procedure AddModeOn;
+    procedure UpdateModeOn;
   end;
 
 var
@@ -187,7 +189,7 @@ begin
 
    ResetElementsArrays;
 
-   g_ButtonMode := bmAdd;
+   AddModeOn;
 
    HelicoptersInitialization;
 
@@ -212,7 +214,7 @@ begin
 
  CreateLabeledScrollbars(ConvertManevrType(cbb_Manevry.Items[cbb_Manevry.ItemIndex])); 
 
- g_ButtonMode := bmAdd;
+ AddModeOn;
 end;
 
  procedure Tfrm_Interface.AppendTempManevr (tempManevr : TManevr);
@@ -353,7 +355,7 @@ begin
 
  pm_Manevry.AutoPopup := True;
 
- g_ButtonMode := bmUpdate;
+ UpdateModeOn;
 
  DrawTrajectory(cht_traj,g_FlightData);
 
@@ -1081,7 +1083,7 @@ begin
 
  pm_Manevry.AutoPopup := True;
 
- g_ButtonMode := bmUpdate;
+ UpdateModeOn;
 
  DrawTrajectory(cht_traj,g_FlightData);
 
@@ -1158,5 +1160,17 @@ begin
 
 end;
 
+
+procedure Tfrm_Interface.AddModeOn;
+begin
+ btn_AddManevr.Caption := 'Добавить маневр';
+ g_ButtonMode := bmAdd;
+end;
+
+procedure Tfrm_Interface.UpdateModeOn;
+begin
+ btn_AddManevr.Caption := 'Обновить маневр';
+ g_ButtonMode := bmUpdate;
+end;
 
 end.
