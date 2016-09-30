@@ -116,6 +116,7 @@ type
     procedure FullRecalculate(Sender: TObject);
     procedure DisableCalculateButton;
     procedure EnableCalculateButton;
+    procedure CollectTrackBarsData(var ParamArray : TParametersArray);
   end;
 
 var
@@ -252,55 +253,12 @@ var
 
 begin
 
- if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горизонтальный полет')  then
-   begin
-     ParamArray[1] := g_Multipliers[0]*g_TrackBars[0].Position;
-     ParamArray[2] :=0;
-     ParamArray[3] :=0;
-     ParamArray[4] :=0;
-     ParamArray[5] :=0;
-     ParamArray[6] :=0;
-     ParamArray[7] :=0;
-     ParamArray[8] :=0;
-   end;
-  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] ='Пикирование') then
-   begin
-     ParamArray[1] := 0;
-     ParamArray[2] :=g_Multipliers[0]*g_TrackBars[0].Position;
-     ParamArray[3] :=g_Multipliers[1]*g_TrackBars[1].Position;
-     ParamArray[4] :=g_Multipliers[2]*g_TrackBars[2].Position;
-     ParamArray[5] :=g_Multipliers[3]*g_TrackBars[3].Position;
-     ParamArray[6] :=0;
-     ParamArray[7] :=0;
-     ParamArray[8] :=0;
-   end;
-  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый вираж') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый вираж') then
-     begin
-     ParamArray[1] :=0;
-     ParamArray[2] :=0;
-     ParamArray[3] :=0;
-     ParamArray[4] :=0;
-     ParamArray[5] :=0;
-     ParamArray[6] :=g_Multipliers[0]*g_TrackBars[0].Position;
-     ParamArray[7] :=g_Multipliers[1]*g_TrackBars[1].Position;
-     ParamArray[8] :=0;
-   end;
-
-    if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте')  then
-   begin
-     ParamArray[1] :=0;
-     ParamArray[2] :=0;
-     ParamArray[3] :=0;
-     ParamArray[4] :=0;
-     ParamArray[5] :=0;
-     ParamArray[6] :=0;
-     ParamArray[7] :=0;
-     ParamArray[8] :=g_Multipliers[0]*g_TrackBars[0].Position;
-   end;
-
+//adding
  if g_ButtonMode = bmAdd then
    begin
-       tempManevr := TManevr.Create(ConvertManevrType(cbb_Manevry.Items[cbb_Manevry.ItemIndex]),ParamArray);
+     CollectTrackBarsData(ParamArray);
+
+     tempManevr := TManevr.Create(ConvertManevrType(cbb_Manevry.Items[cbb_Manevry.ItemIndex]),ParamArray);
 
     //calculating task and appending it
       if g_ManevrList.Count =0 then
@@ -322,6 +280,8 @@ begin
       end;
    end;
 
+   
+//updating
  if lst_Manevry.Count > 0 then
  if (g_ButtonMode = bmUpdate) and (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = lst_Manevry.Items[lst_Manevry.ItemIndex]) then
     begin
@@ -344,10 +304,11 @@ begin
             g_ManevrList[SelectedIndex].fParameters[8] := g_Multipliers[0]*g_TrackBars[0].Position;
        end;
 
-       SetLength(g_FlightData,1); // if manoeuvre is updated, recalculate all manoeuvres in the flight task
+      // since one manoeuvre is updated we need to recalculate all manoeuvres in the flight task
+      RecalculateRedrawFromManevrList;
 
-       for i:=0 to g_ManevrList.Count - 1 do
-        AppendTempManevr(g_ManevrList[i]);
+      DisableCalculateButton;
+
     end;
 
 
@@ -1169,5 +1130,55 @@ begin
 
 end;
 
+
+
+procedure Tfrm_Interface.CollectTrackBarsData(var ParamArray : TParametersArray);
+begin
+ if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горизонтальный полет')  then
+   begin
+     ParamArray[1] := g_Multipliers[0]*g_TrackBars[0].Position;
+     ParamArray[2] :=0;
+     ParamArray[3] :=0;
+     ParamArray[4] :=0;
+     ParamArray[5] :=0;
+     ParamArray[6] :=0;
+     ParamArray[7] :=0;
+     ParamArray[8] :=0;
+   end;
+  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] ='Пикирование') then
+   begin
+     ParamArray[1] := 0;
+     ParamArray[2] :=g_Multipliers[0]*g_TrackBars[0].Position;
+     ParamArray[3] :=g_Multipliers[1]*g_TrackBars[1].Position;
+     ParamArray[4] :=g_Multipliers[2]*g_TrackBars[2].Position;
+     ParamArray[5] :=g_Multipliers[3]*g_TrackBars[3].Position;
+     ParamArray[6] :=0;
+     ParamArray[7] :=0;
+     ParamArray[8] :=0;
+   end;
+  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый вираж') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый вираж') then
+     begin
+     ParamArray[1] :=0;
+     ParamArray[2] :=0;
+     ParamArray[3] :=0;
+     ParamArray[4] :=0;
+     ParamArray[5] :=0;
+     ParamArray[6] :=g_Multipliers[0]*g_TrackBars[0].Position;
+     ParamArray[7] :=g_Multipliers[1]*g_TrackBars[1].Position;
+     ParamArray[8] :=0;
+   end;
+
+    if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте')  then
+   begin
+     ParamArray[1] :=0;
+     ParamArray[2] :=0;
+     ParamArray[3] :=0;
+     ParamArray[4] :=0;
+     ParamArray[5] :=0;
+     ParamArray[6] :=0;
+     ParamArray[7] :=0;
+     ParamArray[8] :=g_Multipliers[0]*g_TrackBars[0].Position;
+   end;
+end;
 
 end.
