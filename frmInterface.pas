@@ -588,7 +588,7 @@ begin
       multipliers[0]:=0.01;
       multipliers[1]:=0.01;
       multipliers[2]:=1;
-      multipliers[3]:=1;
+      multipliers[3]:=10;
 
 
       mins[2]:=20;
@@ -600,22 +600,22 @@ begin
       begin
        mins[0]:=110;
        mins[1]:=50;
-       mins[3]:=110;
+       mins[3]:=11;
 
        maxes[0]:=170;
        maxes[1]:=90;
-       maxes[3]:=130;
+       maxes[3]:=13;
       end;
 
       if (ManevrType = mtPikirovanie) then
       begin
        mins[0]:=50;
        mins[1]:=110;
-       mins[3]:=200;
+       mins[3]:=20;
 
        maxes[0]:=90;
        maxes[1]:=170;
-       maxes[3]:=Round(0.95*g_Helicopter.Vmax)-2;
+       maxes[3]:=Round(0.95*g_Helicopter.Vmax/10)-1;
       end;
 
 
