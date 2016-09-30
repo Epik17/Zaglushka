@@ -137,7 +137,7 @@ begin
       a := g*(nx - dnxa - Sin(tempstate.theta) - nxOtXvr);
 end;
 
-procedure Etape(var TempFlightData : TFlightData; ny : Real);
+ procedure Etape(var TempFlightData : TFlightData; ny : Real);
    begin
     ExtendArray(TempFlightData);
 
@@ -147,6 +147,7 @@ procedure Etape(var TempFlightData : TFlightData; ny : Real);
 
     TempFlightData[High(TempFlightData)] := tempstate;
    end;
+
 
 begin
    //инициализируем
@@ -159,15 +160,14 @@ begin
  //ввод
    SetLength(vvod,0);
 
-if not failed then
- if (tempstate.V > 0) then
-  while not ((RadToDeg(tempstate.theta)>=thetaSlope) xor Pikirovanie) do
-   begin
-    SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyvvoda,nx(helicopter, nyvvoda, icG, icT,tempstate.y,mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,mps*tempstate.V)); //переводим скорость в км/ч
-    g_Etape(vvod,tempstate, helicopter, nyvvoda,tempa, tempomega);
-   end
- else
-  failed := True;
+  while (not ((RadToDeg(tempstate.theta)>=thetaSlope) xor Pikirovanie)) and (not failed) do
+    if (tempstate.V > 0) then
+     begin
+      SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyvvoda,nx(helicopter, nyvvoda, icG, icT,tempstate.y,mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,mps*tempstate.V)); //переводим скорость в км/ч
+      g_Etape(vvod,tempstate, helicopter, nyvvoda,tempa, tempomega);
+     end
+    else
+    failed := True;
 
   vvod[High(vvod)].theta := DegToRad(thetaSlope);
 
@@ -176,21 +176,19 @@ if not failed then
 
    nyslope := Cos(tempstate.theta);
 
-if not failed then
- if (tempstate.V > 0)  then
-  while not ((mps*tempstate.V <= Vvyvoda) xor Pikirovanie) do
+  while (not ((mps*tempstate.V <= Vvyvoda) xor Pikirovanie)) and (not failed) do
+   if (tempstate.V > 0) then
     Etape(nakl,nyslope)
- else
+   else
   failed := True;
 
  //вывод  
    SetLength(vyvod,0);
 
-if not failed then
- if (tempstate.V > 0) then
-  while not ((RadToDeg(tempstate.theta)<=0) xor Pikirovanie) do
+ while (not ((RadToDeg(tempstate.theta)<=0) xor Pikirovanie)) and (not failed) do
+  if (tempstate.V > 0) then
     Etape(vyvod,nyvyvoda)
- else
+  else
   failed := True;
 
   vyvod[High(vyvod)].theta := 0.;

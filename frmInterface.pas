@@ -12,12 +12,8 @@ unit frmInterface;
 
 - reliable isometric projection (equal axis scales, min/max X and Z, range, etc. !! )
 
-- Hmax have to be less than Hst!
-- Razgon must use Diapazon for offer reasonable Vfin on given height (we get infinite calculation otherwise)
-
 - first V<0 message must stop all posterior calculations and appending of manoeuvres! We apparently need g_failed in appending
 
-- fix V<0 in GorkaPikirovanie and Virage (see how failed is used in Razgon)
 }
 
 
