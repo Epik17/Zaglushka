@@ -115,6 +115,8 @@ type
     procedure CollectTrackBarsData(var ParamArray : TParametersArray);
     procedure UpdateManevrList(var manevrlist: TManevrList);
     procedure DynamicallyChangeV0max;
+    procedure AddModeOn;
+    procedure UpdateModeOn;
   end;
 
 var
@@ -186,7 +188,7 @@ begin
 
    ResetElementsArrays;
 
-   g_ButtonMode := bmAdd;
+   AddModeOn;
 
    HelicoptersInitialization;
 
@@ -211,7 +213,7 @@ begin
 
  CreateLabeledScrollbars(ConvertManevrType(cbb_Manevry.Items[cbb_Manevry.ItemIndex])); 
 
- g_ButtonMode := bmAdd;
+ AddModeOn;
 end;
 
  procedure Tfrm_Interface.AppendTempManevr (tempManevr : TManevr);
@@ -294,7 +296,7 @@ begin
 
  pm_Manevry.AutoPopup := True;
 
- g_ButtonMode := bmUpdate;
+ UpdateModeOn;
 
  DrawTrajectory(cht_traj,g_FlightData);
 
@@ -1036,7 +1038,7 @@ begin
 
  pm_Manevry.AutoPopup := True;
 
- g_ButtonMode := bmUpdate;
+ UpdateModeOn;
 
  DrawTrajectory(cht_traj,g_FlightData);
 
@@ -1237,6 +1239,20 @@ begin
 
   if trckbrV0.Position < defaultMin then
     trckbrV0.Position := defaultMin;
+end;
+
+
+
+procedure Tfrm_Interface.AddModeOn;
+begin
+ btn_AddManevr.Caption := 'Добавить маневр';
+ g_ButtonMode := bmAdd;
+end;
+
+procedure Tfrm_Interface.UpdateModeOn;
+begin
+ btn_AddManevr.Caption := 'Обновить маневр';
+ g_ButtonMode := bmUpdate;
 end;
 
 end.
