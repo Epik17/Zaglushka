@@ -117,6 +117,7 @@ type
     procedure DisableCalculateButton;
     procedure EnableCalculateButton;
     procedure CollectTrackBarsData(var ParamArray : TParametersArray);
+    procedure UpdateManevrList(var manevrlist: TManevrList);
   end;
 
 var
@@ -249,7 +250,7 @@ procedure Tfrm_Interface.btn_AddManevrClick(Sender: TObject);
 var
   tempManevr : TManevr;
   ParamArray : TParametersArray;
-  SelectedIndex, i, temp_g_FlightDataLength : Integer;
+  temp_g_FlightDataLength : Integer;
 
 begin
 
@@ -271,13 +272,13 @@ begin
     if Length(g_FlightData) = temp_g_FlightDataLength then
      ShowMessage('Уточните исходные данные либо удалите маневр из списка');
 
-      begin
-        g_ManevrList.Add(tempManevr);
 
-        lst_Manevry.Items.Add(ConvertManevrType(tempManevr.pType));
+      g_ManevrList.Add(tempManevr);
 
-        lst_Manevry.ItemIndex := lst_Manevry.Count-1;
-      end;
+      lst_Manevry.Items.Add(ConvertManevrType(tempManevr.pType));
+
+      lst_Manevry.ItemIndex := lst_Manevry.Count-1;
+
    end;
 
    
@@ -285,30 +286,12 @@ begin
  if lst_Manevry.Count > 0 then
  if (g_ButtonMode = bmUpdate) and (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = lst_Manevry.Items[lst_Manevry.ItemIndex]) then
     begin
-     SelectedIndex := lst_Manevry.ItemIndex;
-     
-     if SelectedIndex <>-1 then
-       begin
-         if (g_ManevrList[SelectedIndex].pType = mtHorizFlight) then
-            g_ManevrList[SelectedIndex].fParameters[1] := g_Multipliers[0]*g_TrackBars[0].Position;
-
-         if (g_ManevrList[SelectedIndex].pType = mtGorka) or (g_ManevrList[SelectedIndex].pType = mtPikirovanie) then
-          for i:=0 to Length(g_TrackBars)-1 do
-           g_ManevrList[SelectedIndex].fParameters[i+2] := g_Multipliers[i]*g_TrackBars[i].Position;
-
-         if (g_ManevrList[SelectedIndex].pType = mtLeftVirage) or (g_ManevrList[SelectedIndex].pType = mtRightVirage) then
-          for i:=0 to Length(g_TrackBars)-1 do
-           g_ManevrList[SelectedIndex].fParameters[i+6] := g_Multipliers[i]*g_TrackBars[i].Position;
-
-         if  (g_ManevrList[SelectedIndex].pType = mtHorizRazgon) then
-            g_ManevrList[SelectedIndex].fParameters[8] := g_Multipliers[0]*g_TrackBars[0].Position;
-       end;
+      // updating parameters of SELECTED manoeuvre
+      UpdateManevrList(g_ManevrList);
 
       // since one manoeuvre is updated we need to recalculate all manoeuvres in the flight task
+
       RecalculateRedrawFromManevrList;
-
-      DisableCalculateButton;
-
     end;
 
 
@@ -689,9 +672,12 @@ begin
 
   DynamicFoolProtection;
 
-      //refreshing labels' values
+ //refreshing labels' values
   for i:=0 to High(g_TrackBars) do
    g_ValueLabels[i].Caption := FloatToStr(g_Multipliers[i]*g_TrackBars[i].Position);
+
+
+ //UpdateManevrList(g_ManevrList);
 
 end;
 
@@ -1037,7 +1023,14 @@ var
   i:Integer;
 begin
  SetLength(g_FlightData,1);
- 
+
+  for i:=0 to lst_Manevry.Count - 1 do
+     begin
+       lst_Manevry.ItemIndex := i;
+       UpdateValuesFromTManevr;   //setting ALL trackbars to the right positions according to g_ManevrList
+       UpdateManevrList(g_ManevrList);  //little update g_ManevrList of from MODIFIED trackbars
+     end;
+
  for i:=0 to g_ManevrList.Count - 1 do
   AppendTempManevr(g_ManevrList[i]);
 
@@ -1050,6 +1043,8 @@ begin
 
  if g_ManevrList.Count > 0 then
   btn_AddManevr.Enabled := True;
+
+ DisableCalculateButton; 
 end;
 
 procedure Tfrm_Interface.FullRecalculate;
@@ -1179,6 +1174,30 @@ begin
      ParamArray[7] :=0;
      ParamArray[8] :=g_Multipliers[0]*g_TrackBars[0].Position;
    end;
+end;
+
+procedure Tfrm_Interface.UpdateManevrList(var manevrlist: TManevrList);
+var
+SelectedIndex, i : Integer;
+begin
+        SelectedIndex := lst_Manevry.ItemIndex;
+
+     if SelectedIndex <>-1 then
+       begin
+         if (manevrlist[SelectedIndex].pType = mtHorizFlight) then
+            manevrlist[SelectedIndex].fParameters[1] := g_Multipliers[0]*g_TrackBars[0].Position;
+
+         if (manevrlist[SelectedIndex].pType = mtGorka) or (manevrlist[SelectedIndex].pType = mtPikirovanie) then
+          for i:=0 to Length(g_TrackBars)-1 do
+           manevrlist[SelectedIndex].fParameters[i+2] := g_Multipliers[i]*g_TrackBars[i].Position;
+
+         if (manevrlist[SelectedIndex].pType = mtLeftVirage) or (manevrlist[SelectedIndex].pType = mtRightVirage) then
+          for i:=0 to Length(g_TrackBars)-1 do
+           manevrlist[SelectedIndex].fParameters[i+6] := g_Multipliers[i]*g_TrackBars[i].Position;
+
+         if  (manevrlist[SelectedIndex].pType = mtHorizRazgon) then
+            manevrlist[SelectedIndex].fParameters[8] := g_Multipliers[0]*g_TrackBars[0].Position;
+       end;
 end;
 
 end.
