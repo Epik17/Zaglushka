@@ -114,6 +114,7 @@ type
     procedure EnableCalculateButton;
     procedure CollectTrackBarsData(var ParamArray : TParametersArray);
     procedure UpdateManevrList(var manevrlist: TManevrList);
+    procedure DynamicallyChangeV0max;
   end;
 
 var
@@ -719,6 +720,8 @@ end;
 
 procedure Tfrm_Interface.DynamicallyUpdateICLabelValuesAndPlots(Sender: TObject);
 begin
+ DynamicallyChangeV0max;
+
  lbl_H0value.Caption := FloatToStr(g_H0);
  lbl_Gvalue.Caption := FloatToStr(g_G);
  lbl_Tvalue.Caption := FloatToStr(g_T);
@@ -1194,6 +1197,46 @@ begin
          if  (manevrlist[SelectedIndex].pType = mtHorizRazgon) then
             manevrlist[SelectedIndex].fParameters[8] := g_Multipliers[0]*g_TrackBars[0].Position;
        end;
+end;
+
+procedure Tfrm_Interface.DynamicallyChangeV0max;
+var
+  maxV0, minV0, realHstat  : Integer;
+
+const
+ defaultMin = 50;
+begin
+ // updating Hst
+  realHstat := Round(RealHst(g_Helicopter,g_G,g_T));
+
+  if realHstat < deltaH0*trckbr_H0.Position then
+   trckbr_H0.Position := Round(0.9*realHstat/deltaH0);
+
+  trckbr_H0.Max := Round(0.9*realHstat/deltaH0);
+
+
+ // updating maxV0
+  maxV0 := VmaxOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0);
+
+  if maxV0 > 0.85*g_Helicopter.Vmax then
+   maxV0 := Round(0.85*g_Helicopter.Vmax);
+
+  if trckbrV0.Position > maxV0 then
+    trckbrV0.Position := maxV0;
+
+  trckbrV0.Max := maxV0;
+
+
+ // updating minV0
+  minV0 := VminOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0);
+
+ if minV0 < defaultMin then
+  trckbrV0.Min := defaultMin
+ else
+  trckbrV0.Min := minV0;
+
+  if trckbrV0.Position < defaultMin then
+    trckbrV0.Position := defaultMin;
 end;
 
 end.

@@ -193,7 +193,7 @@ begin
 
   vyvod[High(vyvod)].theta := 0.;
 
-  if failed then ShowMessage('Падение скорости до нуля!');
+  if failed then ShowMessage('При данных эксплуатационных условиях разгон невозможен. Падение скорости до нуля!');
 
  //стыкуем
   SetLength(Result,0);

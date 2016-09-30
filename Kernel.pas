@@ -19,6 +19,8 @@ function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent,hManevraIniti
 function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real;
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real):Real;
 function VmaxOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;//на высоте h c точностью до 1 км/ч
+function VminOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;
+function RealHst(helicopter : THelicopter; icG, icT : Real): Real;
 
 implementation
 
@@ -103,9 +105,38 @@ begin
   for i:=0 to maxV do
    if diap[i] > h then
     Result := i;
+end;
 
- { if Result = 0 then
-   ShowMessage('Выход за пределы диапазона высот и скоростей'); }
+
+function VminOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;//c точностью до 1 км/ч
+var
+  i : Integer;
+  diap : TDiapason;
+begin
+  diap := Diapason(helicopter, icG, icT);
+
+  Result := 0;
+
+  for i:=0 to maxV do
+   if diap[i] > h then
+    begin
+     Result := i-1;
+     Break;
+    end;
+end;
+
+function RealHst(helicopter : THelicopter; icG, icT : Real): Real;
+var
+  i : Integer;
+  diap : TDiapason;
+begin
+  diap := Diapason(helicopter, icG, icT);
+
+  Result := -100500;
+
+  for i:=0 to maxV do
+   if diap[i] > Result then
+    Result := diap[i];
 end;
 
 end.
