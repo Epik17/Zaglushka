@@ -104,8 +104,8 @@ begin
    if diap[i] > h then
     Result := i;
 
-  if Result = 0 then
-   ShowMessage('¬ыход за пределы диапазона высот и скоростей');
+ { if Result = 0 then
+   ShowMessage('¬ыход за пределы диапазона высот и скоростей'); }
 end;
 
 end.
