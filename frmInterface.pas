@@ -768,7 +768,7 @@ end;
 procedure Tfrm_Interface.SetInitialConditionsTrackbars;
 
 begin
- SetICTrackbar(trckbr_H0,50{meters}/deltaH0,g_Helicopter.Hdyn/deltaH0,400/deltaH0);
+ SetICTrackbar(trckbr_H0,50{meters}/deltaH0,0.9*g_Helicopter.Hdyn/deltaH0,400/deltaH0);
  SetICTrackbar(trckbrV0,50,0.95*g_Helicopter.Vmax-1,100);
  SetICTrackbar(trckbr_G,g_Helicopter.Gmin,g_Helicopter.Gmax,g_Helicopter.Gmax);
  SetICTrackbar(trckbr_T,Tmin,Tmax,Tdefault);
@@ -786,7 +786,9 @@ begin
  FlightDataInitialization;
 
  if g_ManevrList.Count > 0 then
-  EnableCalculateButton
+  EnableCalculateButton;
+
+ DynamicallyUpdateLabelValues(Self);
 end;
 
 procedure Tfrm_Interface.ExportFlightTask(manevrlist : TManevrList);
@@ -1120,8 +1122,8 @@ end;
 
 procedure Tfrm_Interface.DynamicFoolProtection;
 var
-  cosTheta : Real;
-  cosThetaRounded, trckbarNo : Integer;
+  cosTheta  : Real;
+  cosThetaRounded, trckbarNo,Vmax : Integer;
 const
   cosCorrection = 0.02;
 
@@ -1137,7 +1139,7 @@ begin
       multipliers[2]:=1;
       multipliers[3]:=10;
  }
- 
+
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Пикирование') then
     begin
        if cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка' then
@@ -1155,6 +1157,15 @@ begin
 
         g_TrackBars[trckbarNo].Max := cosThetaRounded;
     end;
+
+  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте') then
+   begin
+     Vmax := VmaxOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0)-1;
+     if g_TrackBars[0].Position > Vmax then
+      g_TrackBars[0].Position := Vmax;
+     g_TrackBars[0].Max := Vmax;
+   end;
+
 
 end;
 
