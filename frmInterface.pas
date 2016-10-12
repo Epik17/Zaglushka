@@ -836,15 +836,14 @@ var
 const
    pointersize = 2;
 begin
-
-  if Length(FlightData) > 1 then
-   begin
-    for i := 0 to cht.SeriesCount - 1 do
+   for i := 0 to cht.SeriesCount - 1 do
       cht.Series[i].Clear;
 
     while cht.SeriesCount > 0 do
       cht.Series[0].Free;
 
+  if Length(FlightData) > 1 then
+   begin 
     for m := 0 to High(FlightData) do
       begin
         NewSeries := TPointSeries.Create(self);
