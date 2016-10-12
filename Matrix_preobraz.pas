@@ -10,11 +10,8 @@ uses Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Math, Matrixes,MyTypes;
 
 
-function RotXMatrix(Angle: Extended) : TMatrix;
-function RotYMatrix(Angle: Extended) : TMatrix;
-function RotZMatrix(Angle: Extended) : TMatrix;
 function IsometryMatrix(phi,theta : Real) : TMatrix;
-function TakeXY (arr: TArrayOfReal) : TArrayOfReal;
+
 
 implementation
                
@@ -46,18 +43,6 @@ begin
  Result[1,2] := Sin(Angle);
  Result[2,1] := -Result[1,2];
  Result[2,2] := Result[1,1];
-end;
-
-function TakeXY (arr: TArrayOfReal) : TArrayOfReal;
-var
-  i : Integer;
-const
- count = 2;
-begin
-  SetLength(Result,count);
-
-  for i:=0 to count-1 do
-   Result[i] := arr[i]
 end;
 
 function IsometryMatrix(phi,theta : Real) : TMatrix;
