@@ -2,13 +2,10 @@ unit Kernel;
 
 interface
 
-uses HelicoptersDatabase, Dialogs,Sysutils,World;
+uses HelicoptersDatabase, Dialogs,Sysutils,World, GlobalConstants;
 
 
-const
-  maxV=360;
-
-type TDiapason = array [0..maxV] of Real;
+type TDiapason = array [0..g_Vmax] of Real;
 
 function HotV(helicopter : THelicopter; V: Real) : Real; overload; //характеризует диапазон высот и скоростей для нормальных условий
 function HotV(helicopter : THelicopter; icG, icT,V: Real) : Real; overload; //характеризует диапазон высот и скоростей с учетом полетного веса и температуры
@@ -41,7 +38,7 @@ function Diapason (helicopter : THelicopter) : TDiapason;overload;  //просто сет
 var
   i : Integer;
 begin
- for i:=0 to maxV do
+ for i:=0 to g_Vmax do
      Result[i] :=  HotV(helicopter, i)
 end;
 
@@ -66,7 +63,7 @@ function Diapason (helicopter : THelicopter; icG, icT : Real) : TDiapason;overlo
 var
  i : Integer;
 begin
-  for i:=0 to maxV do
+  for i:=0 to g_Vmax do
    Result[i] := HotV(helicopter,icG, icT,i)
 end;
 
@@ -110,7 +107,7 @@ begin
 
   Result := 0;
 
-  for i:=0 to maxV do
+  for i:=0 to g_Vmax do
    if diap[i] > h then
     Result := i;
 end;
@@ -125,7 +122,7 @@ begin
 
   Result := 0;
 
-  for i:=0 to maxV do
+  for i:=0 to g_Vmax do
    if diap[i] > h then
     begin
      Result := i-1;
@@ -142,7 +139,7 @@ begin
 
   Result := -100500;
 
-  for i:=0 to maxV do
+  for i:=0 to g_Vmax do
    if diap[i] > Result then
     Result := diap[i];
 end;

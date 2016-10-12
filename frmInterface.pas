@@ -1,9 +1,12 @@
 unit frmInterface;
           //TODO
-{ foolproof:
-- ...
+{
+ -----foolproof:--------------
+ ny(V) dependencies:
+  - gamma(V) in Virage
+  - ny in Gorka, Pikirovanie
+ -----------------------------
 
-- highlight of selected manoeuvre  (we may need a manoeuvres array) 
 - manoeuvre information
 
 - add Desceleration
@@ -22,7 +25,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls,InterfaceClasses, HelicoptersDatabase,FlightData,Manoeuvres,Menus, Grids, ComCtrls,
-  ExtCtrls,Kernel, TeeProcs, TeEngine, Chart, Series,Matrix_preobraz,Matrixes,MyTypes,Math,shellapi;
+  ExtCtrls,Kernel, TeeProcs, TeEngine, Chart, Series,Matrix_preobraz,Matrixes,MyTypes,Math,shellapi, GlobalConstants;
 
 
 type TButtonMode = (bmAdd,bmUpdate);
@@ -137,7 +140,7 @@ Tmin = -40; //minimal outboard temperature
 Tmax = 40;  //maximal outboard temperature
 Tdefault = 15; //default outboard temperature
 deltaH0 = 25; //H0 increment
-g_Vmax = 360; //used for plotting
+
 
 
 function ManevrTypeToNumber (aType : string) : Integer;
@@ -587,7 +590,7 @@ begin
   MySetLength(count);
 
   multipliers[0]:=1;
-  mins[0]:=Round(1.05*g_FlightData[0][0].V*mps);
+  mins[0]:=Round(1.05*g_FlightData[0][0].V*g_mps);
   names[0]:='Макс. скор., км/ч';
   maxes[0]:=Round(0.95*g_Helicopter.Vmax)-1;
  // maxes[0]:=Round(0.95*Vmax(g_Helicopter, g_G, g_T, g_H0));

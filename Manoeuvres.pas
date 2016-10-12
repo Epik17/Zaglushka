@@ -2,7 +2,7 @@ unit Manoeuvres;
 
 interface
 
-uses FlightData,Math,HelicoptersDatabase,Kernel,Dialogs, JmGeometry,SysUtils;
+uses FlightData,Math,HelicoptersDatabase,Kernel,Dialogs, JmGeometry,SysUtils, GlobalConstants;
 
 type TVector = record
 x,y,z : Real;
@@ -19,12 +19,6 @@ function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVe
 
 const
  dt = 0.1; //шаг по времени, с
- g = 9.81;
- mps = 3.6;
-
-
- 
-
 
 implementation
 
@@ -59,7 +53,7 @@ begin
  Result := False;
 
  for i :=0  to High(flightdata) do
-  if flightdata[i].V*mps > 0.95*helicopter.Vmax then
+  if flightdata[i].V*g_mps > 0.95*helicopter.Vmax then
   begin
    Result := True;
    Break;
@@ -192,7 +186,7 @@ begin
      omega.x:=0;
      omega.y:=0;
      if tempstate.V>=0 then
-      omega.z := (ny-Cos(tempstate.theta))*g/tempstate.V   //rad
+      omega.z := (ny-Cos(tempstate.theta))*g_g/tempstate.V   //rad
      else
       begin
         omega.z :=0;
@@ -200,14 +194,14 @@ begin
         Halt;
       end;
 
-      a := g*(nx - dnxa - Sin(tempstate.theta) - nxOtXvr);
+      a := g_g*(nx - dnxa - Sin(tempstate.theta) - nxOtXvr);
 end;
 
  procedure Etape(var TempFlightData : TManevrData; ny : Real);
    begin
     ExtendArray(TempFlightData);
 
-    SetOmegaAndAcceleration(tempomega, tempa, tempstate,ny,nx(helicopter, ny, icG, icT,tempstate.y,mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,mps*tempstate.V)); //переводим скорость в км/ч
+    SetOmegaAndAcceleration(tempomega, tempa, tempstate,ny,nx(helicopter, ny, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
 
     MyIntegrate(tempstate,dt,tempa,tempomega);
 
@@ -219,7 +213,7 @@ begin
    //инициализируем
    tempstate := initialstate;
 
-   dnxa := nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*mps);  //переводим скорость в км/ч
+   dnxa := nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*g_mps);  //переводим скорость в км/ч
 
    failed := False;
 
@@ -229,7 +223,7 @@ begin
   while (not ((RadToDeg(tempstate.theta)>=thetaSlope) xor Pikirovanie)) and (not failed) do
     if (tempstate.V > 0) then
      begin
-      SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyvvoda,nx(helicopter, nyvvoda, icG, icT,tempstate.y,mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,mps*tempstate.V)); //переводим скорость в км/ч
+      SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyvvoda,nx(helicopter, nyvvoda, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
       g_Etape(vvod,tempstate, helicopter, nyvvoda,tempa, tempomega);
      end
     else
@@ -242,7 +236,7 @@ begin
 
    nyslope := Cos(tempstate.theta);
 
-  while (not ((mps*tempstate.V <= Vvyvoda) xor Pikirovanie)) and (not failed) do
+  while (not ((g_mps*tempstate.V <= Vvyvoda) xor Pikirovanie)) and (not failed) do
    if (tempstate.V > 0) then
     Etape(nakl,nyslope)
    else
@@ -289,7 +283,7 @@ function GorkaPikirovanieInputheck(helicopter : THelicopter; initialstate : TSta
 var
   Vtemp : Real;
 begin
-  Vtemp := initialstate.V*mps;
+  Vtemp := initialstate.V*g_mps;
 
   if (Vtemp>=Vmin) and (Vtemp<=Vmax) then
    Result := iGorkaPikirovanie(helicopter, initialstate, icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,Pikirovanie)
@@ -338,7 +332,7 @@ begin
      omega.z:=0;
      if tempstate.V>=0 then
       begin
-       omega.y := Sqrt(Sqr(ny)-1)*g/tempstate.V;   //rad
+       omega.y := Sqrt(Sqr(ny)-1)*g_g/tempstate.V;   //rad
 
        if not Left then omega.y := -omega.y;
       end
@@ -441,7 +435,7 @@ var
   const
    timeBeforeFullNX = 10{секунд}; //на достижение максимально возможной nx уходит время
 begin
-      a := g*nx(helicopter,tempny,icG, icT,tempstate.y,mps*tempstate.V);
+      a := g_g*nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V);
 
       if localTime < timeBeforeFullNX then
        a:= (1/timeBeforeFullNX)*localTime*a;
@@ -461,7 +455,7 @@ begin
 
 
 
-    while (not (mps*tempstate.V >=Vfinal)) and (not failed) do
+    while (not (g_mps*tempstate.V >=Vfinal)) and (not failed) do
       if (tempstate.V > 0) then
         begin
          begin
@@ -473,7 +467,7 @@ begin
       else
         failed := True;
 
-      tempstate.V := Vfinal/mps;
+      tempstate.V := Vfinal/g_mps;
 
   if failed then ShowMessage('Падение скорости до нуля!');
 
@@ -482,12 +476,12 @@ end;
 
 function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 begin
-  if initialstate.V*mps < 0.95*helicopter.Vmax then
+  if initialstate.V*g_mps < 0.95*helicopter.Vmax then
    Result := HorizRazgon(helicopter, initialstate, icG, icT,Vfinal)
   else
    begin
      SetLength(Result,0);
-     ShowMessage('Начальная скорость при разгоне составила ' + FloatToStr(Round(initialstate.V*mps)) + ' км/ч. Эта скорость не может превышать  '+FloatToStr(0.95*helicopter.Vmax)+ ' км/ч');
+     ShowMessage('Начальная скорость при разгоне составила ' + FloatToStr(Round(initialstate.V*g_mps)) + ' км/ч. Эта скорость не может превышать  '+FloatToStr(0.95*helicopter.Vmax)+ ' км/ч');
    end;
 
 end;

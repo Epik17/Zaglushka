@@ -13,7 +13,8 @@ uses
   Matrix_preobraz in 'Matrix_preobraz.pas',
   MyTypes in 'MyTypes.pas',
   JmTypes in 'JmTypes.pas',
-  JmGeometry in 'JmGeometry.pas';
+  JmGeometry in 'JmGeometry.pas',
+  GlobalConstants in 'GlobalConstants.pas';
 
 {$R *.res}
 
