@@ -9,32 +9,48 @@ x,y,z : Real;
 end;
 
 
-procedure AppendManevr(var GlobalFlightData: TFlightData; Manevr : TManevrData; helicopter : THelicopter);overload;
-procedure AppendManevr(var MainManevrData: TManevrData; Manevr : TManevrData; helicopter : THelicopter);overload;
+procedure AppendManevr(var GlobalFlightData: TFlightData; Manevr : TManevrData; helicopter : THelicopter);
 function HorizFlight (initialstate : TStateVector; desiredDistance : Real) : TManevrData;
-function iGorkaPikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real; Pikirovanie : Boolean) : TManevrData;
 function Gorka (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TManevrData;
 function Pikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TManevrData;
-function iVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real; Left:Boolean) : TManevrData;
 function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
-function Vvector(Vmodule, psi, theta : Real) : TVector;
-function Vvector3D(Vmodule, psi, theta : Real) : TVector3D;
-procedure ExtendArray(var myarray: TManevrData);overload;
-procedure ExtendArray(var myarray: TManevrData; count: Integer);overload;
-procedure MyIntegrate(var tempstate : TStateVector; dt,a : Real;omega : TVector3D);
-procedure g_Etape(var TempFlightData : TManevrData; var tempstate : TStateVector; helicopter : THelicopter; ny,a : Real; omega : TVector3D);
-procedure VErrorMessage(temp,min,max: Real; Pikirovanie : boolean);
-function GorkaPikirovanieInputheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,Vmin,Vmax : Real; Pikirovanie : Boolean) : TManevrData;
-function VmaxNotReached(helicopter : THelicopter;flightdata : TManevrData) : Boolean;
 
 const
  dt = 0.1; //шаг по времени, с
  g = 9.81;
  mps = 3.6;
 
+
+ 
+
+
 implementation
+
+procedure ExtendArray(var myarray: TManevrData);overload;
+begin
+ SetLength(myarray,Length(myarray)+1);
+end;
+
+procedure ExtendArray(var myarray: TManevrData; count: Integer);overload;
+begin
+ SetLength(myarray,Length(myarray)+count);
+end;
+
+function Vvector3D(Vmodule, psi, theta : Real) : TVector3D;
+var
+  absV : Real;
+begin
+  absV := Abs(Vmodule);
+
+  with Result do
+   begin
+     x:= absV*Cos(theta)*Cos(psi);
+     y:= absV*Sin(theta);
+     z:= absV*Cos(theta)*Sin(psi)
+   end;
+end;
 
 function VmaxNotReached(helicopter : THelicopter;flightdata : TManevrData) : Boolean;
 var
@@ -50,7 +66,7 @@ begin
   end;
 end;
 
-procedure AppendManevr(var GlobalFlightData: TFlightData; Manevr : TManevrData; helicopter : THelicopter);
+procedure AppendManevr(var GlobalFlightData: TFlightData; Manevr : TManevrData; helicopter : THelicopter);overload;
 var
   i, initialcount :Integer;
 begin
@@ -69,7 +85,7 @@ begin
   ShowMessage('Превышение разрешенной максимальной скорости (' + FloatToStr(0.95*helicopter.Vmax)+ ') км/ч')
 end;
 
-procedure AppendManevr(var MainManevrData: TManevrData; Manevr : TManevrData; helicopter : THelicopter);
+procedure AppendManevr(var MainManevrData: TManevrData; Manevr : TManevrData; helicopter : THelicopter);overload;
 var
   i, initialcount :Integer;
 begin
@@ -123,6 +139,34 @@ begin
      
    end;
 
+end;
+
+procedure MyIntegrate(var tempstate : TStateVector; dt,a : Real;omega : TVector3D);
+var
+angles, dangles, intermediateangles,dr : TVector3D;
+dV : Real;
+begin
+ angles.x := tempstate.gamma;
+ angles.y := tempstate.psi;
+ angles.z := tempstate.theta;
+
+ dangles := Scale(omega,dt);
+ intermediateangles := Add(angles,Scale(dangles,0.5));
+
+ dV := a*dt;
+
+ dr := Scale(Vvector3D((tempstate.V+dV/2),intermediateangles.y,intermediateangles.z),dt);
+
+ angles := Add(angles,dangles);
+
+ tempstate.gamma := angles.x;
+ tempstate.psi := angles.y;
+ tempstate.theta := angles.z;
+ tempstate.V := tempstate.V + dV;
+ tempstate.t := tempstate.t + dt;
+ tempstate.x := tempstate.x + dr.x;
+ tempstate.y := tempstate.y + dr.y;
+ tempstate.z := tempstate.z + dr.z;
 end;
 
 procedure g_Etape(var TempFlightData : TManevrData; var tempstate : TStateVector; helicopter : THelicopter; ny,a : Real; omega : TVector3D);
@@ -462,55 +506,10 @@ begin
    end;
 end;
 
-function Vvector3D(Vmodule, psi, theta : Real) : TVector3D;
-var
-  absV : Real;
-begin
-  absV := Abs(Vmodule);
 
-  with Result do
-   begin
-     x:= absV*Cos(theta)*Cos(psi);
-     y:= absV*Sin(theta);
-     z:= absV*Cos(theta)*Sin(psi)
-   end;
-end;
 
-procedure ExtendArray(var myarray: TManevrData);overload;
-begin
- SetLength(myarray,Length(myarray)+1);
-end;
-procedure ExtendArray(var myarray: TManevrData; count: Integer);overload;
-begin
- SetLength(myarray,Length(myarray)+count);
-end;
 
-procedure MyIntegrate(var tempstate : TStateVector; dt,a : Real;omega : TVector3D);
-var
-angles, dangles, intermediateangles,dr : TVector3D;
-dV : Real;
-begin
- angles.x := tempstate.gamma;
- angles.y := tempstate.psi;
- angles.z := tempstate.theta;
 
- dangles := Scale(omega,dt);
- intermediateangles := Add(angles,Scale(dangles,0.5));
 
- dV := a*dt;
-
- dr := Scale(Vvector3D((tempstate.V+dV/2),intermediateangles.y,intermediateangles.z),dt);
-
- angles := Add(angles,dangles);
-
- tempstate.gamma := angles.x;
- tempstate.psi := angles.y;
- tempstate.theta := angles.z;
- tempstate.V := tempstate.V + dV;
- tempstate.t := tempstate.t + dt;
- tempstate.x := tempstate.x + dr.x;
- tempstate.y := tempstate.y + dr.y;
- tempstate.z := tempstate.z + dr.z;
-end;
 
 end.
