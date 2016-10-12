@@ -1037,7 +1037,7 @@ begin
      Writeln(f,cbb_HelicopterType.Items[cbb_Helicoptertype.ItemIndex]+' G = '+FloatToStr(g_G)+' H0 = ' + FloatToStr(g_H0) +' T = '+FloatToStr(g_T) );
 
      for i:=0 to Length(g_FlightData) -1 do
-      for j := 0 to Length(g_FlightData[i]) do
+      for j := 0 to Length(g_FlightData[i]) -1 do
         Writeln(f, StateVectorString(FlightData[i][j]));
 
      CloseFile(f);
