@@ -260,7 +260,6 @@ object frm_Interface: Tfrm_Interface
       Marks.ArrowLength = 0
       Marks.Visible = False
       SeriesColor = clRed
-      Pointer.Brush.Color = 16744448
       Pointer.HorizSize = 3
       Pointer.InflateMargins = True
       Pointer.Pen.Visible = False
