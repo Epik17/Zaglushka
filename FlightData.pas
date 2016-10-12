@@ -12,8 +12,7 @@ type TManevrData = array of TStateVector;
 type TFlightData = array of TManevrData;
 
 function StateVectorString (state:TStateVector):string;
-function ToXYZ1Array(statevector : TStateVector) : TArrayOfReal;  overload;
-function ToXYZ1Array(FlightData : TManevrData) : TArrayOfArrayOfReal; overload;
+function ToXYZ1Array(FlightData : TManevrData) : TArrayOfArrayOfReal;overload;
 
 implementation
 
@@ -62,4 +61,6 @@ begin
   for i:=0 to count -1 do
    Result[i]:= ToXYZ1Array(FlightData[i])
 end;
+
+
 end.
