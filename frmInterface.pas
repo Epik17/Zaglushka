@@ -79,8 +79,7 @@ type
   helicopter: THelicopter; icG, icT, icH0: Real);
   procedure DrawCharacs(var cht: TChart;
   helicopter: THelicopter; icG, icT, icH0: Real);
-  procedure DrawTrajectory(var cht: TChart;
-  FlightData : TFlightData);
+
     procedure rg_viewClick(Sender: TObject);
     procedure rg_xarakClick(Sender: TObject);
     procedure btn_ExportCalculatedTaskClick(Sender: TObject);
@@ -92,7 +91,8 @@ type
     { Private declarations }
   public
     { Public declarations }
-
+  procedure DrawTrajectory(var cht: TChart;
+  FlightData : TFlightData); 
     procedure CreateLabeledScrollbars(names:TArrayOfString; multipliers:TArrayOfReal; mins : TArrayOfInteger; maxes : TArrayOfInteger); overload;
     procedure CreateLabeledScrollbars(ManevrType : TManevrTypes);overload;
     procedure DynamicallyUpdateLabelValues (Sender: TObject);
@@ -156,8 +156,9 @@ implementation
 procedure Tfrm_Interface.FlightDataInitialization;
 begin
    SetLength(g_FlightData,1);
+   SetLength(g_FlightData[0],1);
 
-    with g_FlightData[0] do
+    with g_FlightData[0,0] do
      begin
       x :=0;
       y := g_H0;
@@ -218,16 +219,30 @@ end;
 
  procedure Tfrm_Interface.AppendTempManevr (tempManevr : TManevr);
  var
-   TempManevrData : TFlightData;
+   TempManevrData : TManevrData;
+   laststate : TStateVector;
  begin
+   laststate := g_FlightData[High(g_FlightData)][High(g_FlightData[High(g_FlightData)])];
 
    case tempManevr.pType of
-        mtHorizFlight : TempManevrData:=HorizFlight(g_FlightData[High(g_FlightData)],tempManevr.fParameters[1]);
-        mtGorka : TempManevrData:=Gorka(g_Helicopter, g_FlightData[High(g_FlightData)],g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],tempManevr.fParameters[4],tempManevr.fParameters[5]);
-        mtPikirovanie : TempManevrData:=Pikirovanie(g_Helicopter, g_FlightData[High(g_FlightData)],g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[5]);
-        mtLeftVirage : TempManevrData:=Virage(g_Helicopter,g_FlightData[High(g_FlightData)], g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[7]);
-        mtRightVirage : TempManevrData:=Virage(g_Helicopter,g_FlightData[High(g_FlightData)], g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7]);
-        mtHorizRazgon : TempManevrData:=HorizRazgonInputCheck(g_Helicopter,g_FlightData[High(g_FlightData)],g_G, g_T,tempManevr.fParameters[8]);
+
+        mtHorizFlight :
+         TempManevrData:=HorizFlight(laststate,tempManevr.fParameters[1]);
+
+        mtGorka :
+         TempManevrData:=Gorka(g_Helicopter, laststate,g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],tempManevr.fParameters[4],tempManevr.fParameters[5]);
+
+        mtPikirovanie :
+         TempManevrData:=Pikirovanie(g_Helicopter, laststate,g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[5]);
+
+        mtLeftVirage :
+         TempManevrData:=Virage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[7]);
+
+        mtRightVirage :
+         TempManevrData:=Virage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7]);
+
+        mtHorizRazgon :
+         TempManevrData:=HorizRazgonInputCheck(g_Helicopter,laststate,g_G, g_T,tempManevr.fParameters[8]);
     end;
 
    if Length(TempManevrData) > 0 then
@@ -572,7 +587,7 @@ begin
   MySetLength(count);
 
   multipliers[0]:=1;
-  mins[0]:=Round(1.05*g_FlightData[0].V*mps);
+  mins[0]:=Round(1.05*g_FlightData[0][0].V*mps);
   names[0]:='Макс. скор., км/ч';
   maxes[0]:=Round(0.95*g_Helicopter.Vmax)-1;
  // maxes[0]:=Round(0.95*Vmax(g_Helicopter, g_G, g_T, g_H0));
@@ -625,6 +640,7 @@ procedure Tfrm_Interface.lst_ManevryMouseDown(Sender: TObject;
 
 begin
   UpdateValuesFromTManevr;
+  DrawTrajectory(cht_traj,g_FlightData);
 end;
 
 function ManevrTypeToNumber (aType : string) : Integer;
@@ -808,62 +824,98 @@ end;
 
 procedure Tfrm_Interface.DrawTrajectory(var cht: TChart;
   FlightData: TFlightData);
-  var
-     i,j : Integer;
-     xyz1 : TArrayOfArrayOfReal;
-     xyz1s : TMatrixData;
-     chopped,
-     rotated : TMatrix;
+var
 
+ NewSeries : TPointSeries;
+ i,j, m  : Integer;
+ xyz1 : TArrayOfArrayOfReal;
+ xyz1s : TMatrixData;
+ chopped,
+ rotated : TMatrix;
+
+const
+   pointersize = 2;
 begin
-  cht.Series[0].Clear;
-  
-  if Length(FlightData) >1 then
-  begin
-       xyz1 := ToXYZ1Array(FlightData);
-    SetLength(xyz1s,Length(xyz1));
 
-    for i :=0 to Length (xyz1)-1 do
+  if Length(FlightData) > 1 then
+   begin
+    for i := 0 to cht.SeriesCount - 1 do
+      cht.Series[i].Clear;
+
+    while cht.SeriesCount > 0 do
+      cht.Series[0].Free;
+
+    for m := 0 to High(FlightData) do
       begin
-        SetLength(xyz1s[i],Length(xyz1[i]));
+        NewSeries := TPointSeries.Create(self);
 
-        for j:=0 to Length(xyz1[i]) -1 do
-         xyz1s[i,j]:= xyz1[i,j]
+        with NewSeries.Pointer do
+         begin
+          Style := psCircle;
+          Pen.Visible := False; //removes the border
+
+          HorizSize := pointersize;
+          VertSize := pointersize;
+
+          if (m = lst_Manevry.ItemIndex+1)  then
+           begin
+            HorizSize := HorizSize + 2;
+            VertSize := VertSize + 2;
+           end;
+           
+         end;
+
+       if Length(FlightData[m]) > 1 then
+        begin
+             xyz1 := ToXYZ1Array(FlightData[m]);
+
+          SetLength(xyz1s,Length(xyz1));
+
+          for i :=0 to Length (xyz1) - 1 do
+            begin
+              SetLength(xyz1s[i],Length(xyz1[i]));
+
+              for j:=0 to Length(xyz1[i]) - 1 do
+               xyz1s[i,j]:= xyz1[i,j]
+            end;
+
+          chopped := TMatrix.Create(xyz1s);
+
+          if rg_view.ItemIndex = 2 then //isometric
+             begin
+               cht.LeftAxis.Visible := False;
+               cht.BottomAxis.Visible := False;
+               rotated := chopped.Mult(IsometryMatrix(-DegToRad(29.52),-DegToRad(26.23)))
+             end
+          else
+            begin
+             rotated := chopped;  //not rotated
+             cht.LeftAxis.Visible := True;
+             cht.BottomAxis.Visible := True;
+            end;
+
+         if (rg_view.ItemIndex = 1) then
+          with cht.LeftAxis do
+           begin
+            Automatic := False;
+            Minimum := 0;
+            Maximum := Round(1.4*g_H0);
+           end
+         else
+          cht.LeftAxis.Automatic := True;
+
+          for i :=0 to rotated.RowCount - 1 do
+           if (rg_view.ItemIndex = 1) or (rg_view.ItemIndex = 2) then
+             NewSeries.AddXY(rotated[i+1,1],rotated[i+1,2])
+           else
+             NewSeries.AddXY(rotated[i+1,1]{x},rotated[i+1,3]{z});
+
+          cht.AddSeries(NewSeries);
+        end;
+
+
       end;
-
-    chopped := TMatrix.Create(xyz1s);
-
-    if rg_view.ItemIndex = 2 then //isometric
-     begin
-       cht.LeftAxis.Visible := False;
-       cht.BottomAxis.Visible := False;
-       rotated := chopped.Mult(IsometryMatrix(-DegToRad(29.52),-DegToRad(26.23)))
-     end
-    else
-      begin
-       rotated := chopped;  //not rotated
-       cht.LeftAxis.Visible := True;
-       cht.BottomAxis.Visible := True;
-      end;
-
-   if (rg_view.ItemIndex = 1) then
-    with cht.LeftAxis do
-     begin
-      Automatic := False;
-      Minimum := 0;
-      Maximum := Round(1.4*g_H0);
-     end
-   else
-    cht.LeftAxis.Automatic := True;
-
-    for i :=0 to rotated.RowCount -1 do
-     if (rg_view.ItemIndex = 1) or (rg_view.ItemIndex = 2) then
-       cht.Series[0].AddXY(rotated[i+1,1],rotated[i+1,2])
-     else
-       cht.Series[0].AddXY(rotated[i+1,1]{x},rotated[i+1,3]{z})
-  end;
-
-
+   end;
 end;
 
 procedure Tfrm_Interface.rg_viewClick(Sender: TObject);
@@ -973,7 +1025,7 @@ procedure Tfrm_Interface.ExportCalculatedFlightTask(
   FlightData: TFlightData);
 var
 f: textfile;
-i : Integer;
+i,j : Integer;
 currentdir : string;
 begin
  currentdir := GetCurrentDir;
@@ -985,9 +1037,9 @@ begin
      Writeln(f,cbb_HelicopterType.Items[cbb_Helicoptertype.ItemIndex]+' G = '+FloatToStr(g_G)+' H0 = ' + FloatToStr(g_H0) +' T = '+FloatToStr(g_T) );
 
      for i:=0 to Length(g_FlightData) -1 do
-     begin
-      Writeln(f, StateVectorString(FlightData[i]));
-     end;
+      for j := 0 to Length(g_FlightData[i]) do
+        Writeln(f, StateVectorString(FlightData[i][j]));
+
      CloseFile(f);
      ShowMessage('Массив положений вертолета успешно сохранен в файл '+currentdir+'\blitz\lib\massivw.txt');
    end;
@@ -1238,5 +1290,7 @@ begin
  btn_AddManevr.Caption := 'Обновить маневр';
  g_ButtonMode := bmUpdate;
 end;
+
+
 
 end.

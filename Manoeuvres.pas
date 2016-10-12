@@ -9,24 +9,25 @@ x,y,z : Real;
 end;
 
 
-procedure AppendManevr(var GlobalFlightData: TFlightData; Manevr : TFlightData; helicopter : THelicopter);
-function HorizFlight (initialstate : TStateVector; desiredDistance : Real) : TFlightData;
-function iGorkaPikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real; Pikirovanie : Boolean) : TFlightData;
-function Gorka (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TFlightData;
-function Pikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TFlightData;
-function iVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real; Left:Boolean) : TFlightData;
-function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TFlightData;
-function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TFlightData;
-function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TFlightData;
+procedure AppendManevr(var GlobalFlightData: TFlightData; Manevr : TManevrData; helicopter : THelicopter);overload;
+procedure AppendManevr(var MainManevrData: TManevrData; Manevr : TManevrData; helicopter : THelicopter);overload;
+function HorizFlight (initialstate : TStateVector; desiredDistance : Real) : TManevrData;
+function iGorkaPikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real; Pikirovanie : Boolean) : TManevrData;
+function Gorka (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TManevrData;
+function Pikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TManevrData;
+function iVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real; Left:Boolean) : TManevrData;
+function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
+function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
+function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 function Vvector(Vmodule, psi, theta : Real) : TVector;
 function Vvector3D(Vmodule, psi, theta : Real) : TVector3D;
-procedure ExtendArray(var myarray: TFlightData);overload;
-procedure ExtendArray(var myarray: TFlightData; count: Integer);overload;
+procedure ExtendArray(var myarray: TManevrData);overload;
+procedure ExtendArray(var myarray: TManevrData; count: Integer);overload;
 procedure MyIntegrate(var tempstate : TStateVector; dt,a : Real;omega : TVector3D);
-procedure g_Etape(var TempFlightData : TFlightData; var tempstate : TStateVector; helicopter : THelicopter; ny,a : Real; omega : TVector3D);
+procedure g_Etape(var TempFlightData : TManevrData; var tempstate : TStateVector; helicopter : THelicopter; ny,a : Real; omega : TVector3D);
 procedure VErrorMessage(temp,min,max: Real; Pikirovanie : boolean);
-function GorkaPikirovanieInputheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,Vmin,Vmax : Real; Pikirovanie : Boolean) : TFlightData;
-function VmaxNotReached(helicopter : THelicopter;flightdata : TFlightData) : Boolean;
+function GorkaPikirovanieInputheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,Vmin,Vmax : Real; Pikirovanie : Boolean) : TManevrData;
+function VmaxNotReached(helicopter : THelicopter;flightdata : TManevrData) : Boolean;
 
 const
  dt = 0.1; //шаг по времени, с
@@ -35,7 +36,7 @@ const
 
 implementation
 
-function VmaxNotReached(helicopter : THelicopter;flightdata : TFlightData) : Boolean;
+function VmaxNotReached(helicopter : THelicopter;flightdata : TManevrData) : Boolean;
 var
   i:Integer;
 begin
@@ -49,23 +50,44 @@ begin
   end;
 end;
 
-procedure AppendManevr(var GlobalFlightData: TFlightData; Manevr : TFlightData; helicopter : THelicopter);
+procedure AppendManevr(var GlobalFlightData: TFlightData; Manevr : TManevrData; helicopter : THelicopter);
 var
   i, initialcount :Integer;
 begin
  if not VmaxNotReached (helicopter,Manevr) then
   begin
+
     initialcount := Length(GlobalFlightData);
-    SetLength(GlobalFlightData,initialcount+Length(Manevr));
+    SetLength(GlobalFlightData,initialcount+1);
+    SetLength(GlobalFlightData[High(GlobalFlightData)],Length(Manevr));
 
     for i:=Low(Manevr) to High(Manevr) do
-      GlobalFlightData[initialcount+i]:= Manevr[i]
+      GlobalFlightData[High(GlobalFlightData),i]:= Manevr[i];
+
   end
  else
   ShowMessage('Превышение разрешенной максимальной скорости (' + FloatToStr(0.95*helicopter.Vmax)+ ') км/ч')
 end;
 
-function HorizFlight (initialstate : TStateVector; desiredDistance : Real) : TFlightData;
+procedure AppendManevr(var MainManevrData: TManevrData; Manevr : TManevrData; helicopter : THelicopter);
+var
+  i, initialcount :Integer;
+begin
+ if not VmaxNotReached (helicopter,Manevr) then
+  begin
+
+    initialcount := Length(MainManevrData);
+    SetLength(MainManevrData,initialcount+Length(Manevr));
+
+    for i:=Low(Manevr) to High(Manevr) do
+      MainManevrData[initialcount+i]:= Manevr[i]
+
+  end
+ else
+  ShowMessage('Превышение разрешенной максимальной скорости (' + FloatToStr(0.95*helicopter.Vmax)+ ') км/ч')
+end;
+
+function HorizFlight (initialstate : TStateVector; desiredDistance : Real) : TManevrData;
 var
   distance, tempt,tempx,tempz,dx,dz : Real;
 begin
@@ -103,7 +125,7 @@ begin
 
 end;
 
-procedure g_Etape(var TempFlightData : TFlightData; var tempstate : TStateVector; helicopter : THelicopter; ny,a : Real; omega : TVector3D);
+procedure g_Etape(var TempFlightData : TManevrData; var tempstate : TStateVector; helicopter : THelicopter; ny,a : Real; omega : TVector3D);
 begin
   ExtendArray(TempFlightData);
 
@@ -112,9 +134,9 @@ begin
   TempFlightData[High(TempFlightData)] := tempstate;
 end;
 
-function iGorkaPikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real; Pikirovanie : Boolean) : TFlightData;
+function iGorkaPikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real; Pikirovanie : Boolean) : TManevrData;
 var
- vvod,nakl,vyvod : TFlightData;
+ vvod,nakl,vyvod : TManevrData;
  nyslope,tempa,dnxa : Real;
  tempstate : TStateVector;
  tempomega : TVector3D;
@@ -137,7 +159,7 @@ begin
       a := g*(nx - dnxa - Sin(tempstate.theta) - nxOtXvr);
 end;
 
- procedure Etape(var TempFlightData : TFlightData; ny : Real);
+ procedure Etape(var TempFlightData : TManevrData; ny : Real);
    begin
     ExtendArray(TempFlightData);
 
@@ -219,7 +241,7 @@ begin
 end;
 
 
-function GorkaPikirovanieInputheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,Vmin,Vmax : Real; Pikirovanie : Boolean) : TFlightData;
+function GorkaPikirovanieInputheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,Vmin,Vmax : Real; Pikirovanie : Boolean) : TManevrData;
 var
   Vtemp : Real;
 begin
@@ -234,7 +256,7 @@ begin
    end;
 end;
 
-function Gorka (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TFlightData;
+function Gorka (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TManevrData;
 const
   Vmin = 150;
 var
@@ -246,7 +268,7 @@ begin
 end;
 
 
-function Pikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TFlightData;
+function Pikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TManevrData;
 const
   Vmin = 50;
   Vmax = 150;
@@ -254,10 +276,10 @@ begin
   Result := GorkaPikirovanieInputheck(helicopter, initialstate, icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,Vmin,Vmax,True)
 end;
 
-function iVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real; Left: Boolean) : TFlightData;
+function iVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real; Left: Boolean) : TManevrData;
 var
   tempa, tempny, dpsiVvod, prevgamma: Real;
-  vvod, constgammaUchastok,vyvod : TFlightData;
+  vvod, constgammaUchastok,vyvod : TManevrData;
   tempstate : TStateVector;
   tempomega : TVector3D;
   failed:Boolean;
@@ -354,7 +376,7 @@ if not failed then
   SetLength(vyvod,0);
 end;
 
-function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TFlightData;
+function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 begin
   if deltaPsi < 0 then
     Result:=iVirage(helicopter, initialstate, icG, icT,kren, deltaPsi, False);
@@ -364,7 +386,7 @@ begin
    SetLength(Result,0)
 end;
 
-function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TFlightData;
+function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 var
   localTime,tempny,a : Real;
   tempstate : TStateVector;
@@ -414,7 +436,7 @@ begin
   //ShowMessage(FloatToStr(localTime));
 end;
 
-function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TFlightData;
+function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 begin
   if initialstate.V*mps < 0.95*helicopter.Vmax then
    Result := HorizRazgon(helicopter, initialstate, icG, icT,Vfinal)
@@ -454,11 +476,11 @@ begin
    end;
 end;
 
-procedure ExtendArray(var myarray: TFlightData);overload;
+procedure ExtendArray(var myarray: TManevrData);overload;
 begin
  SetLength(myarray,Length(myarray)+1);
 end;
-procedure ExtendArray(var myarray: TFlightData; count: Integer);overload;
+procedure ExtendArray(var myarray: TManevrData; count: Integer);overload;
 begin
  SetLength(myarray,Length(myarray)+count);
 end;

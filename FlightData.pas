@@ -8,11 +8,12 @@ x,y,z,theta,gamma,psi,V,ny,t : Real;
 end;
 
 
-type TFlightData = array of TStateVector;
+type TManevrData = array of TStateVector;
+type TFlightData = array of TManevrData;
 
 function StateVectorString (state:TStateVector):string;
 function ToXYZ1Array(statevector : TStateVector) : TArrayOfReal;  overload;
-function ToXYZ1Array(FlightData : TFlightData) : TArrayOfArrayOfReal; overload;
+function ToXYZ1Array(FlightData : TManevrData) : TArrayOfArrayOfReal; overload;
 
 implementation
 
@@ -50,7 +51,7 @@ begin
 
 end;
 
-function ToXYZ1Array(FlightData : TFlightData) : TArrayOfArrayOfReal; overload;
+function ToXYZ1Array(FlightData : TManevrData) : TArrayOfArrayOfReal; overload;
 var
   i,count : Integer;
 begin
