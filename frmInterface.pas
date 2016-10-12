@@ -220,15 +220,7 @@ end;
  var
    TempManevrData : TFlightData;
  begin
-  {  case tempManevr.pType of
-        mtHorizFlight : AppendManevr(g_FlightData,HorizFlight(g_FlightData[High(g_FlightData)],tempManevr.fParameters[1]),g_Helicopter);
-        mtGorka : AppendManevr(g_FlightData,Gorka(g_Helicopter, g_FlightData[High(g_FlightData)],g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],tempManevr.fParameters[4],tempManevr.fParameters[5]),g_Helicopter);
-        mtPikirovanie : AppendManevr(g_FlightData,Pikirovanie(g_Helicopter, g_FlightData[High(g_FlightData)],g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[5]),g_Helicopter);
-        mtLeftVirage : AppendManevr(g_FlightData,Virage(g_Helicopter,g_FlightData[High(g_FlightData)], g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[7]),g_Helicopter);
-        mtRightVirage : AppendManevr(g_FlightData,Virage(g_Helicopter,g_FlightData[High(g_FlightData)], g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7]),g_Helicopter);
-        mtHorizRazgon : AppendManevr(g_FlightData,HorizRazgonInputCheck(g_Helicopter,g_FlightData[High(g_FlightData)],g_G, g_T,tempManevr.fParameters[8]),g_Helicopter);
-    end;
-    }
+
    case tempManevr.pType of
         mtHorizFlight : TempManevrData:=HorizFlight(g_FlightData[High(g_FlightData)],tempManevr.fParameters[1]);
         mtGorka : TempManevrData:=Gorka(g_Helicopter, g_FlightData[High(g_FlightData)],g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],tempManevr.fParameters[4],tempManevr.fParameters[5]);
@@ -289,7 +281,6 @@ begin
       UpdateManevrList(g_ManevrList);
 
       // since one manoeuvre is updated we need to recalculate all manoeuvres in the flight task
-
       RecalculateRedrawFromManevrList;
     end;
 
@@ -460,7 +451,6 @@ begin
                Left:=startleft+100;
                Max:=maxes[i];
                Position:=mins[i];
-               //TickMarks:=tmBottomRight;
                TickStyle:=tsNone;
                ThumbLength:=10;
                Height :=17;
@@ -619,15 +609,11 @@ if lst_Manevry.ItemIndex <>-1 then
 
        if (SelectedManevr.pType = mtGorka) or (SelectedManevr.pType = mtPikirovanie) then
          for i:=0 to Length(g_TrackBars)-1 do
-          begin
-           g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+2]/g_Multipliers[i])
-          end;
+           g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+2]/g_Multipliers[i]);
 
        if (SelectedManevr.pType = mtLeftVirage) or (SelectedManevr.pType = mtRightVirage) then
          for i:=0 to Length(g_TrackBars)-1 do
-          begin
-           g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+6]/g_Multipliers[i])
-          end;
+           g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+6]/g_Multipliers[i]);
 
       if (SelectedManevr.pType = mtHorizRazgon) then
         g_TrackBars[0].Position := Round(SelectedManevr.fParameters[8]/g_Multipliers[0]);
@@ -674,9 +660,6 @@ begin
  //refreshing labels' values
   for i:=0 to High(g_TrackBars) do
    g_ValueLabels[i].Caption := FloatToStr(g_Multipliers[i]*g_TrackBars[i].Position);
-
-
- //UpdateManevrList(g_ManevrList);
 
 end;
 
@@ -864,10 +847,11 @@ begin
       end;
 
    if (rg_view.ItemIndex = 1) then
+    with cht.LeftAxis do
      begin
-      cht.LeftAxis.Automatic := False;
-      cht.LeftAxis.Minimum := 0;
-      cht.LeftAxis.Maximum := Round(1.4*g_H0);
+      Automatic := False;
+      Minimum := 0;
+      Maximum := Round(1.4*g_H0);
      end
    else
     cht.LeftAxis.Automatic := True;
