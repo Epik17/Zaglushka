@@ -15,7 +15,7 @@ function ToXYZ1Array(FlightData : TManevrData) : TArrayOfArrayOfReal;overload;
 procedure AppendManevrData(var GlobalFlightData: TFlightData; Manevr : TManevrData; helicopter : THelicopter);overload;
 procedure AppendManevrData(var MainManevrData: TManevrData; Manevr : TManevrData; helicopter : THelicopter);overload;
 
-
+function FlightDataToManevrData(FlightData : TFlightData; helicopter : THelicopter) : TManevrData;
 
 implementation
 
@@ -116,6 +116,15 @@ begin
   ShowMessage('Превышение разрешенной максимальной скорости (' + FloatToStr(0.95*helicopter.Vmax)+ ') км/ч')
 end;
 
+function FlightDataToManevrData(FlightData : TFlightData; helicopter : THelicopter) : TManevrData;
+var
+  i : Integer;
+begin
+  SetLength(Result,0);
+
+  for i := Low(FlightData) to High(FlightData) do
+   AppendManevrData(Result,FlightData[i],helicopter)
+end;
 
 
 

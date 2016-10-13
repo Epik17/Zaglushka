@@ -835,6 +835,7 @@ var
  xyz1s : TMatrixData;
  chopped,
  rotated : TMatrix;
+ //props : TManevrPropsPerebornye;
 
 const
    pointersize = 2;
@@ -918,6 +919,9 @@ begin
 
       end;
    end;
+
+ // props := ManevrPropsPerebornye(FlightDataToManevrData(FlightData,g_Helicopter));
+ // ShowMessage(FloatToStr(props.S));
 end;
 
 procedure Tfrm_Interface.rg_viewClick(Sender: TObject);
