@@ -5,7 +5,7 @@ interface
 uses FlightData,Math,HelicoptersDatabase,Kernel,Dialogs, JmGeometry,SysUtils, GlobalConstants;
 
 type TVector = record
-x,y,z : Real;
+x,y,z : Real
 end;
 
 
@@ -16,6 +16,12 @@ function Pikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG
 function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
+
+function tVypoln(Manevr : TManevrData) : Extended;
+function Vfinal(Manevr : TManevrData) : Extended;
+function deltaX(Manevr : TManevrData) : Extended;
+function deltaY(Manevr : TManevrData) : Extended;
+function deltaZ(Manevr : TManevrData) : Extended;
 
 const
  dt = 0.1; //шаг по времени, с
@@ -265,6 +271,8 @@ begin
   SetLength(vvod,0);
   SetLength(nakl,0);
   SetLength(vyvod,0);
+
+  ShowMessage(FloatToStr(deltaY(Result)));
 end;
 
 procedure VErrorMessage(temp,min,max: Real; Pikirovanie : boolean);
@@ -500,10 +508,32 @@ begin
    end;
 end;
 
+function tVypoln(Manevr : TManevrData) : Extended;
+begin
+  Result := Manevr[High(Manevr)].t - Manevr[Low(Manevr)].t
+end;
 
+function Vfinal(Manevr : TManevrData) : Extended;
+begin
+  Result := Manevr[High(Manevr)].V * g_mps
+end;
 
+function deltaX(Manevr : TManevrData) : Extended;
+begin
+  Result := Manevr[High(Manevr)].x - Manevr[Low(Manevr)].x
+end;
 
+function deltaY(Manevr : TManevrData) : Extended;
+begin
+  Result := Manevr[High(Manevr)].y - Manevr[Low(Manevr)].y
+end;
 
-
+function deltaZ(Manevr : TManevrData) : Extended;
+begin
+  Result := Manevr[High(Manevr)].z - Manevr[Low(Manevr)].z
+end;
 
 end.
+
+
+
