@@ -13,7 +13,7 @@ Vmax, Vmin, S, xmin, xmax, ymin, ymax, zmin, zmax : Real
 end;
 
 
-procedure AppendManevr(var GlobalFlightData: TFlightData; Manevr : TManevrData; helicopter : THelicopter);
+
 function HorizFlight (initialstate : TStateVector; desiredDistance : Real) : TManevrData;
 function Gorka (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TManevrData;
 function Pikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TManevrData;
@@ -57,56 +57,9 @@ begin
    end;
 end;
 
-function VmaxNotReached(helicopter : THelicopter;flightdata : TManevrData) : Boolean;
-var
-  i:Integer;
-begin
- Result := False;
 
- for i :=0  to High(flightdata) do
-  if flightdata[i].V*g_mps > 0.95*helicopter.Vmax then
-  begin
-   Result := True;
-   Break;
-  end;
-end;
 
-procedure AppendManevr(var GlobalFlightData: TFlightData; Manevr : TManevrData; helicopter : THelicopter);overload;
-var
-  i, initialcount :Integer;
-begin
- if not VmaxNotReached (helicopter,Manevr) then
-  begin
 
-    initialcount := Length(GlobalFlightData);
-    SetLength(GlobalFlightData,initialcount+1);
-    SetLength(GlobalFlightData[High(GlobalFlightData)],Length(Manevr));
-
-    for i:=Low(Manevr) to High(Manevr) do
-      GlobalFlightData[High(GlobalFlightData),i]:= Manevr[i];
-
-  end
- else
-  ShowMessage('Превышение разрешенной максимальной скорости (' + FloatToStr(0.95*helicopter.Vmax)+ ') км/ч')
-end;
-
-procedure AppendManevr(var MainManevrData: TManevrData; Manevr : TManevrData; helicopter : THelicopter);overload;
-var
-  i, initialcount :Integer;
-begin
- if not VmaxNotReached (helicopter,Manevr) then
-  begin
-
-    initialcount := Length(MainManevrData);
-    SetLength(MainManevrData,initialcount+Length(Manevr));
-
-    for i:=Low(Manevr) to High(Manevr) do
-      MainManevrData[initialcount+i]:= Manevr[i]
-
-  end
- else
-  ShowMessage('Превышение разрешенной максимальной скорости (' + FloatToStr(0.95*helicopter.Vmax)+ ') км/ч')
-end;
 
 function HorizFlight (initialstate : TStateVector; desiredDistance : Real) : TManevrData;
 var
@@ -268,9 +221,9 @@ begin
 
  //стыкуем
   SetLength(Result,0);
-  AppendManevr(Result,vvod,helicopter);
-  AppendManevr(Result,nakl,helicopter);
-  AppendManevr(Result,vyvod,helicopter);
+  AppendManevrData(Result,vvod,helicopter);
+  AppendManevrData(Result,nakl,helicopter);
+  AppendManevrData(Result,vyvod,helicopter);
 
  //очищаем 
   SetLength(vvod,0);
@@ -418,9 +371,9 @@ if not failed then
   if failed then ShowMessage('Падение скорости до нуля!');
 
   SetLength(Result,0);
-  AppendManevr(Result,vvod,helicopter);
-  AppendManevr(Result,constgammaUchastok,helicopter);
-  AppendManevr(Result,vyvod,helicopter);
+  AppendManevrData(Result,vvod,helicopter);
+  AppendManevrData(Result,constgammaUchastok,helicopter);
+  AppendManevrData(Result,vyvod,helicopter);
 
   SetLength(vvod,0);
   SetLength(constgammaUchastok,0);

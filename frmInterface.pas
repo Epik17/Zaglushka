@@ -250,7 +250,7 @@ end;
 
    if Length(TempManevrData) > 0 then
     //if there were no errors during the calculation of TempManevrData
-     AppendManevr(g_FlightData,TempManevrData,g_Helicopter);
+     AppendManevrData(g_FlightData,TempManevrData,g_Helicopter);
 
 
  end;
