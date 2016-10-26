@@ -142,8 +142,8 @@ object frm_Interface: Tfrm_Interface
     OnClick = btn_ImportFlightTaskClick
   end
   object Memo1: TMemo
-    Left = 24
-    Top = 312
+    Left = 80
+    Top = 552
     Width = 617
     Height = 57
     Lines.Strings = (
@@ -323,6 +323,15 @@ object frm_Interface: Tfrm_Interface
     TabOrder = 16
     ThumbLength = 10
     TickStyle = tsNone
+  end
+  object strngrd_ManevrInfo: TStringGrid
+    Left = 408
+    Top = 240
+    Width = 313
+    Height = 253
+    ColCount = 3
+    RowCount = 10
+    TabOrder = 17
   end
   object pm_Manevry: TPopupMenu
     AutoPopup = False

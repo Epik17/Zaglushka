@@ -63,6 +63,7 @@ type
     lblV0value: TLabel;
     trckbrV0: TTrackBar;
     lbl_RecalcNeeded: TLabel;
+    strngrd_ManevrInfo: TStringGrid;
     procedure FormCreate(Sender: TObject);
     procedure cbb_ManevryChange(Sender: TObject);
     procedure btn_AddManevrClick(Sender: TObject);
@@ -120,6 +121,8 @@ type
     procedure DynamicallyChangeV0max;
     procedure AddModeOn;
     procedure UpdateModeOn;
+    procedure CreateManevrInfoGrid;
+    procedure ShowManevrInfo;
   end;
 
 var
@@ -204,6 +207,8 @@ begin
    FlightDataInitialization;
 
    DisableCalculateButton;
+
+   CreateManevrInfoGrid;
 
 end;
 
@@ -835,7 +840,7 @@ var
  xyz1s : TMatrixData;
  chopped,
  rotated : TMatrix;
- //props : TManevrPropsPerebornye;
+
 
 const
    pointersize = 2;
@@ -920,8 +925,7 @@ begin
       end;
    end;
 
- // props := ManevrPropsPerebornye(FlightDataToManevrData(FlightData,g_Helicopter));
- // ShowMessage(FloatToStr(props.S));
+
 end;
 
 procedure Tfrm_Interface.rg_viewClick(Sender: TObject);
@@ -1299,4 +1303,43 @@ end;
 
 
 
+procedure Tfrm_Interface.CreateManevrInfoGrid;
+begin
+ with strngrd_ManevrInfo do
+   begin
+
+     ColWidths[0]:=160;
+     ColWidths[1]:=115;
+     ColWidths[2]:=115;
+
+     Width := 396;
+
+     Cells[0,1] := 'Время выполнения, с';
+     Cells[0,2] := 'Максимальная высота, м';
+     Cells[0,3] := 'Минимальная высота, м';
+     Cells[0,4] := 'Изменение высоты, м';
+     Cells[0,5] := 'Горизонтальное смещение, м';
+     Cells[0,6] := 'Пройденный путь, м';
+     Cells[0,7] := 'Максимальная скорость, км/ч';
+     Cells[0,8] := 'Минимальная скорость, км/ч';
+     Cells[0,9] := 'Конечная скорость, км/ч';
+
+     Cells[1,0] :='Выделенный маневр';
+     Cells[2,0] :='Полетное задание';
+
+   end;
+
+
+end;
+
+procedure Tfrm_Interface.ShowManevrInfo;
+var
+ props : TManevrPropsPerebornye;
+begin
+// props := ManevrPropsPerebornye(FlightDataToManevrData(FlightData,g_Helicopter));
+
+
+end;
+
 end.
+
