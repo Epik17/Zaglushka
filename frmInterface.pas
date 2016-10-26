@@ -7,8 +7,6 @@ unit frmInterface;
   - ny in Gorka, Pikirovanie
  -----------------------------
 
-- manoeuvre information
-
 - add Desceleration
 
 - add theta = arctan(nx) in GorkaPikirovanie and Razgon/Desceleration
@@ -17,6 +15,7 @@ unit frmInterface;
 
 - first V<0 message must stop all posterior calculations and appending of manoeuvres! We apparently need g_failed in appending
 
+- add TSaveDialog 
 }
 
 
@@ -360,6 +359,9 @@ begin
    UpdateValuesFromTManevr;
 
    RecalculateRedrawFromManevrList;
+
+   if Length(g_FlightData)-1 = lst_Manevry.Count then
+    ShowManevrInfo(g_FlightData[lst_Manevry.ItemIndex+1],1);
  end;
 
 end;
