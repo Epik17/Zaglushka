@@ -122,7 +122,7 @@ type
     procedure AddModeOn;
     procedure UpdateModeOn;
     procedure CreateManevrInfoGrid;
-    procedure ShowManevrInfo(manevr : TManevrData);
+    procedure ShowManevrInfo(manevr : TManevrData; colNo : Byte);
   end;
 
 var
@@ -314,7 +314,11 @@ begin
 
  DrawTrajectory(cht_traj,g_FlightData);
 
- ShowManevrInfo(g_FlightData[lst_Manevry.Count]);
+ if Length(g_FlightData)-1 = lst_Manevry.Count then
+  begin
+    ShowManevrInfo(g_FlightData[lst_Manevry.Count],1);
+    ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2);
+  end;
 
 end;
 
@@ -415,7 +419,12 @@ if dlgOpenFile.Execute then
 
           RecalculateRedrawFromManevrList;
 
-          ShowManevrInfo(g_FlightData[lst_Manevry.Count]);
+          if Length(g_FlightData)-1 = lst_Manevry.Count then
+           begin
+            ShowManevrInfo(g_FlightData[lst_Manevry.Count],1);
+            ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2);
+           end;
+
          end;
       except
         ShowMessage('Некорректная структура файла');
@@ -654,7 +663,8 @@ begin
   UpdateValuesFromTManevr;
   DrawTrajectory(cht_traj,g_FlightData);
 
-  ShowManevrInfo(g_FlightData[lst_Manevry.ItemIndex+1]);
+ if Length(g_FlightData)-1 = lst_Manevry.Count then
+  ShowManevrInfo(g_FlightData[lst_Manevry.ItemIndex+1],1);
 end;
 
 function ManevrTypeToNumber (aType : string) : Integer;
@@ -1108,7 +1118,12 @@ begin
 
     RecalculateRedrawFromManevrList;
 
-    ShowManevrInfo(g_FlightData[lst_Manevry.Count]);
+    if Length(g_FlightData)-1 = lst_Manevry.Count then
+     begin
+      ShowManevrInfo(g_FlightData[lst_Manevry.Count],1);
+      ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2);
+     end;
+
    end;
 end;
 
@@ -1340,7 +1355,7 @@ begin
 
 end;
 
-procedure Tfrm_Interface.ShowManevrInfo(manevr : TManevrData);
+procedure Tfrm_Interface.ShowManevrInfo(manevr : TManevrData; colNo : Byte);
 var
  props : TManevrPropsPerebornye;
 
@@ -1354,15 +1369,15 @@ begin
 
  with strngrd_ManevrInfo do
   begin
-    Cells[1,1] := Format(tVypoln(manevr));
-    Cells[1,2] := Format(props.ymax);
-    Cells[1,3] := Format(props.ymin);
-    Cells[1,4] := Format(deltaY(manevr));
-    Cells[1,5] := Format(Sqrt(Sqr(deltaX(manevr))+Sqr(deltaZ(manevr))));
-    Cells[1,6] := Format(props.S);
-    Cells[1,7] := Format(props.Vmax);
-    Cells[1,8] := Format(props.Vmin);
-    Cells[1,9] := Format(manevr[High(manevr)].V*g_mps);
+    Cells[colNo,1] := Format(tVypoln(manevr));
+    Cells[colNo,2] := Format(props.ymax);
+    Cells[colNo,3] := Format(props.ymin);
+    Cells[colNo,4] := Format(deltaY(manevr));
+    Cells[colNo,5] := Format(Sqrt(Sqr(deltaX(manevr))+Sqr(deltaZ(manevr))));
+    Cells[colNo,6] := Format(props.S);
+    Cells[colNo,7] := Format(props.Vmax);
+    Cells[colNo,8] := Format(props.Vmin);
+    Cells[colNo,9] := Format(manevr[High(manevr)].V*g_mps);
   end;
 
 end;
