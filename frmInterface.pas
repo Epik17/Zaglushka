@@ -122,7 +122,7 @@ type
     procedure AddModeOn;
     procedure UpdateModeOn;
     procedure CreateManevrInfoGrid;
-    procedure ShowManevrInfo;
+    procedure ShowManevrInfo(manevr : TManevrData);
   end;
 
 var
@@ -314,6 +314,8 @@ begin
 
  DrawTrajectory(cht_traj,g_FlightData);
 
+ ShowManevrInfo(g_FlightData[lst_Manevry.Count]);
+
 end;
 
 procedure Tfrm_Interface.DeleteManevrClick(Sender: TObject);
@@ -406,12 +408,14 @@ if dlgOpenFile.Execute then
            lst_Manevry.Items.Add(ConvertManevrType(g_ManevrList[i].pType));
 
 
-         lst_Manevry.ItemIndex := 0;
-         pm_Manevry.AutoPopup := True;
+          lst_Manevry.ItemIndex := 0;
+          pm_Manevry.AutoPopup := True;
 
-         UpdateValuesFromTManevr;
+          UpdateValuesFromTManevr;
 
-         RecalculateRedrawFromManevrList;
+          RecalculateRedrawFromManevrList;
+
+          ShowManevrInfo(g_FlightData[lst_Manevry.Count]);
          end;
       except
         ShowMessage('Некорректная структура файла');
@@ -649,6 +653,8 @@ procedure Tfrm_Interface.lst_ManevryMouseDown(Sender: TObject;
 begin
   UpdateValuesFromTManevr;
   DrawTrajectory(cht_traj,g_FlightData);
+
+  ShowManevrInfo(g_FlightData[lst_Manevry.ItemIndex+1]);
 end;
 
 function ManevrTypeToNumber (aType : string) : Integer;
@@ -1101,6 +1107,8 @@ begin
     FlightDataInitialization;
 
     RecalculateRedrawFromManevrList;
+
+    ShowManevrInfo(g_FlightData[lst_Manevry.Count]);
    end;
 end;
 
@@ -1332,12 +1340,30 @@ begin
 
 end;
 
-procedure Tfrm_Interface.ShowManevrInfo;
+procedure Tfrm_Interface.ShowManevrInfo(manevr : TManevrData);
 var
  props : TManevrPropsPerebornye;
-begin
-// props := ManevrPropsPerebornye(FlightDataToManevrData(FlightData,g_Helicopter));
 
+ function Format(value: Real):string;
+ begin
+   Result := FloatToStr(RoundTo(value,-1))
+ end;
+
+begin
+ props := ManevrPropsPerebornye(manevr);
+
+ with strngrd_ManevrInfo do
+  begin
+    Cells[1,1] := Format(tVypoln(manevr));
+    Cells[1,2] := Format(props.ymax);
+    Cells[1,3] := Format(props.ymin);
+    Cells[1,4] := Format(deltaY(manevr));
+    Cells[1,5] := Format(Sqrt(Sqr(deltaX(manevr))+Sqr(deltaZ(manevr))));
+    Cells[1,6] := Format(props.S);
+    Cells[1,7] := Format(props.Vmax);
+    Cells[1,8] := Format(props.Vmin);
+    Cells[1,9] := Format(manevr[High(manevr)].V*g_mps);
+  end;
 
 end;
 
