@@ -7,8 +7,6 @@ unit frmInterface;
   - ny in Gorka, Pikirovanie
  -----------------------------
 
-- manoeuvre information
-
 - add Desceleration
 
 - add theta = arctan(nx) in GorkaPikirovanie and Razgon/Desceleration
@@ -17,6 +15,7 @@ unit frmInterface;
 
 - first V<0 message must stop all posterior calculations and appending of manoeuvres! We apparently need g_failed in appending
 
+- add TSaveDialog 
 }
 
 
@@ -63,6 +62,7 @@ type
     lblV0value: TLabel;
     trckbrV0: TTrackBar;
     lbl_RecalcNeeded: TLabel;
+    strngrd_ManevrInfo: TStringGrid;
     procedure FormCreate(Sender: TObject);
     procedure cbb_ManevryChange(Sender: TObject);
     procedure btn_AddManevrClick(Sender: TObject);
@@ -120,6 +120,9 @@ type
     procedure DynamicallyChangeV0max;
     procedure AddModeOn;
     procedure UpdateModeOn;
+    procedure CreateManevrInfoGrid;
+    procedure ShowManevrInfo(manevr : TManevrData; colNo : Byte);overload;
+    procedure ShowManevrInfo;overload;
   end;
 
 var
@@ -204,6 +207,8 @@ begin
    FlightDataInitialization;
 
    DisableCalculateButton;
+
+   CreateManevrInfoGrid;
 
 end;
 
@@ -309,6 +314,9 @@ begin
 
  DrawTrajectory(cht_traj,g_FlightData);
 
+ if Length(g_FlightData)-1 = lst_Manevry.Count then
+  ShowManevrInfo;
+
 end;
 
 procedure Tfrm_Interface.DeleteManevrClick(Sender: TObject);
@@ -351,6 +359,9 @@ begin
    UpdateValuesFromTManevr;
 
    RecalculateRedrawFromManevrList;
+
+   if Length(g_FlightData)-1 = lst_Manevry.Count then
+    ShowManevrInfo(g_FlightData[lst_Manevry.ItemIndex+1],1);
  end;
 
 end;
@@ -401,12 +412,16 @@ if dlgOpenFile.Execute then
            lst_Manevry.Items.Add(ConvertManevrType(g_ManevrList[i].pType));
 
 
-         lst_Manevry.ItemIndex := 0;
-         pm_Manevry.AutoPopup := True;
+          lst_Manevry.ItemIndex := 0;
+          pm_Manevry.AutoPopup := True;
 
-         UpdateValuesFromTManevr;
+          UpdateValuesFromTManevr;
 
-         RecalculateRedrawFromManevrList;
+          RecalculateRedrawFromManevrList;
+
+          if Length(g_FlightData)-1 = lst_Manevry.Count then
+           ShowManevrInfo;
+
          end;
       except
         ShowMessage('Некорректная структура файла');
@@ -644,6 +659,9 @@ procedure Tfrm_Interface.lst_ManevryMouseDown(Sender: TObject;
 begin
   UpdateValuesFromTManevr;
   DrawTrajectory(cht_traj,g_FlightData);
+
+ if Length(g_FlightData)-1 = lst_Manevry.Count then
+  ShowManevrInfo(g_FlightData[lst_Manevry.ItemIndex+1],1);
 end;
 
 function ManevrTypeToNumber (aType : string) : Integer;
@@ -835,7 +853,7 @@ var
  xyz1s : TMatrixData;
  chopped,
  rotated : TMatrix;
- //props : TManevrPropsPerebornye;
+
 
 const
    pointersize = 2;
@@ -920,8 +938,7 @@ begin
       end;
    end;
 
- // props := ManevrPropsPerebornye(FlightDataToManevrData(FlightData,g_Helicopter));
- // ShowMessage(FloatToStr(props.S));
+
 end;
 
 procedure Tfrm_Interface.rg_viewClick(Sender: TObject);
@@ -1097,6 +1114,10 @@ begin
     FlightDataInitialization;
 
     RecalculateRedrawFromManevrList;
+
+    if Length(g_FlightData)-1 = lst_Manevry.Count then
+     ShowManevrInfo
+
    end;
 end;
 
@@ -1299,4 +1320,72 @@ end;
 
 
 
+procedure Tfrm_Interface.CreateManevrInfoGrid;
+begin
+ with strngrd_ManevrInfo do
+   begin
+
+     ColWidths[0]:=160;
+     ColWidths[1]:=115;
+     ColWidths[2]:=115;
+
+     Width := 396;
+
+     Cells[0,1] := 'Время выполнения, с';
+     Cells[0,2] := 'Максимальная высота, м';
+     Cells[0,3] := 'Минимальная высота, м';
+     Cells[0,4] := 'Изменение высоты, м';
+     Cells[0,5] := 'Горизонтальное смещение, м';
+     Cells[0,6] := 'Пройденный путь, м';
+     Cells[0,7] := 'Максимальная скорость, км/ч';
+     Cells[0,8] := 'Минимальная скорость, км/ч';
+     Cells[0,9] := 'Конечная скорость, км/ч';
+
+     Cells[1,0] :='Выделенный маневр';
+     Cells[2,0] :='Полетное задание';
+
+   end;
+
+
+end;
+
+procedure Tfrm_Interface.ShowManevrInfo(manevr : TManevrData; colNo : Byte);
+var
+ props : TManevrPropsPerebornye;
+
+ function Format(value: Real):string;
+ begin
+   Result := FloatToStr(RoundTo(value,-1))
+ end;
+
+begin
+ props := ManevrPropsPerebornye(manevr);
+
+ with strngrd_ManevrInfo do
+  begin
+    Cells[colNo,1] := Format(tVypoln(manevr));
+    Cells[colNo,2] := Format(props.ymax);
+    Cells[colNo,3] := Format(props.ymin);
+    Cells[colNo,4] := Format(deltaY(manevr));
+    Cells[colNo,5] := Format(Sqrt(Sqr(deltaX(manevr))+Sqr(deltaZ(manevr))));
+    Cells[colNo,6] := Format(props.S);
+    Cells[colNo,7] := Format(props.Vmax);
+    Cells[colNo,8] := Format(props.Vmin);
+    Cells[colNo,9] := Format(manevr[High(manevr)].V*g_mps);
+  end;
+
+end;
+
+procedure Tfrm_Interface.ShowManevrInfo;
+begin
+
+   begin
+    strngrd_ManevrInfo.Visible := True;
+
+    ShowManevrInfo(g_FlightData[lst_Manevry.Count],1);
+    ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2);
+   end;
+end;
+
 end.
+

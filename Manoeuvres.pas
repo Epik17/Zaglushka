@@ -467,8 +467,16 @@ begin
 end;
 
 function tVypoln(Manevr : TManevrData) : Extended;
+var
+ t0 : Real;
 begin
-  Result := Manevr[High(Manevr)].t - Manevr[Low(Manevr)].t
+  t0 := Manevr[Low(Manevr)].t;
+
+  Result := Manevr[High(Manevr)].t - Manevr[Low(Manevr)].t;
+
+  if t0 > dt/2 then
+   Result := Result + dt;
+
 end;
 
 function Vfinal(Manevr : TManevrData) : Extended;
