@@ -122,7 +122,8 @@ type
     procedure AddModeOn;
     procedure UpdateModeOn;
     procedure CreateManevrInfoGrid;
-    procedure ShowManevrInfo(manevr : TManevrData; colNo : Byte);
+    procedure ShowManevrInfo(manevr : TManevrData; colNo : Byte);overload;
+    procedure ShowManevrInfo;overload;
   end;
 
 var
@@ -315,10 +316,7 @@ begin
  DrawTrajectory(cht_traj,g_FlightData);
 
  if Length(g_FlightData)-1 = lst_Manevry.Count then
-  begin
-    ShowManevrInfo(g_FlightData[lst_Manevry.Count],1);
-    ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2);
-  end;
+  ShowManevrInfo;
 
 end;
 
@@ -420,10 +418,7 @@ if dlgOpenFile.Execute then
           RecalculateRedrawFromManevrList;
 
           if Length(g_FlightData)-1 = lst_Manevry.Count then
-           begin
-            ShowManevrInfo(g_FlightData[lst_Manevry.Count],1);
-            ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2);
-           end;
+           ShowManevrInfo;
 
          end;
       except
@@ -1119,10 +1114,7 @@ begin
     RecalculateRedrawFromManevrList;
 
     if Length(g_FlightData)-1 = lst_Manevry.Count then
-     begin
-      ShowManevrInfo(g_FlightData[lst_Manevry.Count],1);
-      ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2);
-     end;
+     ShowManevrInfo
 
    end;
 end;
@@ -1380,6 +1372,17 @@ begin
     Cells[colNo,9] := Format(manevr[High(manevr)].V*g_mps);
   end;
 
+end;
+
+procedure Tfrm_Interface.ShowManevrInfo;
+begin
+
+   begin
+    strngrd_ManevrInfo.Visible := True;
+
+    ShowManevrInfo(g_FlightData[lst_Manevry.Count],1);
+    ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2);
+   end;
 end;
 
 end.

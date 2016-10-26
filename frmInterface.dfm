@@ -332,6 +332,7 @@ object frm_Interface: Tfrm_Interface
     ColCount = 3
     RowCount = 10
     TabOrder = 17
+    Visible = False
   end
   object pm_Manevry: TPopupMenu
     AutoPopup = False
