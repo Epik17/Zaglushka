@@ -361,7 +361,7 @@ begin
    RecalculateRedrawFromManevrList;
 
    if Length(g_FlightData)-1 = lst_Manevry.Count then
-    ShowManevrInfo(g_FlightData[lst_Manevry.ItemIndex+1],1);
+    ShowManevrInfo;
  end;
 
 end;
