@@ -70,12 +70,24 @@ end;
 
 function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V : Real) : Real;
 //с учетом полетного веса и температуры
+
+var
+ tempV : Real;
+const
+  smallnumber = 0.001;
+
+
 begin
  Result :=0;
 
- if v>0 then
+   if Abs(V) <= smallnumber then
+  tempV := smallnumber
+ else
+  tempV := V;
+
+ if tempV>0 then
   with helicopter do
-   Result := (540/Gnorm)*((TraspUZemli*(1-ny)/ctgTotH+HotV(helicopter,icG, icT,V)*ny-hManevraCurrent)*ctgNotH+0.0066*icG)/V
+   Result := (540/Gnorm)*((TraspUZemli*(1-ny)/ctgTotH+HotV(helicopter,icG, icT,tempV)*ny-hManevraCurrent)*ctgNotH{+0.0066*icG})/tempV
  else
   ShowMessage('function nx: некорректное значение скорости '+FloatToStr(V));
 end;
@@ -83,12 +95,22 @@ end;
 
 function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V{km/h}, Vy{m/s} : Real) : Real;overload;
 //с учетом полетного веса и температуры
+var
+ tempV : Real;
+const
+  smallnumber = 0.001;
+
 begin
  Result :=0;
 
- if v>0 then
+  if Abs(V) <= smallnumber then
+  tempV := smallnumber
+ else
+  tempV := V;
+
+ if tempV>0 then
   with helicopter do
-   Result := (540/Gnorm)*((TraspUZemli*(1-ny)/ctgTotH+HotV(helicopter,icG, icT,V)*ny-hManevraCurrent)*ctgNotH+0.0066*icG*(1-Vy))/V
+   Result := (540/Gnorm)*((TraspUZemli*(1-ny)/ctgTotH+HotV(helicopter,icG, icT,tempV)*ny-hManevraCurrent)*ctgNotH-0.0066*icG*Vy/2)/tempV
  else
   ShowMessage('function nx: некорректное значение скорости '+FloatToStr(V));
 end;
@@ -158,12 +180,12 @@ const
 var
  tempV : Real;
 begin
- if Abs(V) < smallnumber then
+ if Abs(V) <= smallnumber then
   tempV := smallnumber
  else
   tempV := V;
 
- Result := nx(helicopter, 1, icG, icT,h0,V)*tempV/g_mps;
+ Result := nx(helicopter, 1, icG, icT,h0,tempV)*tempV/g_mps;
 end;
 
 function VyRasp(helicopter : THelicopter; icG, icT, h0, Vnach, Vkon : Real) : Real;overload; //m/s

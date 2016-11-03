@@ -25,7 +25,7 @@ function CreateHelicopter (params: THelicopterParameters) : THelicopter;
 
 const
 mi8 : THelicopterParameters = (356,12000,10800,0.5,1.5,1.036,0.15,-100,4500,250,60,0.5,11000,12500);
-mi81 : THelicopterParameters = (356,12500,11800,0.5,1.5,1.036,0.15,-100,4000,250,60,0.5,11000,12800);
+mi81 : THelicopterParameters = (356,12500,11800,0.5,1.5,1.036,0.15,1000,4000,250,60,0.5,11000,12800);
 
 implementation
 function CreateHelicopter (params: THelicopterParameters) : THelicopter;

@@ -66,38 +66,43 @@ function HorizFlight (initialstate : TStateVector; desiredDistance : Real) : TMa
 var
   distance, tempt,tempx,tempz,dx,dz : Real;
 begin
-  SetLength(Result,0);
-  distance :=0;
-  tempt := initialstate.t;
-  tempx := initialstate.x;
-  tempz := initialstate.z;
+   SetLength(Result,0);
 
-  while distance <= desiredDistance do
-   begin
-    ExtendArray(Result);
+  if initialstate.V>0 then
+    begin
+      distance :=0;
+      tempt := initialstate.t;
+      tempx := initialstate.x;
+      tempz := initialstate.z;
 
-    with Result[High(Result)] do
-     begin
-      y := initialstate.y;
-      V := initialstate.V;
-      psi := initialstate.psi;
-      theta := initialstate.theta;
-      gamma := initialstate.gamma;
-      ny := initialstate.ny;
+        while distance <= desiredDistance do
+         begin
+          ExtendArray(Result);
 
-        tempt := tempt + dt;
-      t := tempt;
-        dx:=V*dt*Cos(psi);
-        tempx := tempx+dx;
-      x := tempx;
-        dz:=V*dt*Sin(psi);
-        tempz := tempz+dz;
-      z := tempz;
-      distance := distance + Sqrt(Sqr(dx)+Sqr(dz))
-     end;
-     
-   end;
+          with Result[High(Result)] do
+           begin
+            y := initialstate.y;
+            V := initialstate.V;
+            psi := initialstate.psi;
+            theta := initialstate.theta;
+            gamma := initialstate.gamma;
+            ny := initialstate.ny;
 
+              tempt := tempt + dt;
+            t := tempt;
+              dx:=V*dt*Cos(psi);
+              tempx := tempx+dx;
+            x := tempx;
+              dz:=V*dt*Sin(psi);
+              tempz := tempz+dz;
+            z := tempz;
+            distance := distance + Sqrt(Sqr(dx)+Sqr(dz))
+           end;
+
+         end;
+    end
+  else
+   ShowMessage('function HorizFlight: V <= 0!');
 end;
 
 procedure MyIntegrate(var tempstate : TStateVector; dt,a : Real;omega : TVector3D);
@@ -401,7 +406,11 @@ var
  procedure SetAcceleration(var a : Real; tempstate: TStateVector; ny, Vy : Real);
   const
    timeBeforeFullNX = 10{секунд}; //на достижение максимально возможной nx уходит время
+   smallnumber = 0.001;
 begin
+      if (Abs(tempstate.V) < smallnumber) and (tempstate.V > 0) then
+       tempstate.V := smallnumber;
+
       a := g_g*nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy);
 
       if localTime < timeBeforeFullNX then
@@ -424,7 +433,7 @@ begin
 
 
     while (not (g_mps*tempstate.V >=Vfinal)) and (not failed) do
-      if (tempstate.V > 0) then
+      if (tempstate.V >= 0) then
         begin
          begin
           if Length(Result) = 0 then
@@ -453,6 +462,7 @@ begin
       else
         failed := True;
 
+     if not failed then
       Result[High(Result)].V := Vfinal/g_mps;
 
   if failed then ShowMessage('Падение скорости до нуля!');
@@ -461,7 +471,7 @@ end;
 
 function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 begin
- Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 0);
+ Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 5);
 end;
 
 function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}, Vy{m/s}: Real) : TManevrData;
