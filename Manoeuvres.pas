@@ -19,6 +19,7 @@ function Gorka (helicopter : THelicopter; initialstate : TStateVector; icG, icT,
 function Pikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TManevrData;
 function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
+function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}, Vy{m/s}: Real) : TManevrData;
 function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 
 function tVypoln(Manevr : TManevrData) : Extended;
@@ -390,18 +391,18 @@ begin
    SetLength(Result,0)
 end;
 
-function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
+function iRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{km/h}, VyDesired{m/s} : Real) : TManevrData;
 var
-  localTime,tempny,a : Real;
+  localTime,tempny,a, Vytemp, tempy : Real;
   tempstate : TStateVector;
   tempomega : TVector3D;
   failed : Boolean;
 
- procedure SetAcceleration(var a : Real; tempstate: TStateVector; ny : Real);
+ procedure SetAcceleration(var a : Real; tempstate: TStateVector; ny, Vy : Real);
   const
    timeBeforeFullNX = 10{секунд}; //на достижение максимально возможной nx уходит время
 begin
-      a := g_g*nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V);
+      a := g_g*nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy);
 
       if localTime < timeBeforeFullNX then
        a:= (1/timeBeforeFullNX)*localTime*a;
@@ -418,6 +419,7 @@ begin
  tempomega.y:=0;
  tempomega.z:=0;
  SetLength(Result,0);
+ tempy := initialstate.y;
 
 
 
@@ -425,9 +427,26 @@ begin
       if (tempstate.V > 0) then
         begin
          begin
-          SetAcceleration(a,tempstate, tempny);
+          if Length(Result) = 0 then
+           Vytemp := VyRasp(helicopter, icG, icT, tempy, initialstate.V*g_mps)
+          else
+           Vytemp := VyRasp(helicopter, icG, icT, Result[High(Result)].y, Result[High(Result)].V*g_mps);
+
+          if (Vytemp > VyDesired) or (Abs(VyDesired) < 0.001){in case of horizontal flight} then
+            Vytemp := VyDesired;
+
+          SetAcceleration(a,tempstate, tempny, Vytemp);
           g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
+
+                     //climb
+          tempy := tempy +  + Vytemp*dt;
+          Result[High(Result)].y := tempy;
+
           Result[High(Result)].theta := -ArcTan(a/g_g); //pitch according to nx_temp
+
+
+
+
           localTime := localTime + dt;
          end;
         end
@@ -440,6 +459,16 @@ begin
 
 end;
 
+function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
+begin
+ Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 0);
+end;
+
+function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}, Vy{m/s}: Real) : TManevrData;
+begin
+ Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, Vy);
+end;
+
 function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 begin
   if initialstate.V*g_mps < 0.95*helicopter.Vmax then
@@ -448,8 +477,7 @@ begin
    begin
      SetLength(Result,0);
      ShowMessage('Начальная скорость при разгоне составила ' + FloatToStr(Round(initialstate.V*g_mps)) + ' км/ч. Эта скорость не может превышать  '+FloatToStr(0.95*helicopter.Vmax)+ ' км/ч');
-   end;
-
+   end; 
 end;
 
 function Vvector(Vmodule, psi, theta : Real) : TVector;

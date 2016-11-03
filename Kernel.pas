@@ -13,8 +13,8 @@ function HotV(helicopter : THelicopter; icG, icT,V: Real) : Real; overload; //ха
 function Diapason(helicopter : THelicopter; icG, icT : Real) : TDiapason;overload; //просто сетка для визуализации скорректированного диапазона
 
 function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V : Real) : Real;overload; //с учетом полетного веса и температуры
-function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent,hManevraInitial,V : Real) : Real;overload; //с учетом полетного веса, температуры и шага несущего винта
-         //вторая функция nx не рекомендуется к использованию; лучше посчитать поправку один раз и потом вычитать ее
+function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V{km/h}, Vy{m/s} : Real) : Real;overload;
+
 function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real;
 
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real):Real;
@@ -24,7 +24,8 @@ function VminOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Inte
 
 function RealHst(helicopter : THelicopter; icG, icT : Real): Real;
 
-function VyRasp(helicopter : THelicopter; icG, icT, h0, Vnach, Vkon : Real) : Real; //m/s
+function VyRasp(helicopter : THelicopter; icG, icT, h0, Vnach, Vkon{km/h} : Real) : Real;overload; //m/s
+function VyRasp(helicopter : THelicopter; icG, icT, h0, V{km/h}  : Real) : Real;overload;
 
 implementation
 
@@ -79,17 +80,24 @@ begin
   ShowMessage('function nx: некорректное значение скорости '+FloatToStr(V));
 end;
 
-function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,hManevraInitial,V : Real) : Real;overload;
-//с учетом полетного веса, температуры и шага несущего винта; не рекомендуется применять: может замедлять расчет
+
+function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V{km/h}, Vy{m/s} : Real) : Real;overload;
+//с учетом полетного веса и температуры
 begin
-  Result := nx(helicopter, ny, icG, icT,hManevraCurrent,V) - nx(helicopter, ny, icG, icT,hManevraInitial,V)
+ Result :=0;
+
+ if v>0 then
+  with helicopter do
+   Result := (540/Gnorm)*((TraspUZemli*(1-ny)/ctgTotH+HotV(helicopter,icG, icT,V)*ny-hManevraCurrent)*ctgNotH+0.0066*icG*(1-Vy))/V
+ else
+  ShowMessage('function nx: некорректное значение скорости '+FloatToStr(V));
 end;
 
 function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real;
 const
   Cx = 0.0115;
 begin
-  Result := Cx*helicopter.Fomet*AirDensity(hManevraCurrent)*Sqr(V/3.6/2)/icG
+  Result := Cx*helicopter.Fomet*AirDensity(hManevraCurrent)*Sqr(V/g_mps/2)/icG
 end;
 
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real): Real;
@@ -144,12 +152,23 @@ begin
     Result := diap[i];
 end;
 
-function VyRasp(helicopter : THelicopter; icG, icT, h0, Vnach, Vkon : Real) : Real; //m/s
+function VyRasp(helicopter : THelicopter; icG, icT, h0, V : Real) : Real;overload;
+const
+  smallnumber = 0.001;
 var
-  tempV : Real;
+ tempV : Real;
 begin
-  tempV := Min(Vnach, Vkon);
-  Result := nx (helicopter, 1, icG, icT,h0,tempV)*tempV/g_mps;
+ if Abs(V) < smallnumber then
+  tempV := smallnumber
+ else
+  tempV := V;
+
+ Result := nx(helicopter, 1, icG, icT,h0,V)*tempV/g_mps;
+end;
+
+function VyRasp(helicopter : THelicopter; icG, icT, h0, Vnach, Vkon : Real) : Real;overload; //m/s
+begin
+  Result := Max(VyRasp(helicopter, icG, icT,h0,Vnach),VyRasp(helicopter, icG, icT,h0,Vkon));
 end;
 
 end.
