@@ -222,13 +222,13 @@ begin
  then
   btn_AddManevr.Enabled := False
  else
-//  begin
+  begin
    btn_AddManevr.Enabled := True;
 
    CreateLabeledScrollbars(ConvertManevrType(cbb_Manevry.Items[cbb_Manevry.ItemIndex]));
 
    AddModeOn;
- // end
+  end
 end;
 
  procedure Tfrm_Interface.AppendTempManevr (tempManevr : TManevr);

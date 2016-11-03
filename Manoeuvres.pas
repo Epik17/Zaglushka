@@ -478,7 +478,7 @@ end;
 
 function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{κμ/χ}: Real) : TManevrData;
 begin
- Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, -5);
+ Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 0);
 end;
 
 function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{κμ/χ}, Vy{m/s}: Real) : TManevrData;
