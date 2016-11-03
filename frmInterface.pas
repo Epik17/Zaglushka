@@ -15,7 +15,9 @@ unit frmInterface;
 
 - first V<0 message must stop all posterior calculations and appending of manoeuvres! We apparently need g_failed in appending
 
-- add TSaveDialog 
+- add TSaveDialog
+
+- fix incorrect psi in Virage (360 and self-crossing of trajectory) 
 }
 
 
@@ -737,7 +739,7 @@ procedure Tfrm_Interface.SetInitialConditionsTrackbars;
 
 begin
  SetICTrackbar(trckbr_H0,50{meters}/deltaH0,0.9*g_Helicopter.Hdyn/deltaH0,400/deltaH0);
- SetICTrackbar(trckbrV0,50,0.95*g_Helicopter.Vmax-1,100);
+ SetICTrackbar(trckbrV0,0,0.95*g_Helicopter.Vmax-1,100);
  SetICTrackbar(trckbr_G,g_Helicopter.Gmin,g_Helicopter.Gmax,g_Helicopter.Gmax);
  SetICTrackbar(trckbr_T,Tmin,Tmax,Tdefault);
 end;
@@ -1271,7 +1273,7 @@ var
   maxV0, minV0, realHstat  : Integer;
 
 const
- defaultMin = 50;
+ defaultVMin = 0;
 begin
  // updating Hst
   realHstat := Round(RealHst(g_Helicopter,g_G,g_T));
@@ -1297,13 +1299,13 @@ begin
  // updating minV0
   minV0 := VminOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0);
 
- if minV0 < defaultMin then
-  trckbrV0.Min := defaultMin
+ if minV0 < defaultVMin then
+  trckbrV0.Min := defaultVMin
  else
   trckbrV0.Min := minV0;
 
-  if trckbrV0.Position < defaultMin then
-    trckbrV0.Position := defaultMin;
+  if trckbrV0.Position < defaultVMin then
+    trckbrV0.Position := defaultVMin;
 end;
 
 
