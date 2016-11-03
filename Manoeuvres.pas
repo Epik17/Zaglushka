@@ -405,16 +405,23 @@ var
 
  procedure SetAcceleration(var a : Real; tempstate: TStateVector; ny, Vy : Real);
   const
-   timeBeforeFullNX = 10{секунд}; //на достижение максимально возможной nx уходит врем€
-   smallnumber = 0.001;
+ knx = 0.013;
+//   timeBeforeFullNX = 10{секунд}; //на достижение максимально возможной nx уходит врем€
+ var
+   linearnx, realnx : Real;
+
 begin
-      if (Abs(tempstate.V) < smallnumber) and (tempstate.V > 0) then
-       tempstate.V := smallnumber;
+      linearnx := knx*localTime;
+      realnx := nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy);
 
-      a := g_g*nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy);
+      if linearnx > realnx then
+       a := g_g*realnx
+      else
+       a := g_g*linearnx
 
-      if localTime < timeBeforeFullNX then
-       a:= (1/timeBeforeFullNX)*localTime*a;
+
+  {    if localTime < timeBeforeFullNX then
+       a:= (1/timeBeforeFullNX)*localTime*a;  }
 end;
 
 begin
@@ -471,7 +478,7 @@ end;
 
 function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 begin
- Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 5);
+ Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, -5);
 end;
 
 function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}, Vy{m/s}: Real) : TManevrData;
