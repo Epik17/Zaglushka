@@ -5,6 +5,8 @@ unit frmInterface;
  ny(V) dependencies:
   - gamma(V) in Virage
   - ny in Gorka, Pikirovanie
+
+ Vy in Razgon s naborom
  -----------------------------
 
 - add Desceleration
@@ -17,7 +19,9 @@ unit frmInterface;
 
 - add TSaveDialog
 
-- fix incorrect psi in Virage (360 and self-crossing of trajectory) 
+- fix incorrect psi in Virage (360 and self-crossing of trajectory)
+
+- HorizRazgon goes to infinity when T is 40 deg, H is about 3000, V0 is max, V1 is max, G is max 
 }
 
 
