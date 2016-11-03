@@ -174,7 +174,7 @@ begin
       theta :=0;
       gamma := 0;
       psi :=DegToRad(45);
-      V := g_V0/3.6;
+      V := g_V0/g_mps;
       ny :=1;
       t :=0;
      end
@@ -211,8 +211,6 @@ begin
    DisableCalculateButton;
 
    CreateManevrInfoGrid;
-
-  // ShowMessage(FloatToStr(VyRasp(g_helicopter, 11000, 15, 400, 0.01, 200)));
 
 end;
 
@@ -256,7 +254,10 @@ end;
          TempManevrData:=Virage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7]);
 
         mtHorizRazgon :
-         TempManevrData:=HorizRazgonInputCheck(g_Helicopter,laststate,g_G, g_T,tempManevr.fParameters[8]);
+         TempManevrData:=HorizRazgon(g_Helicopter,laststate,g_G, g_T,tempManevr.fParameters[8]);
+
+        mtRazgonSnaborom :
+         TempManevrData:=RazgonSnaborom(g_Helicopter,laststate,g_G, g_T,tempManevr.fParameters[8],tempManevr.fParameters[9]);
     end;
 
    if Length(TempManevrData) > 0 then
@@ -299,12 +300,13 @@ begin
 
       lst_Manevry.ItemIndex := lst_Manevry.Count-1;
 
-   end;
+   end
 
-   
-//updating
+ else
+
+ //updating
  if lst_Manevry.Count > 0 then
- if (g_ButtonMode = bmUpdate) and (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = lst_Manevry.Items[lst_Manevry.ItemIndex]) then
+  if (g_ButtonMode = bmUpdate) and (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = lst_Manevry.Items[lst_Manevry.ItemIndex]) then
     begin
       // updating parameters of SELECTED manoeuvre
       UpdateManevrList(g_ManevrList);
@@ -614,8 +616,23 @@ begin
   mins[0]:=Round(1.05*g_FlightData[0][0].V*g_mps);
   names[0]:='Макс. скор., км/ч';
   maxes[0]:=Round(0.95*g_Helicopter.Vmax)-1;
- // maxes[0]:=Round(0.95*Vmax(g_Helicopter, g_G, g_T, g_H0));
  end;
+
+ if ManevrType = mtRazgonSnaborom then
+   begin
+    count :=2;
+    MySetLength(count);
+
+    multipliers[0]:=1;
+    mins[0]:=Round(1.05*g_FlightData[0][0].V*g_mps);
+    names[0]:='Макс. скор., км/ч';
+    maxes[0]:=Round(0.95*g_Helicopter.Vmax)-1;
+
+    multipliers[1]:=0.5;
+    mins[1]:=2;
+    names[1]:='Верт. скор., м/с';
+    maxes[1]:=10;
+   end;
 
   CreateLabeledScrollbars(names, multipliers, mins, maxes);
 end;
@@ -656,6 +673,10 @@ if lst_Manevry.ItemIndex <>-1 then
 
       if (SelectedManevr.pType = mtHorizRazgon) then
         g_TrackBars[0].Position := Round(SelectedManevr.fParameters[8]/g_Multipliers[0]);
+
+      if (SelectedManevr.pType = mtRazgonSnaborom) then
+         for i:=0 to Length(g_TrackBars)-1 do
+           g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+8]/g_Multipliers[i]);
  end;
 end;
 
@@ -672,24 +693,60 @@ end;
 
 function ManevrTypeToNumber (aType : string) : Integer;
 begin
-    Result := -1;
-    if aType = 'Горизонтальный полет' then Result := 0;
-    if aType = 'Горка' then Result := 1;
-    if aType = 'Пикирование' then Result := 2;
-    if aType = 'Левый вираж' then Result := 3;
-    if aType = 'Правый вираж' then Result := 4;
-    if aType = 'Разгон в горизонте' then Result := 5;
+
+  if aType = 'Горизонтальный полет' then
+   Result := 0
+  else
+    if aType = 'Горка' then
+     Result := 1
+    else
+     if aType = 'Пикирование' then
+      Result := 2
+     else
+      if aType = 'Левый вираж' then
+       Result := 3
+      else
+       if aType = 'Правый вираж' then
+        Result := 4
+       else
+        if aType = 'Разгон в горизонте' then
+         Result := 5
+        else
+         if aType = 'Разгон с набором высоты' then
+          Result := 6
+         else
+          begin
+           Result := -1;
+           ShowMessage('function ManevrTypeToNumber: некорректное название маневра');
+          end;
+
 end;
 
 function HelicopterTypeToNumber (aType : string) : Integer;
 begin
-  Result := -1;
-  if aType = 'Ансат-У' then Result := 0;
-  if aType = 'Ми-26' then Result := 1;
-  if aType = 'Ка-226' then Result := 2;
-  if aType = 'Ми-28Н' then Result := 3;
-  if aType = 'Ми-8МТВ-5' then Result := 4;
-  if aType = 'Ми-8АМТШ' then Result := 5;
+
+  if aType = 'Ансат-У' then
+   Result := 0
+  else
+    if aType = 'Ми-26' then
+     Result := 1
+    else
+     if aType = 'Ка-226' then
+      Result := 2
+     else
+      if aType = 'Ми-28Н' then
+       Result := 3
+      else
+       if aType = 'Ми-8МТВ-5' then
+        Result := 4
+       else
+        if aType = 'Ми-8АМТШ' then
+         Result := 5
+        else
+          begin
+           Result := -1;
+           ShowMessage('function HelicopterTypeToNumber: некорректное название вертолета');
+          end;
 end;
 
 
@@ -1209,6 +1266,7 @@ begin
      ParamArray[6] :=0;
      ParamArray[7] :=0;
      ParamArray[8] :=0;
+     ParamArray[9] :=0;
    end;
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] ='Пикирование') then
    begin
@@ -1220,6 +1278,7 @@ begin
      ParamArray[6] :=0;
      ParamArray[7] :=0;
      ParamArray[8] :=0;
+     ParamArray[9] :=0;
    end;
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый вираж') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый вираж') then
      begin
@@ -1231,6 +1290,7 @@ begin
      ParamArray[6] :=g_Multipliers[0]*g_TrackBars[0].Position;
      ParamArray[7] :=g_Multipliers[1]*g_TrackBars[1].Position;
      ParamArray[8] :=0;
+     ParamArray[9] :=0;
    end;
 
     if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте')  then
@@ -1243,6 +1303,20 @@ begin
      ParamArray[6] :=0;
      ParamArray[7] :=0;
      ParamArray[8] :=g_Multipliers[0]*g_TrackBars[0].Position;
+     ParamArray[9] :=0;
+   end;
+
+     if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон с набором высоты')  then
+   begin
+     ParamArray[1] :=0;
+     ParamArray[2] :=0;
+     ParamArray[3] :=0;
+     ParamArray[4] :=0;
+     ParamArray[5] :=0;
+     ParamArray[6] :=0;
+     ParamArray[7] :=0;
+     ParamArray[8] :=g_Multipliers[0]*g_TrackBars[0].Position;
+     ParamArray[9] :=g_Multipliers[1]*g_TrackBars[1].Position;
    end;
 end;
 
@@ -1267,6 +1341,10 @@ begin
 
          if  (manevrlist[SelectedIndex].pType = mtHorizRazgon) then
             manevrlist[SelectedIndex].fParameters[8] := g_Multipliers[0]*g_TrackBars[0].Position;
+
+         if (manevrlist[SelectedIndex].pType = mtRazgonSnaborom) then
+          for i:=0 to Length(g_TrackBars)-1 do
+           manevrlist[SelectedIndex].fParameters[i+8] := g_Multipliers[i]*g_TrackBars[i].Position;
        end;
 end;
 

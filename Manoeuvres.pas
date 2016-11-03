@@ -20,7 +20,7 @@ function Pikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG
 function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}, Vy{m/s}: Real) : TManevrData;
-function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
+//function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 
 function tVypoln(Manevr : TManevrData) : Extended;
 function Vfinal(Manevr : TManevrData) : Extended;
@@ -438,7 +438,8 @@ begin
  tempy := initialstate.y;
 
 
-
+  if initialstate.V*g_mps < 0.95*helicopter.Vmax then
+   begin
     while (not (g_mps*tempstate.V >=Vfinal)) and (not failed) do
       if (tempstate.V >= 0) then
         begin
@@ -472,8 +473,11 @@ begin
      if not failed then
       Result[High(Result)].V := Vfinal/g_mps;
 
-  if failed then ShowMessage('Падение скорости до нуля!');
+     if failed then ShowMessage('Падение скорости до нуля!');
+   end
 
+  else
+    ShowMessage('Начальная скорость при разгоне составила ' + FloatToStr(Round(initialstate.V*g_mps)) + ' км/ч. Эта скорость не может превышать  '+FloatToStr(0.95*helicopter.Vmax)+ ' км/ч');
 end;
 
 function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
@@ -486,8 +490,8 @@ begin
  Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, Vy);
 end;
 
-function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
-begin
+//function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
+{begin
   if initialstate.V*g_mps < 0.95*helicopter.Vmax then
    Result := HorizRazgon(helicopter, initialstate, icG, icT,Vfinal)
   else
@@ -496,7 +500,7 @@ begin
      ShowMessage('Начальная скорость при разгоне составила ' + FloatToStr(Round(initialstate.V*g_mps)) + ' км/ч. Эта скорость не может превышать  '+FloatToStr(0.95*helicopter.Vmax)+ ' км/ч');
    end; 
 end;
-
+ }
 function Vvector(Vmodule, psi, theta : Real) : TVector;
 var
   absV : Real;
