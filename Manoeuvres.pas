@@ -427,6 +427,7 @@ begin
          begin
           SetAcceleration(a,tempstate, tempny);
           g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
+          Result[High(Result)].theta := -ArcTan(a/g_g); //pitch according to nx_temp
           localTime := localTime + dt;
          end;
         end
