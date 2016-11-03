@@ -1382,10 +1382,14 @@ procedure Tfrm_Interface.ShowManevrInfo;
 begin
 
    begin
-    strngrd_ManevrInfo.Visible := True;
-
-    ShowManevrInfo(g_FlightData[lst_Manevry.Count],1);
-    ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2);
+    if not (lst_Manevry.Count = 0) then
+     begin
+      strngrd_ManevrInfo.Visible := True;
+      ShowManevrInfo(g_FlightData[lst_Manevry.Count],1);
+      ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2);
+     end
+    else
+     strngrd_ManevrInfo.Visible := False;
    end;
 end;
 
