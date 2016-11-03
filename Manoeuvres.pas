@@ -437,7 +437,6 @@ begin
 
   if failed then ShowMessage('Падение скорости до нуля!');
 
-  //ShowMessage(FloatToStr(localTime));
 end;
 
 function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
