@@ -201,7 +201,7 @@ begin
 
    HelicoptersInitialization;
 
-   cbb_HelicopterType.ItemIndex :=4; // choosing Mi-8
+   cbb_HelicopterType.ItemIndex :=5; // choosing Mi-81
    cbb_HelicopterTypeSelect(Self);
 
 
