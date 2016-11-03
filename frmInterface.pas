@@ -113,7 +113,7 @@ type
     procedure AppendTempManevr (tempManevr : TManevr);
     procedure RecalculateRedrawFromManevrList;
     procedure FlightDataInitialization;
-    procedure DynamicFoolProtection;
+    procedure DynamicFoolProof;
     procedure FullRecalculate(Sender: TObject);
     procedure DisableCalculateButton;
     procedure EnableCalculateButton;
@@ -226,6 +226,8 @@ begin
    CreateLabeledScrollbars(ConvertManevrType(cbb_Manevry.Items[cbb_Manevry.ItemIndex]));
 
    AddModeOn;
+
+   DynamicFoolProof;
   end
 end;
 
@@ -755,7 +757,7 @@ procedure Tfrm_Interface.DynamicallyUpdateLabelValues(Sender: TObject);  //обнов
   i : Integer; //number of the selected manoeuvre in the form list
 begin
 
-  DynamicFoolProtection;
+  DynamicFoolProof;
 
  //refreshing labels' values
   for i:=0 to High(g_TrackBars) do
@@ -1203,10 +1205,10 @@ begin
  DisableCalculateButton;
 end;
 
-procedure Tfrm_Interface.DynamicFoolProtection;
+procedure Tfrm_Interface.DynamicFoolProof;
 var
   cosTheta  : Real;
-  cosThetaRounded, trckbarNo,Vmax : Integer;
+  cosThetaRounded, trckbarNo,Vmax, Vmin : Integer;
 const
   cosCorrection = 0.02;
 
@@ -1241,12 +1243,19 @@ begin
         g_TrackBars[trckbarNo].Max := cosThetaRounded;
     end;
 
-  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте') then
+  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон с набором высоты') then
    begin
      Vmax := VmaxOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0)-1;
      if g_TrackBars[0].Position > Vmax then
       g_TrackBars[0].Position := Vmax;
      g_TrackBars[0].Max := Vmax;
+
+     Vmin := Round(1.05*trckbrV0.Position);
+
+     if (Vmin > -0.05) and (Vmin < 0.05) then
+      Vmin := 1;
+
+     g_TrackBars[0].Min := Vmin;
    end;
 
 

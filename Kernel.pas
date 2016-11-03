@@ -85,7 +85,7 @@ begin
 
  if tempV>0 then
   with helicopter do
-   Result := (540/Gnorm)*((TraspUZemli*(1-ny)/ctgTotH+HotV(helicopter,icG, icT,tempV)*ny-hManevraCurrent)*ctgNotH-0.0066*icG*Vy/2)/tempV
+   Result := (540/Gnorm)*((TraspUZemli*(1-ny)/ctgTotH+HotV(helicopter,icG, icT,tempV)*ny-hManevraCurrent)*ctgNotH -0.0066*icG*Vy/2)/tempV
  else
   ShowMessage('function nx: некорректное значение скорости '+FloatToStr(V));
 end;
