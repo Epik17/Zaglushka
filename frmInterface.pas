@@ -210,6 +210,8 @@ begin
 
    CreateManevrInfoGrid;
 
+  // ShowMessage(FloatToStr(VyRasp(g_helicopter, 11000, 15, 400, 0.01, 200)));
+
 end;
 
 procedure Tfrm_Interface.cbb_ManevryChange(Sender: TObject);

@@ -433,7 +433,7 @@ begin
       else
         failed := True;
 
-      tempstate.V := Vfinal/g_mps;
+      Result[High(Result)].V := Vfinal/g_mps;
 
   if failed then ShowMessage('Падение скорости до нуля!');
 

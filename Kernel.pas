@@ -2,7 +2,7 @@ unit Kernel;
 
 interface
 
-uses HelicoptersDatabase, Dialogs,Sysutils,World, GlobalConstants;
+uses HelicoptersDatabase, Dialogs,Sysutils,World, GlobalConstants, Math;
 
 
 type TDiapason = array [0..g_Vmax] of Real;
@@ -24,7 +24,7 @@ function VminOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Inte
 
 function RealHst(helicopter : THelicopter; icG, icT : Real): Real;
 
-
+function VyRasp(helicopter : THelicopter; icG, icT, h0, Vnach, Vkon : Real) : Real; //m/s
 
 implementation
 
@@ -142,6 +142,14 @@ begin
   for i:=0 to g_Vmax do
    if diap[i] > Result then
     Result := diap[i];
+end;
+
+function VyRasp(helicopter : THelicopter; icG, icT, h0, Vnach, Vkon : Real) : Real; //m/s
+var
+  tempV : Real;
+begin
+  tempV := Min(Vnach, Vkon);
+  Result := nx (helicopter, 1, icG, icT,h0,tempV)*tempV/g_mps;
 end;
 
 end.
