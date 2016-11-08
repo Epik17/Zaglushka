@@ -188,10 +188,8 @@ end;
 procedure Tfrm_Interface.FormCreate(Sender: TObject);
 var
   i : Byte;
-
-begin
-
-  ShowMessage(FloatToStr(VertVzletPosadkay(30,2,15.75)));
+ // test : TManevrData;
+begin   
 
  for i:=1 to Length(g_ManevrNames) do
    cbb_Manevry.Items.Add(g_ManevrNames[i]);
@@ -217,6 +215,9 @@ begin
    DisableCalculateButton;
 
    CreateManevrInfoGrid;
+
+ //  test := VertVzlet(g_Helicopter,g_FlightData[0,0], 11000, g_T,g_H0, 30, 1.4);
+   //ShowMessage(FloatToStr(test[High(test)].y));
 
 end;
 
@@ -806,7 +807,7 @@ procedure Tfrm_Interface.SetInitialConditionsTrackbars;
 
 begin
  SetICTrackbar(trckbr_H0,50{meters}/deltaH0,0.9*g_Helicopter.Hdyn/deltaH0,400/deltaH0);
- SetICTrackbar(trckbrV0,0,0.95*g_Helicopter.Vmax-1,100);
+ SetICTrackbar(trckbrV0,0,0.95*g_Helicopter.Vmax-1,0);
  SetICTrackbar(trckbr_G,g_Helicopter.Gmin,g_Helicopter.Gmax,g_Helicopter.Gmax);
  SetICTrackbar(trckbr_T,Tmin,Tmax,Tdefault);
 end;

@@ -4,7 +4,11 @@ interface
 uses SysUtils,MyTypes, Math, GlobalConstants, HelicoptersDatabase,Dialogs;
 
 type TStateVector = record
-x,y,z,theta,gamma,psi,V,ny,t : Real;
+x,y,z,{m}
+theta,gamma,psi,{rad}
+V{m/s},
+ny,
+t{s} : Real;
 end;                     
 
 type TManevrData = array of TStateVector;
