@@ -29,8 +29,12 @@ function deltaY(Manevr : TManevrData) : Extended;
 function deltaZ(Manevr : TManevrData) : Extended;
 function ManevrPropsPerebornye(Manevr : TManevrData) : TManevrPropsPerebornye;
 
+function VertVzletPosadkay (deltay, Vmax, t : Real) : Real;
+
+
 const
  dt = 0.1; //шаг по времени, с
+ deltatSlope = 1.; //продолжительность ненулевого ускорения при взлете/посадке
 
 implementation
 
@@ -598,6 +602,109 @@ begin
 
   Result.Vmin := Result.Vmin * g_mps;
   Result.Vmax := Result.Vmax * g_mps;
+end;
+
+function VertVzletPosadkaDeltaT (deltay, Vmax : Real) : Real;
+//constant speed duration
+var
+  relation : Real;
+begin
+ Result := 0;
+
+ if deltay <> 0 then
+   if Vmax > 0 then
+    begin
+      relation := Abs(deltay/Vmax);
+
+       if relation > deltatSlope then
+        Result := relation - deltatSlope
+       else
+        begin
+          ShowMessage('Скорость слишком велика и не может обеспечить столь малое перемещение!');
+        end  
+    end
+   else
+      ShowMessage('Скорость должна быть неотрицательной!')
+ else
+   ShowMessage('Перемещение не должно быть равно нулю!');
+
+end;
+
+function VertVzletPosadkaAcceleration(deltay, Vmax : Real) : Real;
+begin
+  Result := 0;
+
+  if Vmax > 0 then
+   begin
+    Result := Vmax/deltatSlope;
+
+    if deltay <0 then   //landing
+     Result := -Result;
+   end
+  else
+    ShowMessage('Скорость должна быть неотрицательной!');
+end;
+
+function VertVzletPosadkaV (deltay, Vmax, t : Real) : Real;
+var
+  deltat, a : Real;
+begin
+  Result := 0;
+
+  deltat := VertVzletPosadkaDeltaT(deltay, Vmax);
+
+  if deltat > 0 then
+   begin
+      a := VertVzletPosadkaAcceleration(deltay, Vmax);
+
+      if deltay < 0 then
+       Vmax := -Vmax; //landing
+
+      if t <= 2*deltatSlope + deltat then
+       begin
+        if t <= deltatSlope then //first slope
+         Result := a*t
+        else
+         if (t>deltatSlope) and (t < deltatSlope+deltat) then //plato
+          Result := Vmax
+         else //second slope
+          Result := -a*(t-deltatSlope-deltat)+Vmax;
+       end
+      else
+       ShowMessage('Заданное время превышает время выполнения маневра') 
+   end
+
+
+end;
+
+function VertVzletPosadkay (deltay, Vmax, t : Real) : Real;
+var
+  deltat, a : Real;
+begin
+  Result := 0;
+
+  deltat := VertVzletPosadkaDeltaT(deltay, Vmax);
+
+  if deltat > 0 then
+   begin
+    a := VertVzletPosadkaAcceleration(deltay, Vmax);
+
+    if deltay < 0 then
+       Vmax := -Vmax; //landing
+
+    if t <= 2*deltatSlope + deltat then
+     begin
+      if t <= deltatSlope then //first parabola
+       Result := (0.5*a)*Sqr(t)
+      else
+       if (t>deltatSlope) and (t < deltatSlope+deltat) then //slope
+        Result := Vmax*(t - deltatSlope/2)
+       else //second parabola
+        Result := (0.5*a)*(Sqr(t)-Sqr(2*deltatSlope+deltat)) + (Vmax-a*(deltatSlope+deltat))*(t - 2*deltatSlope - deltat) + deltay;
+     end
+    else
+     ShowMessage('Заданное время превышает время выполнения маневра');
+   end;
 end;
 
 end.

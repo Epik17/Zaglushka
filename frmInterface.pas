@@ -191,6 +191,8 @@ var
 
 begin
 
+  ShowMessage(FloatToStr(VertVzletPosadkay(30,2,15.75)));
+
  for i:=1 to Length(g_ManevrNames) do
    cbb_Manevry.Items.Add(g_ManevrNames[i]);
 
