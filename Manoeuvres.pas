@@ -20,8 +20,8 @@ function Pikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG
 function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}, Vy{m/s}: Real) : TManevrData;
-function VertVzlet(helicopter : THelicopter; initialstate : TStateVector; icG, icT,icH0, deltayInterface, Vdesired : Real) : TManevrData;
-function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT,icH0, deltayInterface, Vdesired : Real) : TManevrData;
+function VertVzlet(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
+function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
 
 function tVypoln(Manevr : TManevrData) : Extended;
 function Vfinal(Manevr : TManevrData) : Extended;
@@ -713,14 +713,14 @@ begin
    end;
 end;
 
-function iVertVzletPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT,icH0, deltay, Vdesired : Real) : TManevrData;
+function iVertVzletPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltay, Vdesired : Real) : TManevrData;
 var
   deltat, localt : Real;
 
 begin
  SetLength(Result,0);
 
- if Vdesired <= VertVzletPosadkaVmax (helicopter,icG, icT,icH0,deltay) then
+ if Vdesired <= VertVzletPosadkaVmax (helicopter,icG, icT,initialstate.y,deltay) then
    if deltay <> 0 then
     if Abs(initialstate. V) < 0.001 then
       begin
@@ -758,14 +758,14 @@ begin
   ShowMessage('Заданная вертикальная скорость не может быть достигнута')
 end;
 
-function VertVzlet(helicopter : THelicopter; initialstate : TStateVector; icG, icT,icH0, deltayInterface, Vdesired : Real) : TManevrData;
+function VertVzlet(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
 begin
-  Result := iVertVzletPosadka(helicopter, initialstate, icG, icT,icH0, deltayInterface, Vdesired);
+  Result := iVertVzletPosadka(helicopter, initialstate, icG, icT, deltayInterface, Vdesired);
 end;
 
-function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT,icH0, deltayInterface, Vdesired : Real) : TManevrData;
+function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
 begin
-  Result := iVertVzletPosadka(helicopter, initialstate, icG, icT,icH0, -deltayInterface, Vdesired);
+  Result := iVertVzletPosadka(helicopter, initialstate, icG, icT, -deltayInterface, Vdesired);
 end;
 
 end.

@@ -121,8 +121,8 @@ begin
     mtLeftVirage : Result := 'Левый вираж';
     mtRightVirage :  Result := 'Правый вираж';
     mtHorizRazgon :  Result := 'Разгон в горизонте';
-    mtRazgonSnaborom :  Result := 'Вертикальный взлет';
-    mtLiftOff :  Result := 'Разгон с набором высоты';
+    mtRazgonSnaborom :  Result := 'Разгон с набором высоты';
+    mtLiftOff :  Result := 'Вертикальный взлет';
     mtLanding :  Result := 'Вертикальная посадка';
   end;
 end;
