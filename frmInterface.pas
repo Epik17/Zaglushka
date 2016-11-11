@@ -11,8 +11,6 @@ unit frmInterface;
 
 - add Desceleration
 
-- add theta = arctan(nx) in GorkaPikirovanie and Razgon/Desceleration
-
 - reliable isometric projection (equal axis scales, min/max X and Z, range, etc. !! )
 
 - first V<0 message must stop all posterior calculations and appending of manoeuvres! We apparently need g_failed in appending
@@ -267,7 +265,13 @@ end;
 
         mtRazgonSnaborom :
          TempManevrData:=RazgonSnaborom(g_Helicopter,laststate,g_G, g_T,tempManevr.fParameters[8],tempManevr.fParameters[9]);
-    end;
+
+        mtLiftOff :
+         TempManevrData:=VertVzlet(g_Helicopter,laststate,g_G, g_T,tempManevr.fParameters[10],tempManevr.fParameters[9]);
+
+        mtLanding :
+         TempManevrData:=VertPosadka(g_Helicopter,laststate,g_G, g_T,tempManevr.fParameters[10],tempManevr.fParameters[9]);
+   end;
 
    if Length(TempManevrData) > 0 then
     //if there were no errors during the calculation of TempManevrData
@@ -498,7 +502,7 @@ begin
             begin
                Parent:=Self;
                Top:=starttop+i*30;
-               Left:=startleft+100;
+               Left:=startleft+113;
                Max:=maxes[i];
                Position:=mins[i];
                TickStyle:=tsNone;
@@ -515,7 +519,7 @@ begin
          begin
            Parent:=Self;
            Top:=starttop+i*30;
-           Left:=startleft+200;
+           Left:=startleft+213;
            Height :=17;
            Width:=25;
            Visible :=True;
@@ -643,6 +647,22 @@ begin
     maxes[1]:=10;
    end;
 
+  if (ManevrType = mtLiftOff) or (ManevrType = mtLanding) then
+   begin
+    count :=2;
+    MySetLength(count);
+
+    multipliers[0]:=0.1;
+    mins[0]:=1;
+    names[0]:='Макс. верт. скор., м/с';
+    maxes[0]:=50;
+
+    multipliers[1]:=1;
+    mins[1]:=5;
+    names[1]:='Верт. смещение, м';
+    maxes[1]:=100; 
+   end;
+
   CreateLabeledScrollbars(names, multipliers, mins, maxes);
 end;
 
@@ -686,6 +706,10 @@ if lst_Manevry.ItemIndex <>-1 then
       if (SelectedManevr.pType = mtRazgonSnaborom) then
          for i:=0 to Length(g_TrackBars)-1 do
            g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+8]/g_Multipliers[i]);
+
+      if (SelectedManevr.pType = mtLiftOff) or (SelectedManevr.pType = mtLanding) then
+         for i:=0 to Length(g_TrackBars)-1 do
+           g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+9]/g_Multipliers[i]);
  end;
 end;
 
@@ -724,10 +748,16 @@ begin
          if aType = 'Разгон с набором высоты' then
           Result := 6
          else
-          begin
-           Result := -1;
-           ShowMessage('function ManevrTypeToNumber: некорректное название маневра');
-          end;
+          if aType = 'Вертикальный взлет' then
+           Result := 7
+          else
+           if aType = 'Вертикальная посадка' then
+            Result := 8
+           else
+              begin
+               Result := -1;
+               ShowMessage('function ManevrTypeToNumber: некорректное название маневра');
+              end;
 
 end;
 
@@ -1283,6 +1313,7 @@ begin
      ParamArray[7] :=0;
      ParamArray[8] :=0;
      ParamArray[9] :=0;
+     ParamArray[10] :=0;
    end;
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] ='Пикирование') then
    begin
@@ -1295,6 +1326,7 @@ begin
      ParamArray[7] :=0;
      ParamArray[8] :=0;
      ParamArray[9] :=0;
+     ParamArray[10] :=0;
    end;
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый вираж') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый вираж') then
      begin
@@ -1307,6 +1339,7 @@ begin
      ParamArray[7] :=g_Multipliers[1]*g_TrackBars[1].Position;
      ParamArray[8] :=0;
      ParamArray[9] :=0;
+     ParamArray[10] :=0;
    end;
 
     if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте')  then
@@ -1320,6 +1353,7 @@ begin
      ParamArray[7] :=0;
      ParamArray[8] :=g_Multipliers[0]*g_TrackBars[0].Position;
      ParamArray[9] :=0;
+     ParamArray[10] :=0;
    end;
 
      if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон с набором высоты')  then
@@ -1333,8 +1367,24 @@ begin
      ParamArray[7] :=0;
      ParamArray[8] :=g_Multipliers[0]*g_TrackBars[0].Position;
      ParamArray[9] :=g_Multipliers[1]*g_TrackBars[1].Position;
+     ParamArray[10] :=0;
+   end;
+
+     if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Вертикальный взлет') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Вертикальная посадка')  then
+   begin
+     ParamArray[1] :=0;
+     ParamArray[2] :=0;
+     ParamArray[3] :=0;
+     ParamArray[4] :=0;
+     ParamArray[5] :=0;
+     ParamArray[6] :=0;
+     ParamArray[7] :=0;
+     ParamArray[8] :=0;
+     ParamArray[9] :=g_Multipliers[0]*g_TrackBars[0].Position;
+     ParamArray[10] :=g_Multipliers[1]*g_TrackBars[1].Position;;
    end;
 end;
+
 
 procedure Tfrm_Interface.UpdateManevrList(var manevrlist: TManevrList);
 var
@@ -1361,6 +1411,10 @@ begin
          if (manevrlist[SelectedIndex].pType = mtRazgonSnaborom) then
           for i:=0 to Length(g_TrackBars)-1 do
            manevrlist[SelectedIndex].fParameters[i+8] := g_Multipliers[i]*g_TrackBars[i].Position;
+
+         if (manevrlist[SelectedIndex].pType = mtLiftOff) or (manevrlist[SelectedIndex].pType = mtLanding) then
+          for i:=0 to Length(g_TrackBars)-1 do
+           manevrlist[SelectedIndex].fParameters[i+9] := g_Multipliers[i]*g_TrackBars[i].Position;
        end;
 end;
 
