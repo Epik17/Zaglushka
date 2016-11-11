@@ -745,7 +745,9 @@ begin
               t := localt
              end;
 
-           end
+           end;
+
+          Result[High(Result)].V := 0;
          end
         else
          ShowMessage('function iVertVzletPosadka: deltat error ')
