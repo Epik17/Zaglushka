@@ -9,7 +9,7 @@ uses Contnrs,  // чтобы работал TObjectList
 
 const
 
-g_ParametersCount = 9;
+g_ParametersCount = 10;
 //1: Дальность, м
 //2: Перегрузка на вводе
 //3: Перегрузка на выводе
@@ -18,13 +18,17 @@ g_ParametersCount = 9;
 //6: Крен при вираже, градусов
 //7: Изменение курса при вираже, градусов
 //8: Конечная скорость при разгоне, км/ч
+//9: Вертикальная скорость при разгоне/взлете/посадке, м/с
+//10: Вертикальное смещение при взлете/посадке, м
+
 g_HelicoptersCount = 6;
-g_ManevrTypesCount = 7;
-g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон в горизонте','Разгон с набором высоты');
+g_ManevrTypesCount = 9;
+g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон в горизонте','Разгон с набором высоты','Вертикальный взлет','Вертикальная посадка');
 g_HelicopterTypes : array [1..g_HelicoptersCount] of string = ('Ансат-У','Ми-26','Ка-226','Ми-28Н','Ми-8МТВ-5','Ми-8АМТШ');
 
 
-type TManevrTypes = (mtUndefined, mtHorizFlight, mtGorka, mtPikirovanie,mtLeftVirage,mtRightVirage,mtHorizRazgon,mtRazgonSnaborom);
+type TManevrTypes = (mtUndefined, mtHorizFlight, mtGorka, mtPikirovanie,mtLeftVirage,mtRightVirage,
+mtHorizRazgon,mtRazgonSnaborom, mtLiftOff, mtLanding);
 type TParametersArray = array [1..g_ParametersCount] of Real;
 type TArrayOfString = array of string;
 
@@ -102,6 +106,8 @@ begin
     if aType = 'Правый вираж' then Result := mtRightVirage;
     if aType = 'Разгон в горизонте' then Result := mtHorizRazgon;
     if aType = 'Разгон с набором высоты' then Result := mtRazgonSnaborom;
+    if aType = 'Вертикальный взлет' then Result := mtLiftOff;
+    if aType = 'Вертикальная посадка' then Result := mtLanding;
 end;
 
 function ConvertManevrType (aType : TManevrTypes) : string; overload;
@@ -115,7 +121,9 @@ begin
     mtLeftVirage : Result := 'Левый вираж';
     mtRightVirage :  Result := 'Правый вираж';
     mtHorizRazgon :  Result := 'Разгон в горизонте';
-    mtRazgonSnaborom :  Result := 'Разгон с набором высоты';
+    mtRazgonSnaborom :  Result := 'Вертикальный взлет';
+    mtLiftOff :  Result := 'Разгон с набором высоты';
+    mtLanding :  Result := 'Вертикальная посадка';
   end;
 end;
 
