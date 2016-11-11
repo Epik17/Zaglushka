@@ -9,7 +9,7 @@ uses Contnrs,  // чтобы работал TObjectList
 
 const
 
-g_ParametersCount = 10;
+g_ParametersCount = 11;
 //1: Дальность, м
 //2: Перегрузка на вводе
 //3: Перегрузка на выводе
@@ -20,15 +20,16 @@ g_ParametersCount = 10;
 //8: Конечная скорость при разгоне, км/ч
 //9: Вертикальная скорость при разгоне/взлете/посадке, м/с
 //10: Вертикальное смещение при взлете/посадке, м
+//11: Продолжительность висения, с
 
 g_HelicoptersCount = 6;
-g_ManevrTypesCount = 9;
-g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон в горизонте','Разгон с набором высоты','Вертикальный взлет','Вертикальная посадка');
+g_ManevrTypesCount = 10;
+g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон в горизонте','Разгон с набором высоты','Вертикальный взлет','Вертикальная посадка','Висение');
 g_HelicopterTypes : array [1..g_HelicoptersCount] of string = ('Ансат-У','Ми-26','Ка-226','Ми-28Н','Ми-8МТВ-5','Ми-8АМТШ');
 
 
 type TManevrTypes = (mtUndefined, mtHorizFlight, mtGorka, mtPikirovanie,mtLeftVirage,mtRightVirage,
-mtHorizRazgon,mtRazgonSnaborom, mtLiftOff, mtLanding);
+mtHorizRazgon,mtRazgonSnaborom, mtLiftOff, mtLanding, mtHovering);
 type TParametersArray = array [1..g_ParametersCount] of Real;
 type TArrayOfString = array of string;
 
@@ -108,6 +109,7 @@ begin
     if aType = 'Разгон с набором высоты' then Result := mtRazgonSnaborom;
     if aType = 'Вертикальный взлет' then Result := mtLiftOff;
     if aType = 'Вертикальная посадка' then Result := mtLanding;
+    if aType = 'Висение' then Result := mtHovering;
 end;
 
 function ConvertManevrType (aType : TManevrTypes) : string; overload;
@@ -124,6 +126,7 @@ begin
     mtRazgonSnaborom :  Result := 'Разгон с набором высоты';
     mtLiftOff :  Result := 'Вертикальный взлет';
     mtLanding :  Result := 'Вертикальная посадка';
+    mtHovering :  Result := 'Висение';
   end;
 end;
 
