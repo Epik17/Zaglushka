@@ -271,6 +271,9 @@ end;
 
         mtLanding :
          TempManevrData:=VertPosadka(g_Helicopter,laststate,g_G, g_T,tempManevr.fParameters[10],tempManevr.fParameters[9]);
+
+        mtHovering :
+         TempManevrData:=Visenie(laststate,tempManevr.fParameters[11]);
    end;
 
    if Length(TempManevrData) > 0 then
@@ -663,6 +666,17 @@ begin
     maxes[1]:=100; 
    end;
 
+   if ManevrType = mtHovering then
+   begin
+    count :=1;
+    MySetLength(count);
+
+    multipliers[0]:=1;
+    mins[0]:=1;
+    names[0]:='Длительность, с';
+    maxes[0]:=60;
+   end;
+
   CreateLabeledScrollbars(names, multipliers, mins, maxes);
 end;
 
@@ -710,6 +724,9 @@ if lst_Manevry.ItemIndex <>-1 then
       if (SelectedManevr.pType = mtLiftOff) or (SelectedManevr.pType = mtLanding) then
          for i:=0 to Length(g_TrackBars)-1 do
            g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+9]/g_Multipliers[i]);
+
+      if (SelectedManevr.pType = mtHovering) then
+          g_TrackBars[0].Position := Round(SelectedManevr.fParameters[11]/g_Multipliers[0]);
  end;
 end;
 
@@ -754,6 +771,9 @@ begin
            if aType = 'Вертикальная посадка' then
             Result := 8
            else
+            if aType = 'Висение' then
+             Result := 9
+            else
               begin
                Result := -1;
                ShowMessage('function ManevrTypeToNumber: некорректное название маневра');
@@ -1314,6 +1334,7 @@ begin
      ParamArray[8] :=0;
      ParamArray[9] :=0;
      ParamArray[10] :=0;
+     ParamArray[11] :=0;
    end;
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] ='Пикирование') then
    begin
@@ -1327,6 +1348,7 @@ begin
      ParamArray[8] :=0;
      ParamArray[9] :=0;
      ParamArray[10] :=0;
+     ParamArray[11] :=0;
    end;
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый вираж') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый вираж') then
      begin
@@ -1340,6 +1362,7 @@ begin
      ParamArray[8] :=0;
      ParamArray[9] :=0;
      ParamArray[10] :=0;
+     ParamArray[11] :=0;
    end;
 
     if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте')  then
@@ -1354,6 +1377,7 @@ begin
      ParamArray[8] :=g_Multipliers[0]*g_TrackBars[0].Position;
      ParamArray[9] :=0;
      ParamArray[10] :=0;
+     ParamArray[11] :=0;
    end;
 
      if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон с набором высоты')  then
@@ -1368,6 +1392,7 @@ begin
      ParamArray[8] :=g_Multipliers[0]*g_TrackBars[0].Position;
      ParamArray[9] :=g_Multipliers[1]*g_TrackBars[1].Position;
      ParamArray[10] :=0;
+     ParamArray[11] :=0;
    end;
 
      if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Вертикальный взлет') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Вертикальная посадка')  then
@@ -1381,7 +1406,23 @@ begin
      ParamArray[7] :=0;
      ParamArray[8] :=0;
      ParamArray[9] :=g_Multipliers[0]*g_TrackBars[0].Position;
-     ParamArray[10] :=g_Multipliers[1]*g_TrackBars[1].Position;;
+     ParamArray[10] :=g_Multipliers[1]*g_TrackBars[1].Position;
+     ParamArray[11] :=0;
+   end;
+
+    if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Висение')  then
+   begin
+     ParamArray[1] := 0;
+     ParamArray[2] :=0;
+     ParamArray[3] :=0;
+     ParamArray[4] :=0;
+     ParamArray[5] :=0;
+     ParamArray[6] :=0;
+     ParamArray[7] :=0;
+     ParamArray[8] :=0;
+     ParamArray[9] :=0;
+     ParamArray[10] :=0;
+     ParamArray[11] :=g_Multipliers[0]*g_TrackBars[0].Position;
    end;
 end;
 
@@ -1415,6 +1456,9 @@ begin
          if (manevrlist[SelectedIndex].pType = mtLiftOff) or (manevrlist[SelectedIndex].pType = mtLanding) then
           for i:=0 to Length(g_TrackBars)-1 do
            manevrlist[SelectedIndex].fParameters[i+9] := g_Multipliers[i]*g_TrackBars[i].Position;
+
+         if (manevrlist[SelectedIndex].pType = mtHovering) then
+            manevrlist[SelectedIndex].fParameters[11] := g_Multipliers[0]*g_TrackBars[0].Position;
        end;
 end;
 

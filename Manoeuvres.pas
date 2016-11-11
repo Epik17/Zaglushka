@@ -773,7 +773,7 @@ end;
 
 function MyOscillation (A, Omega, phi, duration, t : Real) : Real;
 begin
-  if t<=duration then
+  if t<=duration/2 then
     Result := (2/duration)* t * A * Cos(Omega * t + phi)
   else
     Result := ((-2/duration)* t + 2) * A * Cos(Omega * t + phi)
@@ -783,14 +783,15 @@ function Visenie(initialstate : TStateVector; duration : Real) : TManevrData;
 var
 localtime : Real;
 const
-  ampli = 0.0174; // 1 degree
+  ampli = 0.0349; // 2 degrees
+  omega = 0.04;
 begin
    SetLength(Result,0);
    localtime := 0;
 
   if duration>0 then
     begin
-        while localtime <= duration do
+        while localtime < duration-dt/2 do
          begin
           ExtendArray(Result);
 
@@ -803,15 +804,20 @@ begin
             psi := initialstate.psi;
             ny := initialstate.ny;
 
-            theta := initialstate.theta + MyOscillation (ampli, 2, Pi/2, 10, localtime);
-            gamma := initialstate.gamma + MyOscillation (ampli, 2, 0, 10, localtime);
+            theta := initialstate.theta + MyOscillation (ampli, omega, Pi/2, duration, localtime);
+            gamma := initialstate.gamma + MyOscillation (ampli, omega, 0, duration, localtime);
             t := initialstate.t + localtime + dt;
 
             localtime := localtime + dt;
 
            end;
-
          end;
+
+          with Result[High(Result)] do
+             begin
+              theta := 0;
+              gamma := 0;
+             end;
     end
   else
    ShowMessage('ѕродолжительность висени€ должна быть больше нул€!');
