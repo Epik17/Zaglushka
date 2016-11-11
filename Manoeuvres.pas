@@ -22,6 +22,7 @@ function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG,
 function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}, Vy{m/s}: Real) : TManevrData;
 function VertVzlet(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
 function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
+function Visenie(initialstate : TStateVector; duration : Real) : TManevrData;
 
 function tVypoln(Manevr : TManevrData) : Extended;
 function Vfinal(Manevr : TManevrData) : Extended;
@@ -768,6 +769,52 @@ end;
 function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
 begin
   Result := iVertVzletPosadka(helicopter, initialstate, icG, icT, -deltayInterface, Vdesired);
+end;
+
+function MyOscillation (A, Omega, phi, duration, t : Real) : Real;
+begin
+  if t<=duration then
+    Result := (2/duration)* t * A * Cos(Omega * t + phi)
+  else
+    Result := ((-2/duration)* t + 2) * A * Cos(Omega * t + phi)
+end;
+       
+function Visenie(initialstate : TStateVector; duration : Real) : TManevrData;
+var
+localtime : Real;
+const
+  ampli = 0.0174; // 1 degree
+begin
+   SetLength(Result,0);
+   localtime := 0;
+
+  if duration>0 then
+    begin
+        while localtime <= duration do
+         begin
+          ExtendArray(Result);
+
+          with Result[High(Result)] do
+           begin
+            x := initialstate.x;
+            y := initialstate.y;
+            z := initialstate.z;
+            V := 0;
+            psi := initialstate.psi;
+            ny := initialstate.ny;
+
+            theta := initialstate.theta + MyOscillation (ampli, 2, Pi/2, 10, localtime);
+            gamma := initialstate.gamma + MyOscillation (ampli, 2, 0, 10, localtime);
+            t := initialstate.t + localtime + dt;
+
+            localtime := localtime + dt;
+
+           end;
+
+         end;
+    end
+  else
+   ShowMessage('Продолжительность висения должна быть больше нуля!');
 end;
 
 end.
