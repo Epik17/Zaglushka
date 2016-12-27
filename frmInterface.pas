@@ -274,6 +274,12 @@ end;
 
         mtHovering :
          TempManevrData:=Visenie(laststate,tempManevr.fParameters[11]);
+
+        mtLeftSpiral :
+         TempManevrData:=Spiral(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[7],tempManevr.fParameters[9]);
+
+        mtRightSpiral :
+         TempManevrData:=Spiral(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7],tempManevr.fParameters[9]);
    end;
 
    if Length(TempManevrData) > 0 then
@@ -677,6 +683,27 @@ begin
     maxes[0]:=60;
    end;
 
+  if (ManevrType = mtLeftSpiral) or (ManevrType = mtRightSpiral)then
+   begin
+    count :=3;
+    MySetLength(count);
+
+    multipliers[1]:=1;
+    mins[1]:=1;
+    names[1]:='Изм-е курса, град';
+    maxes[1]:=720;
+
+    multipliers[0]:=1;
+    mins[0]:=10;
+    names[0]:='Крен';
+    maxes[0]:=45;
+
+    multipliers[2]:=0.1;
+    mins[2]:=-50;
+    names[2]:='Макс. верт. скор., м/с';
+    maxes[2]:=50;
+   end;
+
   CreateLabeledScrollbars(names, multipliers, mins, maxes);
 end;
 
@@ -727,6 +754,15 @@ if lst_Manevry.ItemIndex <>-1 then
 
       if (SelectedManevr.pType = mtHovering) then
           g_TrackBars[0].Position := Round(SelectedManevr.fParameters[11]/g_Multipliers[0]);
+
+
+      if (SelectedManevr.pType = mtLeftSpiral) or (SelectedManevr.pType = mtRightSpiral) then
+       begin
+         for i:=0 to Length(g_TrackBars)-1 do
+           g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+6]/g_Multipliers[i]);
+
+         g_TrackBars[2].Position := Round(SelectedManevr.fParameters[9]/g_Multipliers[2]);
+       end;
  end;
 end;
 
@@ -774,10 +810,16 @@ begin
             if aType = 'Висение' then
              Result := 9
             else
-              begin
-               Result := -1;
-               ShowMessage('function ManevrTypeToNumber: некорректное название маневра');
-              end;
+             if aType = 'Левая спираль' then
+              Result := 10
+             else
+              if aType = 'Правая спираль' then
+               Result := 11
+              else
+               begin
+                Result := -1;
+                ShowMessage('function ManevrTypeToNumber: некорректное название маневра');
+               end;
 
 end;
 
@@ -1424,6 +1466,21 @@ begin
      ParamArray[10] :=0;
      ParamArray[11] :=g_Multipliers[0]*g_TrackBars[0].Position;
    end;
+
+    if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левая спираль') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правая спираль') then
+     begin
+       ParamArray[1] :=0;
+       ParamArray[2] :=0;
+       ParamArray[3] :=0;
+       ParamArray[4] :=0;
+       ParamArray[5] :=0;
+       ParamArray[6] :=g_Multipliers[0]*g_TrackBars[0].Position;
+       ParamArray[7] :=g_Multipliers[1]*g_TrackBars[1].Position;
+       ParamArray[8] :=0;
+       ParamArray[9] :=g_Multipliers[2]*g_TrackBars[2].Position;
+       ParamArray[10] :=0;
+       ParamArray[11] :=0;
+     end;
 end;
 
 
@@ -1459,6 +1516,14 @@ begin
 
          if (manevrlist[SelectedIndex].pType = mtHovering) then
             manevrlist[SelectedIndex].fParameters[11] := g_Multipliers[0]*g_TrackBars[0].Position;
+
+         if (manevrlist[SelectedIndex].pType = mtLeftSpiral) or (manevrlist[SelectedIndex].pType = mtRightSpiral) then
+           begin
+            for i:=0 to Length(g_TrackBars)-1 do
+             manevrlist[SelectedIndex].fParameters[i+6] := g_Multipliers[i]*g_TrackBars[i].Position;
+
+            manevrlist[SelectedIndex].fParameters[9] := g_Multipliers[2]*g_TrackBars[2].Position;
+           end;
        end;
 end;
 

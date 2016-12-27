@@ -373,8 +373,8 @@ if not failed then
      begin
       g_Etape(constgammaUchastok,tempstate, helicopter, tempny,tempa, tempomega);
 
-      vvod[High(vvod)].y := vvod[High(vvod)].y + Vytemp/2*dt;
-      tempstate.y := vvod[High(vvod)].y;
+      constgammaUchastok[High(constgammaUchastok)].y := constgammaUchastok[High(constgammaUchastok)].y + Vytemp/2*dt;
+      tempstate.y := constgammaUchastok[High(constgammaUchastok)].y;
      end
   else
    failed:= True;
@@ -395,7 +395,7 @@ if not failed then
       //for spiral
       Vytemp := Vy/Abs(kren)*Abs(RadToDeg(tempstate.gamma));
       vyvod[High(vyvod)].y := vyvod[High(vyvod)].y + Vytemp/2*dt;
-      tempstate.y := vvod[High(vvod)].y;
+      tempstate.y := vyvod[High(vyvod)].y;
    end
  else
    failed:= True;
@@ -417,9 +417,9 @@ end;
 function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 begin
   if deltaPsi < 0 then
-    Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, deltaPsi, -2, False);
+    Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, deltaPsi, 0, False);
   if deltaPsi > 0 then
-    Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, deltaPsi, -2, True);
+    Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, deltaPsi, 0, True);
   if deltaPsi = 0 then
    SetLength(Result,0)
 end;

@@ -18,18 +18,18 @@ g_ParametersCount = 11;
 //6: Крен при вираже, градусов
 //7: Изменение курса при вираже, градусов
 //8: Конечная скорость при разгоне, км/ч
-//9: Вертикальная скорость при разгоне/взлете/посадке, м/с
+//9: Вертикальная скорость при разгоне/взлете/посадке/спирали, м/с
 //10: Вертикальное смещение при взлете/посадке, м
 //11: Продолжительность висения, с
 
 g_HelicoptersCount = 6;
-g_ManevrTypesCount = 10;
-g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон в горизонте','Разгон с набором высоты','Вертикальный взлет','Вертикальная посадка','Висение');
+g_ManevrTypesCount = 12;
+g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон в горизонте','Разгон с набором высоты','Вертикальный взлет','Вертикальная посадка','Висение','Левая спираль', 'Правая спираль');
 g_HelicopterTypes : array [1..g_HelicoptersCount] of string = ('Ансат-У','Ми-26','Ка-226','Ми-28Н','Ми-8МТВ-5','Ми-8АМТШ');
 
 
 type TManevrTypes = (mtUndefined, mtHorizFlight, mtGorka, mtPikirovanie,mtLeftVirage,mtRightVirage,
-mtHorizRazgon,mtRazgonSnaborom, mtLiftOff, mtLanding, mtHovering);
+mtHorizRazgon,mtRazgonSnaborom, mtLiftOff, mtLanding, mtHovering,mtLeftSpiral,mtRightSpiral);
 type TParametersArray = array [1..g_ParametersCount] of Real;
 type TArrayOfString = array of string;
 
@@ -110,6 +110,8 @@ begin
     if aType = 'Вертикальный взлет' then Result := mtLiftOff;
     if aType = 'Вертикальная посадка' then Result := mtLanding;
     if aType = 'Висение' then Result := mtHovering;
+    if aType = 'Левая спираль' then Result := mtLeftSpiral;
+    if aType = 'Правая спираль' then Result := mtRightSpiral;
 end;
 
 function ConvertManevrType (aType : TManevrTypes) : string; overload;
@@ -127,6 +129,9 @@ begin
     mtLiftOff :  Result := 'Вертикальный взлет';
     mtLanding :  Result := 'Вертикальная посадка';
     mtHovering :  Result := 'Висение';
+    mtLeftSpiral :  Result :=  'Левая спираль';
+    mtRightSpiral :  Result := 'Правая спираль';
+
   end;
 end;
 
