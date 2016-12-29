@@ -456,10 +456,10 @@ begin
 
       linearnx := -knx*localTime;
 
-      if Vfinal <=10 then
+      if Vfinal <=2 then
        VfinalTrick := Vfinal
       else
-       VfinalTrick := Vfinal-10;
+       VfinalTrick := Vfinal-2;
 
       realnx := nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy)-nx(helicopter,tempny,icG, icT,tempstate.y, VfinalTrick(* позволяет избежать зависания из-за малых по модулю ускорений в конце маневра *), Vy);
 
