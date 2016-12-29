@@ -922,13 +922,20 @@ begin
 end;
 
 procedure Tfrm_Interface.SetInitialConditionsTrackbars;
+var
+  v0 : Real;
 
 begin
- // if g_Helicopter.Name ='Ансат-У' then
-  //  ShowMessage(g_Helicopter.Name);
+
  SetICTrackbar(trckbr_H0,50{meters}/deltaH0,0.9*g_Helicopter.Hdyn/deltaH0,400/deltaH0);
- SetICTrackbar(trckbrV0,0,0.95*g_Helicopter.Vmax-1,0);
- SetICTrackbar(trckbr_G,g_Helicopter.Gmin,g_Helicopter.Gmax,g_Helicopter.Gmax);
+
+ if Length(g_FlightData) = 0 then
+  v0 := 0
+ else
+  v0 := g_V0;
+
+ SetICTrackbar(trckbrV0,0,0.95*g_Helicopter.Vmax-1,v0);
+ SetICTrackbar(trckbr_G,g_Helicopter.Gmin,g_Helicopter.Gmax,g_Helicopter.Gnorm);
  SetICTrackbar(trckbr_T,Tmin,Tmax,Tdefault);
 end;
 
@@ -1016,7 +1023,7 @@ begin
    begin
      Title.Caption:='H, км';
      Minimum := 0;
-     Maximum := 6;
+     Maximum := 7;
    end;
 
  cht.BottomAxis.Minimum := 0;
