@@ -441,14 +441,38 @@ var
   tempomega : TVector3D;
   failed : Boolean;
 
- procedure SetAcceleration(var a : Real; tempstate: TStateVector; ny, Vy : Real);
+function Razgon() : Boolean;
+begin
+  Result := g_mps*initialstate.V < Vfinal;
+end;
+
+ procedure SetAccelerationTormozh(var a : Real; tempstate: TStateVector; ny, Vy, V : Real);
   const
  knx = 0.013;
-//   timeBeforeFullNX = 10{секунд}; //на достижение максимально возможной nx уходит время
  var
    linearnx, realnx : Real;
 
 begin
+
+      linearnx := -knx*localTime;
+      realnx := nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy)-nx(helicopter,tempny,icG, icT,tempstate.y,Vfinal-10 (* позволяет избежать зависания из-за малых по модулю ускорений в конце маневра *), Vy);
+
+      if linearnx < realnx then
+       a := g_g*realnx
+      else
+       a := g_g*linearnx
+
+end;
+
+ procedure SetAccelerationRazgon(var a : Real; tempstate: TStateVector; ny, Vy : Real);
+  const
+ knx = 0.013;
+
+ var
+   linearnx, realnx : Real;
+
+begin
+
       linearnx := knx*localTime;
       realnx := nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy);
 
@@ -457,9 +481,6 @@ begin
       else
        a := g_g*linearnx
 
-
-  {    if localTime < timeBeforeFullNX then
-       a:= (1/timeBeforeFullNX)*localTime*a;  }
 end;
 
 begin
@@ -478,7 +499,8 @@ begin
 
   if initialstate.V*g_mps < 0.95*helicopter.Vmax then
    begin
-    while (not (g_mps*tempstate.V >=Vfinal)) and (not failed) do
+    //while (not (g_mps*tempstate.V >=Vfinal)) and (not failed) do
+    while ((Razgon and (g_mps*tempstate.V <=Vfinal)) or ((not Razgon) and (g_mps*tempstate.V >=Vfinal))) and (not failed) do
       if (tempstate.V >= 0) then
         begin
          begin
@@ -490,7 +512,11 @@ begin
           if (Vytemp > VyDesired) or (Abs(VyDesired) < 0.001){in case of horizontal flight} then
             Vytemp := VyDesired;
 
-          SetAcceleration(a,tempstate, tempny, Vytemp);
+          if Razgon then
+           SetAccelerationRazgon(a,tempstate, tempny, Vytemp)
+          else
+           SetAccelerationTormozh(a,tempstate, tempny, Vytemp, initialstate.V);
+
           g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
 
                      //climb
@@ -498,9 +524,6 @@ begin
           Result[High(Result)].y := tempy;
 
           Result[High(Result)].theta := -ArcTan(a/g_g); //pitch according to nx_temp
-
-
-
 
           localTime := localTime + dt;
          end;
@@ -515,7 +538,7 @@ begin
    end
 
   else
-    ShowMessage('Начальная скорость при разгоне составила ' + FloatToStr(Round(initialstate.V*g_mps)) + ' км/ч. Эта скорость не может превышать  '+FloatToStr(0.95*helicopter.Vmax)+ ' км/ч');
+    ShowMessage('Начальная скорость составила ' + FloatToStr(Round(initialstate.V*g_mps)) + ' км/ч. Эта скорость не может превышать  '+FloatToStr(0.95*helicopter.Vmax)+ ' км/ч');
 end;
 
 function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
