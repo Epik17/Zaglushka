@@ -17,19 +17,19 @@ g_ParametersCount = 11;
 //5: Скорость вывода, км/ч
 //6: Крен при вираже, градусов
 //7: Изменение курса при вираже, градусов
-//8: Конечная скорость при разгоне, км/ч
+//8: Конечная скорость при разгоне/торможении, км/ч
 //9: Вертикальная скорость при разгоне/взлете/посадке/спирали, м/с
 //10: Вертикальное смещение при взлете/посадке, м
 //11: Продолжительность висения, с
 
 g_HelicoptersCount = 6;
 g_ManevrTypesCount = 12;
-g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон в горизонте','Разгон с набором высоты','Вертикальный взлет','Вертикальная посадка','Висение','Левая спираль', 'Правая спираль');
+g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон/торможение в горизонте','Разгон с набором высоты','Вертикальный взлет','Вертикальная посадка','Висение','Левая спираль', 'Правая спираль');
 g_HelicopterTypes : array [1..g_HelicoptersCount] of string = ('Ансат-У','Ми-26','Ка-226','Ми-28Н','Ми-8МТВ-5','Ми-8АМТШ');
 
 
 type TManevrTypes = (mtUndefined, mtHorizFlight, mtGorka, mtPikirovanie,mtLeftVirage,mtRightVirage,
-mtHorizRazgon,mtRazgonSnaborom, mtLiftOff, mtLanding, mtHovering,mtLeftSpiral,mtRightSpiral);
+mtHorizRazgonTormozh,mtRazgonSnaborom, mtLiftOff, mtLanding, mtHovering,mtLeftSpiral,mtRightSpiral);
 type TParametersArray = array [1..g_ParametersCount] of Real;
 type TArrayOfString = array of string;
 
@@ -105,7 +105,7 @@ begin
     if aType = 'Пикирование' then Result := mtPikirovanie;
     if aType = 'Левый вираж' then Result := mtLeftVirage;
     if aType = 'Правый вираж' then Result := mtRightVirage;
-    if aType = 'Разгон в горизонте' then Result := mtHorizRazgon;
+    if aType = 'Разгон/торможение в горизонте' then Result := mtHorizRazgonTormozh;
     if aType = 'Разгон с набором высоты' then Result := mtRazgonSnaborom;
     if aType = 'Вертикальный взлет' then Result := mtLiftOff;
     if aType = 'Вертикальная посадка' then Result := mtLanding;
@@ -124,7 +124,7 @@ begin
     mtPikirovanie : Result := 'Пикирование';
     mtLeftVirage : Result := 'Левый вираж';
     mtRightVirage :  Result := 'Правый вираж';
-    mtHorizRazgon :  Result := 'Разгон в горизонте';
+    mtHorizRazgonTormozh :  Result := 'Разгон/торможение в горизонте';
     mtRazgonSnaborom :  Result := 'Разгон с набором высоты';
     mtLiftOff :  Result := 'Вертикальный взлет';
     mtLanding :  Result := 'Вертикальная посадка';

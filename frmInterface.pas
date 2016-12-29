@@ -260,8 +260,8 @@ end;
         mtRightVirage :
          TempManevrData:=Virage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7]);
 
-        mtHorizRazgon :
-         TempManevrData:=HorizRazgon(g_Helicopter,laststate,g_G, g_T,tempManevr.fParameters[8]);
+        mtHorizRazgonTormozh :
+         TempManevrData:=HorizRazgonTormozhenie(g_Helicopter,laststate,g_G, g_T,tempManevr.fParameters[8]);
 
         mtRazgonSnaborom :
          TempManevrData:=RazgonSnaborom(g_Helicopter,laststate,g_G, g_T,tempManevr.fParameters[8],tempManevr.fParameters[9]);
@@ -629,13 +629,13 @@ begin
   maxes[0]:=45;
  end;
 
-  if ManevrType = mtHorizRazgon then
+  if ManevrType = mtHorizRazgonTormozh then
  begin
   count :=1;
   MySetLength(count);
 
   multipliers[0]:=1;
-  mins[0]:=Round(1.05*g_FlightData[0][0].V*g_mps);
+  mins[0]:={Round(1.05*g_FlightData[0][0].V*g_mps)}0;
   names[0]:='Макс. скор., км/ч';
   maxes[0]:=Round(0.95*g_Helicopter.Vmax)-1;
  end;
@@ -741,7 +741,7 @@ if lst_Manevry.ItemIndex <>-1 then
          for i:=0 to Length(g_TrackBars)-1 do
            g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+6]/g_Multipliers[i]);
 
-      if (SelectedManevr.pType = mtHorizRazgon) then
+      if (SelectedManevr.pType = mtHorizRazgonTormozh) then
         g_TrackBars[0].Position := Round(SelectedManevr.fParameters[8]/g_Multipliers[0]);
 
       if (SelectedManevr.pType = mtRazgonSnaborom) then
@@ -795,7 +795,7 @@ begin
        if aType = 'Правый вираж' then
         Result := 4
        else
-        if aType = 'Разгон в горизонте' then
+        if aType = 'Разгон/торможение в горизонте' then
          Result := 5
         else
          if aType = 'Разгон с набором высоты' then
@@ -1307,7 +1307,7 @@ end;
 procedure Tfrm_Interface.DynamicFoolProof;
 var
   cosTheta  : Real;
-  cosThetaRounded, trckbarNo,Vmax, Vmin : Integer;
+  cosThetaRounded, trckbarNo,Vmax{, Vmin }: Integer;
 const
   cosCorrection = 0.02;
 
@@ -1342,19 +1342,19 @@ begin
         g_TrackBars[trckbarNo].Max := cosThetaRounded;
     end;
 
-  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон с набором высоты') then
+  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон/торможение в горизонте') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон с набором высоты') then
    begin
-     Vmax := VmaxOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0)-1;
-     if g_TrackBars[0].Position > Vmax then
-      g_TrackBars[0].Position := Vmax;
+     Vmax := Round(0.95*VmaxOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0));
+     {if g_TrackBars[0].Position > Vmax then
+      g_TrackBars[0].Position := Vmax;   }
      g_TrackBars[0].Max := Vmax;
 
-     Vmin := Round(1.05*trckbrV0.Position);
+     {Vmin := Round(1.05*trckbrV0.Position);
 
      if (Vmin > -0.05) and (Vmin < 0.05) then
-      Vmin := 1;
+      Vmin := 1;}
 
-     g_TrackBars[0].Min := Vmin;
+     g_TrackBars[0].Min := 0{Vmin};
    end;
 
 
@@ -1407,7 +1407,7 @@ begin
      ParamArray[11] :=0;
    end;
 
-    if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон в горизонте')  then
+    if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон/торможение в горизонте')  then
    begin
      ParamArray[1] :=0;
      ParamArray[2] :=0;
@@ -1503,7 +1503,7 @@ begin
           for i:=0 to Length(g_TrackBars)-1 do
            manevrlist[SelectedIndex].fParameters[i+6] := g_Multipliers[i]*g_TrackBars[i].Position;
 
-         if  (manevrlist[SelectedIndex].pType = mtHorizRazgon) then
+         if  (manevrlist[SelectedIndex].pType = mtHorizRazgonTormozh) then
             manevrlist[SelectedIndex].fParameters[8] := g_Multipliers[0]*g_TrackBars[0].Position;
 
          if (manevrlist[SelectedIndex].pType = mtRazgonSnaborom) then

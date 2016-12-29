@@ -19,7 +19,7 @@ function Gorka (helicopter : THelicopter; initialstate : TStateVector; icG, icT,
 function Pikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TManevrData;
 function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 function Spiral(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}, Vy{m/s}: Real) : TManevrData;
-function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
+function HorizRazgonTormozhenie(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}, Vy{m/s}: Real) : TManevrData;
 function VertVzlet(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
 function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
@@ -450,12 +450,18 @@ end;
   const
  knx = 0.013;
  var
-   linearnx, realnx : Real;
+   linearnx, realnx, VfinalTrick : Real;
 
 begin
 
       linearnx := -knx*localTime;
-      realnx := nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy)-nx(helicopter,tempny,icG, icT,tempstate.y,Vfinal-10 (* позволяет избежать зависания из-за малых по модулю ускорений в конце маневра *), Vy);
+
+      if Vfinal <=10 then
+       VfinalTrick := Vfinal
+      else
+       VfinalTrick := Vfinal-10;
+
+      realnx := nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy)-nx(helicopter,tempny,icG, icT,tempstate.y, VfinalTrick(* позволяет избежать зависания из-за малых по модулю ускорений в конце маневра *), Vy);
 
       if linearnx < realnx then
        a := g_g*realnx
@@ -487,61 +493,66 @@ begin
     //инициализируем
  failed := False;
 
- tempstate := initialstate;
- tempny :=1;
- localTime :=0;
- tempomega.x:=0;
- tempomega.y:=0;
- tempomega.z:=0;
- SetLength(Result,0);
- tempy := initialstate.y;
-
-
-  if initialstate.V*g_mps < 0.95*helicopter.Vmax then
+ if initialstate.V*g_mps <> Vfinal then
    begin
-    //while (not (g_mps*tempstate.V >=Vfinal)) and (not failed) do
-    while ((Razgon and (g_mps*tempstate.V <=Vfinal)) or ((not Razgon) and (g_mps*tempstate.V >=Vfinal))) and (not failed) do
-      if (tempstate.V >= 0) then
-        begin
-         begin
-          if Length(Result) = 0 then
-           Vytemp := VyRasp(helicopter, icG, icT, tempy, initialstate.V*g_mps)
-          else
-           Vytemp := VyRasp(helicopter, icG, icT, Result[High(Result)].y, Result[High(Result)].V*g_mps);
+     tempstate := initialstate;
+     tempny :=1;
+     localTime :=0;
+     tempomega.x:=0;
+     tempomega.y:=0;
+     tempomega.z:=0;
+     SetLength(Result,0);
+     tempy := initialstate.y;
 
-          if (Vytemp > VyDesired) or (Abs(VyDesired) < 0.001){in case of horizontal flight} then
-            Vytemp := VyDesired;
 
-          if Razgon then
-           SetAccelerationRazgon(a,tempstate, tempny, Vytemp)
-          else
-           SetAccelerationTormozh(a,tempstate, tempny, Vytemp, initialstate.V);
+    if initialstate.V*g_mps < 0.95*helicopter.Vmax then
+     begin
+      //while (not (g_mps*tempstate.V >=Vfinal)) and (not failed) do
+      while ((Razgon and (g_mps*tempstate.V <=Vfinal)) or ((not Razgon) and (g_mps*tempstate.V >=Vfinal))) and (not failed) do
+        if (tempstate.V >= 0) then
+          begin
+           begin
+            if Length(Result) = 0 then
+             Vytemp := VyRasp(helicopter, icG, icT, tempy, initialstate.V*g_mps)
+            else
+             Vytemp := VyRasp(helicopter, icG, icT, Result[High(Result)].y, Result[High(Result)].V*g_mps);
 
-          g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
+            if (Vytemp > VyDesired) or (Abs(VyDesired) < 0.001){in case of horizontal flight} then
+              Vytemp := VyDesired;
 
-                     //climb
-          tempy := tempy +  + Vytemp*dt;
-          Result[High(Result)].y := tempy;
+            if Razgon then
+             SetAccelerationRazgon(a,tempstate, tempny, Vytemp)
+            else
+             SetAccelerationTormozh(a,tempstate, tempny, Vytemp, initialstate.V);
 
-          Result[High(Result)].theta := -ArcTan(a/g_g); //pitch according to nx_temp
+            g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
 
-          localTime := localTime + dt;
-         end;
-        end
-      else
-        failed := True;
+                       //climb
+            tempy := tempy +  + Vytemp*dt;
+            Result[High(Result)].y := tempy;
 
-     if not failed then
-      Result[High(Result)].V := Vfinal/g_mps;
+            Result[High(Result)].theta := -ArcTan(a/g_g); //pitch according to nx_temp
 
-     if failed then ShowMessage('Падение скорости до нуля!');
+            localTime := localTime + dt;
+           end;
+          end
+        else
+          failed := True;
+
+       if not failed then
+        Result[High(Result)].V := Vfinal/g_mps;
+
+       if failed then ShowMessage('Падение скорости до нуля!');
+     end
+
+    else
+      ShowMessage('Начальная скорость составила ' + FloatToStr(Round(initialstate.V*g_mps)) + ' км/ч. Эта скорость не может превышать  '+FloatToStr(0.95*helicopter.Vmax)+ ' км/ч');
    end
-
-  else
-    ShowMessage('Начальная скорость составила ' + FloatToStr(Round(initialstate.V*g_mps)) + ' км/ч. Эта скорость не может превышать  '+FloatToStr(0.95*helicopter.Vmax)+ ' км/ч');
+ else
+  ShowMessage('Конечная и начальная скорости при разгоне (торможении) не могут быть равны между собой!')
 end;
 
-function HorizRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
+function HorizRazgonTormozhenie(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 begin
  Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 0);
 end;
