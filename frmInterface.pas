@@ -1158,7 +1158,7 @@ begin
    begin
      Title.Caption:='ny max';
      Minimum := 0;
-     Maximum := 2;
+     Maximum := 2.5;
    end;
 
  cht.BottomAxis.Minimum := 0;
@@ -1213,8 +1213,8 @@ begin
   with cht.LeftAxis do
    begin
      Title.Caption:='nx max';
-     Minimum := -0.5;
-     Maximum := 1;
+     Minimum := -1;
+     Maximum := 3;
    end;
 
   tempny := helicopter.nyMin;
