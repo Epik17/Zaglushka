@@ -929,7 +929,7 @@ begin
 
  SetICTrackbar(trckbr_H0,50{meters}/deltaH0,0.9*g_Helicopter.Hdyn/deltaH0,400/deltaH0);
 
- if Length(g_FlightData) = 0 then
+ if Length(g_FlightData) = 0 then  //v0 doesn't change when changing helicopter after calculating some manoeuvres
   v0 := 0
  else
   v0 := g_V0;
