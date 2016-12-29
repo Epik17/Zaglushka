@@ -22,10 +22,10 @@ g_ParametersCount = 11;
 //10: Вертикальное смещение при взлете/посадке, м
 //11: Продолжительность висения, с
 
-g_HelicoptersCount = 6;
+//g_HelicoptersCount = 8;
 g_ManevrTypesCount = 12;
 g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон/торможение в горизонте','Разгон с набором высоты','Вертикальный взлет','Вертикальная посадка','Висение','Левая спираль', 'Правая спираль');
-g_HelicopterTypes : array [1..g_HelicoptersCount] of string = ('Ансат-У','Ми-26','Ка-226','Ми-28Н','Ми-8МТВ-5','Ми-8АМТШ');
+//g_HelicopterTypes : array [1..g_HelicoptersCount] of string = ('Ансат-У','Ми-26','Ка-226','Ми-28Н','Ми-8МТВ-5','Ми-8АМТШ');
 
 
 type TManevrTypes = (mtUndefined, mtHorizFlight, mtGorka, mtPikirovanie,mtLeftVirage,mtRightVirage,

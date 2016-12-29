@@ -3,6 +3,7 @@ unit HelicoptersDatabase;
 interface
 
 type THelicopter = record
+Name: string;
 Fomet, //ометаема€ площадь, м2
 Gnorm, //нормальный полетный вес, кг
 TraspUZemli, //располагаема€ т€га у земли, кг
@@ -21,7 +22,7 @@ end;
 
 type THelicoptersDatabase = array [1..8] of THelicopter;
 type THelicopterParameters = array [1..14] of Real;
-function CreateHelicopter (params: THelicopterParameters) : THelicopter;
+function CreateHelicopter (aname: string;params: THelicopterParameters) : THelicopter;
 
 const
 mi8 : THelicopterParameters = (356,12000,10800,0.5,1.5,1.036,0.15,-100,4500,250,60,0.5,11000,12500);
@@ -35,10 +36,11 @@ ka226 : THelicopterParameters = (132,3100,3920,0.5,1.5,0.315,0.1077,2600,6500,21
 
 
 implementation
-function CreateHelicopter (params: THelicopterParameters) : THelicopter;
+function CreateHelicopter (aname: string; params: THelicopterParameters) : THelicopter;
 begin
  with Result do
  begin
+    Name := aname;
     Fomet := params[1];
     Gnorm := params[2];
     TraspUZemli := params[3];

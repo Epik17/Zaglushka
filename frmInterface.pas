@@ -194,8 +194,7 @@ begin
 
  g_ManevrList := TManevrList.Create;
 
- for i:=1 to Length(g_HelicopterTypes) do
-   cbb_HelicopterType.Items.Add(g_HelicopterTypes[i]);
+
 
    ResetElementsArrays;
 
@@ -203,7 +202,11 @@ begin
 
    HelicoptersInitialization;
 
-   cbb_HelicopterType.ItemIndex :=5; // choosing Mi-81
+  for i:=1 to Length(g_HelicopterDatabase) do
+   cbb_HelicopterType.Items.Add(g_HelicopterDatabase[i].Name);
+
+
+   cbb_HelicopterType.ItemIndex :=6;
    cbb_HelicopterTypeSelect(Self);
 
 
@@ -827,27 +830,33 @@ function HelicopterTypeToNumber (aType : string) : Integer;
 begin
 
   if aType = 'Ансат-У' then
-   Result := 0
+   Result := 6
   else
     if aType = 'Ми-26' then
-     Result := 1
+     Result := 5
     else
      if aType = 'Ка-226' then
-      Result := 2
+      Result := 7
      else
       if aType = 'Ми-28Н' then
-       Result := 3
+       Result := 4
       else
-       if aType = 'Ми-8МТВ-5' then
-        Result := 4
+       if aType = 'Ми-8МТВ-5 (ТВ3-117ВМ)' then
+        Result := 2
        else
-        if aType = 'Ми-8АМТШ' then
-         Result := 5
+        if aType = 'Ми-8МТВ-5 (ВК-2500)' then
+         Result := 3
         else
-          begin
-           Result := -1;
-           ShowMessage('function HelicopterTypeToNumber: некорректное название вертолета');
-          end;
+         if aType = 'Ми-8' then
+          Result := 0
+         else
+          if aType = 'Ми-8МТВ' then
+           Result := 1
+          else
+           begin
+            Result := -1;
+            ShowMessage('function HelicopterTypeToNumber: некорректное название вертолета');
+           end;     
 end;
 
 
@@ -866,15 +875,32 @@ end;
 
 procedure HelicoptersInitialization;
 begin
- g_HelicopterDatabase[1] := CreateHelicopter(mi8);
- g_HelicopterDatabase[2] := CreateHelicopter(mi81);
+ g_HelicopterDatabase[1] := CreateHelicopter('Ми-8',mi8);
+ g_HelicopterDatabase[2] := CreateHelicopter('Ми-8МТВ',mi8mtv);
+ g_HelicopterDatabase[3] := CreateHelicopter('Ми-8МТВ-5 (ТВ3-117ВМ)',mi8mtv5tv3117vm);
+ g_HelicopterDatabase[4] := CreateHelicopter('Ми-8МТВ-5 (ВК-2500)',mi8mtv5vk2500);
+ g_HelicopterDatabase[5] := CreateHelicopter('Ми-28Н',mi28);
+ g_HelicopterDatabase[6] := CreateHelicopter('Ми-26',mi26);
+ g_HelicopterDatabase[7] := CreateHelicopter('Ансат-У',ansatU);
+ g_HelicopterDatabase[8] := CreateHelicopter('Ка-226',ka226);
 end;
 
 
 procedure Tfrm_Interface.cbb_HelicopterTypeSelect(Sender: TObject);
 begin
-  if cbb_HelicopterType.ItemIndex = 4 then g_Helicopter := g_HelicopterDatabase[1];  //Mi-8
-  if cbb_HelicopterType.ItemIndex = 5 then g_Helicopter := g_HelicopterDatabase[2];  //Mi-8 clone
+  case cbb_HelicopterType.ItemIndex of
+   0: g_Helicopter :=g_HelicopterDatabase[1];
+   1: g_Helicopter :=g_HelicopterDatabase[2];
+   2: g_Helicopter :=g_HelicopterDatabase[3];
+   3: g_Helicopter :=g_HelicopterDatabase[4];
+   4: g_Helicopter :=g_HelicopterDatabase[5];
+   5: g_Helicopter :=g_HelicopterDatabase[6];
+   6: g_Helicopter :=g_HelicopterDatabase[7];
+   7: g_Helicopter :=g_HelicopterDatabase[8];
+  end;
+ // if cbb_HelicopterType.ItemIndex = 5 then g_Helicopter := g_HelicopterDatabase[2];
+
+
 
   SetInitialConditionsTrackbars;
   DynamicallyUpdateICLabelValuesAndPlots(Self);
@@ -888,16 +914,18 @@ procedure Tfrm_Interface.SetICTrackbar (var trackbar : TTrackBar; amin,amax,apos
 begin
    with trackbar do
   begin
+   Min := Round(amin);
    Max := Round(amax);
    Position := Round(aposition);
-   OnChange := DynamicallyUpdateICLabelValuesAndPlots;
-   Min := Round(amin); //this has to be at the end, otherwise it doesn't work for trckbr_G (delphi's bug?)
+   OnChange := DynamicallyUpdateICLabelValuesAndPlots; // only this line sequence works for trckbr_G (delphi's bug?)
   end;
 end;
 
 procedure Tfrm_Interface.SetInitialConditionsTrackbars;
 
 begin
+ // if g_Helicopter.Name ='Ансат-У' then
+  //  ShowMessage(g_Helicopter.Name);
  SetICTrackbar(trckbr_H0,50{meters}/deltaH0,0.9*g_Helicopter.Hdyn/deltaH0,400/deltaH0);
  SetICTrackbar(trckbrV0,0,0.95*g_Helicopter.Vmax-1,0);
  SetICTrackbar(trckbr_G,g_Helicopter.Gmin,g_Helicopter.Gmax,g_Helicopter.Gmax);
