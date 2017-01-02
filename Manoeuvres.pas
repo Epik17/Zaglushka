@@ -452,9 +452,11 @@ if not failed then
     end;
 
           //коррекция остатков крена
-      if (Abs(tempstate.gamma) > 0.1) {and (tempstate.gamma*prevgamma < 0)} then
-        // vyvod[High(vyvod)].gamma := 0;
-       SetLength(vyvod,Length(vyvod)-1)
+      if (Abs(tempstate.gamma) > 0.001)  then
+       if (tempstate.gamma*prevgamma < 0) then
+        SetLength(vyvod,Length(vyvod)-1)
+       else
+         vyvod[High(vyvod)].gamma := 0;
 
  end;
 
