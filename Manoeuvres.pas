@@ -24,6 +24,7 @@ function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; i
 function VertVzlet(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
 function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
 function Visenie(initialstate : TStateVector; duration : Real) : TManevrData;
+function ForcedVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 
 function tVypoln(Manevr : TManevrData) : Extended;
 function Vfinal(Manevr : TManevrData) : Extended;
@@ -337,7 +338,7 @@ begin
      else
       begin
         omega.y :=0;
-        ShowMessage('procedure SetOmegaAndAcceleration: V <= 0!');
+        ShowMessage('procedure SetOmegaAndAcceleration: V <= 0!'+' ' + FloatToStr(tempstate.V));
         Halt;
       end;
 
@@ -359,22 +360,26 @@ begin
 
  //ввод
    SetLength(vvod,0);
+
  if not failed then
-  if (tempstate.V > 0)  then
    while not (Abs(RadToDeg(tempstate.gamma)) >=Abs(kren)) do
+    if (tempstate.V > 0)  then
+       begin
+        tempny := 1/Cos(tempstate.gamma);
+
+        SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny, dnxa, Left, Forced, False);
+        g_Etape(vvod,tempstate, helicopter, tempny,tempa, tempomega);
+
+         //for spiral
+        Vytemp := Vy/Abs(kren)*Abs(RadToDeg(tempstate.gamma));
+        vvod[High(vvod)].y := vvod[High(vvod)].y + Vytemp/2*dt;
+        tempstate.y := vvod[High(vvod)].y;
+       end
+    else
      begin
-      tempny := 1/Cos(tempstate.gamma);
-
-      SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny, dnxa, Left, Forced, False);
-      g_Etape(vvod,tempstate, helicopter, tempny,tempa, tempomega);
-
-       //for spiral
-      Vytemp := Vy/Abs(kren)*Abs(RadToDeg(tempstate.gamma));
-      vvod[High(vvod)].y := vvod[High(vvod)].y + Vytemp/2*dt;
-      tempstate.y := vvod[High(vvod)].y;
-     end
-  else
-   failed:= True;
+      failed:= True;
+      Break;
+     end;
 
  //  ShowMessage('iVirage: y = ' + FloatToStr(vvod[High(vvod)].y));
 
@@ -393,57 +398,65 @@ if not failed then
    dpsiVvod := tempstate.psi-initialstate.psi;
 
  if not failed then
-  if (tempstate.V > 0) then
-    while not (Abs(tempstate.psi-initialstate.psi) >= Abs((DegToRad(deltaPsi))-Abs(dpsiVvod))) do
+   while not (Abs(tempstate.psi-initialstate.psi) >= Abs((DegToRad(deltaPsi))-Abs(dpsiVvod))) do
+    if (tempstate.V > 0) then
+       begin
+        SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny, dnxa, Left,Forced,True);
+
+        g_Etape(constgammaUchastok,tempstate, helicopter, tempny,tempa, tempomega);  
+
+        constgammaUchastok[High(constgammaUchastok)].y := constgammaUchastok[High(constgammaUchastok)].y + Vytemp/2*dt;
+        tempstate.y := constgammaUchastok[High(constgammaUchastok)].y;
+       end
+    else
      begin
-
-      SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny, dnxa, Left,Forced,True);
-
-      g_Etape(constgammaUchastok,tempstate, helicopter, tempny,tempa, tempomega);
-
-      constgammaUchastok[High(constgammaUchastok)].y := constgammaUchastok[High(constgammaUchastok)].y + Vytemp/2*dt;
-      tempstate.y := constgammaUchastok[High(constgammaUchastok)].y;
-     end
-  else
-   failed:= True;
+      failed:= True;
+      Break;
+     end;
 
  //вывод
    SetLength(vyvod,0);
 
  prevgamma := 0;
 
- if (tempstate.V > 0) and not failed then
+ if not failed then
   while not (tempstate.gamma*prevgamma < 0) do
-   begin
-     tempny := 1/Cos(tempstate.gamma);
+   if (tempstate.V > 0) then
+     begin
+       tempny := 1/Cos(tempstate.gamma);
 
-    SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny,dnxa,Left, Forced, False);
-    tempomega.x := -tempomega.x;
-    prevgamma := tempstate.gamma;
-    g_Etape(vyvod,tempstate, helicopter, tempny,tempa, tempomega);
+      SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny,dnxa,Left, Forced, False);
+      tempomega.x := -tempomega.x;
+      prevgamma := tempstate.gamma;
+      g_Etape(vyvod,tempstate, helicopter, tempny,tempa, tempomega);
 
-      //for spiral
-      Vytemp := Vy/Abs(kren)*Abs(RadToDeg(tempstate.gamma));
-      vyvod[High(vyvod)].y := vyvod[High(vyvod)].y + Vytemp/2*dt;
-      tempstate.y := vyvod[High(vyvod)].y;
-   end
- else
-   failed:= True;
-
+        //for spiral
+        Vytemp := Vy/Abs(kren)*Abs(RadToDeg(tempstate.gamma));
+        vyvod[High(vyvod)].y := vyvod[High(vyvod)].y + Vytemp/2*dt;
+        tempstate.y := vyvod[High(vyvod)].y;
+     end
+   else
+    begin
+     failed:= True;
+     Break;
+    end;
 
 
   //ShowMessage('iVirage: Vy = ' + FloatToStr(Vytemp));
 
-  if failed then ShowMessage('Падение скорости до нуля!');
+  if not failed then
+    begin
+      SetLength(Result,0);
+      AppendManevrData(Result,vvod,helicopter);
+      AppendManevrData(Result,constgammaUchastok,helicopter);
+      AppendManevrData(Result,vyvod,helicopter);
 
-  SetLength(Result,0);
-  AppendManevrData(Result,vvod,helicopter);
-  AppendManevrData(Result,constgammaUchastok,helicopter);
-  AppendManevrData(Result,vyvod,helicopter);
-
-  SetLength(vvod,0);
-  SetLength(constgammaUchastok,0);
-  SetLength(vyvod,0);
+      SetLength(vvod,0);
+      SetLength(constgammaUchastok,0);
+      SetLength(vyvod,0);
+    end
+  else
+   ShowMessage('Падение скорости до нуля!');
 end;
 
 function iiVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real; Forced : Boolean) : TManevrData;

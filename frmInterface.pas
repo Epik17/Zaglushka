@@ -283,6 +283,12 @@ end;
 
         mtRightSpiral :
          TempManevrData:=Spiral(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7],tempManevr.fParameters[9]);
+
+        mtLeftForcedVirage :
+         TempManevrData:=ForcedVirage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[7]);
+
+        mtRightForcedVirage :
+         TempManevrData:=ForcedVirage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7]);
    end;
 
    if Length(TempManevrData) > 0 then
@@ -616,20 +622,36 @@ begin
       end;
 
 
-  if (ManevrType = mtLeftVirage) or (ManevrType = mtRightVirage)then
+  if (ManevrType = mtLeftVirage) or (ManevrType = mtRightVirage) or (ManevrType = mtLeftForcedVirage) or (ManevrType = mtRightForcedVirage) then
  begin
   count :=2;
   MySetLength(count);
 
   multipliers[1]:=1;
-  mins[1]:=1;
+  mins[1]:=90;
   names[1]:='Изм-е курса, град';
   maxes[1]:=720;
 
   multipliers[0]:=1;
-  mins[0]:=10;
+  mins[0]:=5;
   names[0]:='Крен';
   maxes[0]:=45;
+ end;
+
+   if (ManevrType = mtLeftForcedVirage) or (ManevrType = mtRightForcedVirage) then
+ begin
+  count :=2;
+  MySetLength(count);
+
+  multipliers[1]:=1;
+  mins[1]:=90;
+  names[1]:='Изм-е курса, град';
+  maxes[1]:=180;
+
+  multipliers[0]:=1;
+  mins[0]:=5;
+  names[0]:='Крен';
+  maxes[0]:=50;
  end;
 
   if ManevrType = mtHorizRazgonTormozh then
@@ -740,7 +762,7 @@ if lst_Manevry.ItemIndex <>-1 then
          for i:=0 to Length(g_TrackBars)-1 do
            g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+2]/g_Multipliers[i]);
 
-       if (SelectedManevr.pType = mtLeftVirage) or (SelectedManevr.pType = mtRightVirage) then
+       if (SelectedManevr.pType = mtLeftVirage) or (SelectedManevr.pType = mtRightVirage) or (SelectedManevr.pType = mtLeftForcedVirage) or (SelectedManevr.pType = mtRightForcedVirage) then
          for i:=0 to Length(g_TrackBars)-1 do
            g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+6]/g_Multipliers[i]);
 
@@ -813,16 +835,22 @@ begin
             if aType = 'Висение' then
              Result := 9
             else
-             if aType = 'Левая спираль' then
+              if aType = 'Левая спираль' then
               Result := 10
              else
               if aType = 'Правая спираль' then
                Result := 11
               else
-               begin
-                Result := -1;
-                ShowMessage('function ManevrTypeToNumber: некорректное название маневра');
-               end;
+                if aType = 'Левый форсированный вираж' then
+                 Result := 12
+                else
+                 if aType = 'Правый форсированный вираж' then
+                  Result := 13
+                 else
+                   begin
+                    Result := -1;
+                    ShowMessage('function ManevrTypeToNumber: некорректное название маневра');
+                   end;
 
 end;
 
@@ -1427,7 +1455,8 @@ begin
      ParamArray[10] :=0;
      ParamArray[11] :=0;
    end;
-  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый вираж') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый вираж') then
+  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый вираж') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый вираж') or
+     (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый форсированный вираж') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый форсированный вираж') then
      begin
      ParamArray[1] :=0;
      ParamArray[2] :=0;
@@ -1534,7 +1563,7 @@ begin
           for i:=0 to Length(g_TrackBars)-1 do
            manevrlist[SelectedIndex].fParameters[i+2] := g_Multipliers[i]*g_TrackBars[i].Position;
 
-         if (manevrlist[SelectedIndex].pType = mtLeftVirage) or (manevrlist[SelectedIndex].pType = mtRightVirage) then
+         if (manevrlist[SelectedIndex].pType = mtLeftVirage) or (manevrlist[SelectedIndex].pType = mtRightVirage) or (manevrlist[SelectedIndex].pType = mtLeftForcedVirage) or (manevrlist[SelectedIndex].pType = mtRightForcedVirage) then
           for i:=0 to Length(g_TrackBars)-1 do
            manevrlist[SelectedIndex].fParameters[i+6] := g_Multipliers[i]*g_TrackBars[i].Position;
 

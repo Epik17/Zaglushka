@@ -22,14 +22,12 @@ g_ParametersCount = 11;
 //10: Вертикальное смещение при взлете/посадке, м
 //11: Продолжительность висения, с
 
-//g_HelicoptersCount = 8;
-g_ManevrTypesCount = 12;
-g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон/торможение в горизонте','Разгон с набором высоты','Вертикальный взлет','Вертикальная посадка','Висение','Левая спираль', 'Правая спираль');
-//g_HelicopterTypes : array [1..g_HelicoptersCount] of string = ('Ансат-У','Ми-26','Ка-226','Ми-28Н','Ми-8МТВ-5','Ми-8АМТШ');
-
+g_ManevrTypesCount = 14;
+g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон/торможение в горизонте',
+'Разгон с набором высоты','Вертикальный взлет','Вертикальная посадка','Висение','Левая спираль', 'Правая спираль','Левый форсированный вираж', 'Правый форсированный вираж');
 
 type TManevrTypes = (mtUndefined, mtHorizFlight, mtGorka, mtPikirovanie,mtLeftVirage,mtRightVirage,
-mtHorizRazgonTormozh,mtRazgonSnaborom, mtLiftOff, mtLanding, mtHovering,mtLeftSpiral,mtRightSpiral);
+mtHorizRazgonTormozh,mtRazgonSnaborom, mtLiftOff, mtLanding, mtHovering,mtLeftSpiral,mtRightSpiral,mtLeftForcedVirage,mtRightForcedVirage);
 type TParametersArray = array [1..g_ParametersCount] of Real;
 type TArrayOfString = array of string;
 
@@ -112,6 +110,8 @@ begin
     if aType = 'Висение' then Result := mtHovering;
     if aType = 'Левая спираль' then Result := mtLeftSpiral;
     if aType = 'Правая спираль' then Result := mtRightSpiral;
+    if aType = 'Левый форсированный вираж' then Result := mtLeftForcedVirage;
+    if aType = 'Правый форсированный вираж' then Result := mtRightForcedVirage;
 end;
 
 function ConvertManevrType (aType : TManevrTypes) : string; overload;
@@ -131,6 +131,8 @@ begin
     mtHovering :  Result := 'Висение';
     mtLeftSpiral :  Result :=  'Левая спираль';
     mtRightSpiral :  Result := 'Правая спираль';
+    mtLeftForcedVirage : Result := 'Левый форсированный вираж';
+    mtRightForcedVirage :  Result := 'Правый форсированный вираж';
 
   end;
 end;
