@@ -964,7 +964,10 @@ begin
 
  SetICTrackbar(trckbrV0,0,0.95*g_Helicopter.Vmax-1,v0);
  SetICTrackbar(trckbr_G,g_Helicopter.Gmin,g_Helicopter.Gmax,g_Helicopter.Gnorm);
+
+ trckbr_G.Min := Round(g_Helicopter.Gmin); //(setting Min explicitly; fixing delphi's bug)
  SetICTrackbar(trckbr_T,Tmin,Tmax,Tdefault);
+
 end;
 
 procedure Tfrm_Interface.DynamicallyUpdateICLabelValuesAndPlots(Sender: TObject);
