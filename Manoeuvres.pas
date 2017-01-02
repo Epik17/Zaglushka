@@ -403,7 +403,12 @@ if not failed then
        begin
         SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny, dnxa, Left,Forced,True);
 
-        g_Etape(constgammaUchastok,tempstate, helicopter, tempny,tempa, tempomega);  
+        g_Etape(constgammaUchastok,tempstate, helicopter, tempny,tempa, tempomega);
+
+        //коррекция излишков курса
+        {if Abs(tempstate.psi) > Abs(initialstate.psi + DegToRad(deltaPsi)) then
+         constgammaUchastok[High(constgammaUchastok)].psi := initialstate.psi + DegToRad(deltaPsi);
+         }
 
         constgammaUchastok[High(constgammaUchastok)].y := constgammaUchastok[High(constgammaUchastok)].y + Vytemp/2*dt;
         tempstate.y := constgammaUchastok[High(constgammaUchastok)].y;
@@ -420,6 +425,7 @@ if not failed then
  prevgamma := 0;
 
  if not failed then
+ begin
   while not (tempstate.gamma*prevgamma < 0) do
    if (tempstate.V > 0) then
      begin
@@ -429,6 +435,10 @@ if not failed then
       tempomega.x := -tempomega.x;
       prevgamma := tempstate.gamma;
       g_Etape(vyvod,tempstate, helicopter, tempny,tempa, tempomega);
+
+      //коррекция излишков курса
+     { if Abs(tempstate.psi) > Abs(initialstate.psi + DegToRad(deltaPsi)) then
+         vyvod[High(vyvod)].psi := initialstate.psi + DegToRad(deltaPsi); }
 
         //for spiral
         Vytemp := Vy/Abs(kren)*Abs(RadToDeg(tempstate.gamma));
@@ -440,6 +450,14 @@ if not failed then
      failed:= True;
      Break;
     end;
+
+          //коррекция остатков крена
+      if (Abs(tempstate.gamma) > 0.1) {and (tempstate.gamma*prevgamma < 0)} then
+        // vyvod[High(vyvod)].gamma := 0;
+       SetLength(vyvod,Length(vyvod)-1)
+
+ end;
+
 
 
   //ShowMessage('iVirage: Vy = ' + FloatToStr(Vytemp));
