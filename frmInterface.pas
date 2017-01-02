@@ -321,6 +321,8 @@ begin
 
      AppendTempManevr(tempManevr);
 
+      
+
     if Length(g_FlightData) = temp_g_FlightDataLength then
      ShowMessage('Уточните исходные данные либо удалите маневр из списка');
 
@@ -330,6 +332,8 @@ begin
       lst_Manevry.Items.Add(ConvertManevrType(tempManevr.pType));
 
       lst_Manevry.ItemIndex := lst_Manevry.Count-1;
+
+
 
    end
 
@@ -1148,7 +1152,7 @@ begin
          if (rg_view.ItemIndex = 1) then
           with cht.LeftAxis do
            begin
-            Automatic := False;
+            Automatic := True;
             Minimum := 0;
             Maximum := Round(1.4*g_H0);
            end
