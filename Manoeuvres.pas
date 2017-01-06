@@ -629,10 +629,137 @@ begin
   ShowMessage('Конечная и начальная скорости при разгоне (торможении) не могут быть равны между собой!')
 end;
 
+function iTormozhNew(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{km/h}, VyDesired{m/s} : Real) : TManevrData;
+var
+  localTime,tempny,a, Vytemp, tempy : Real;
+  tempstate : TStateVector;
+  tempomega : TVector3D;
+  failed : Boolean;
+
+procedure SetAccelerationTormozh(var a : Real; tempstate: TStateVector; ny, Vy : Real);
+ var
+  realnx,VfinalTrick : Real;
+ const
+  VfinalReper = 2;
+  thetaMax = 7;//degree
+begin
+      if Vfinal <= VfinalReper then
+       if Vfinal < 0.1
+       then
+         VfinalTrick := Vfinal+0.1
+       else
+         VfinalTrick := Vfinal
+      else
+       VfinalTrick := Vfinal - VfinalReper;
+
+  realnx := nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy)-nx(helicopter,tempny,icG, icT,tempstate.y, VfinalTrick, Vy);
+
+  if g_mps*tempstate.V < 100 then
+    if Abs(realnx) > Tan(DegToRad(thetaMax))
+    then
+      realnx := -Tan(DegToRad(thetaMax));
+
+  a := g_g*realnx
+end;
+
+begin
+ failed := False;
+
+ if Round(initialstate.V*g_mps) <> Vfinal then
+   begin
+      //инициализируем
+     tempstate := initialstate;
+     tempny :=1;
+     localTime :=0;
+     tempomega.x:=0;
+     tempomega.y:=0;
+     tempomega.z:=0;
+     SetLength(Result,0);
+     tempy := initialstate.y;
+     a:=0;
+
+    if initialstate.V*g_mps < 0.95*helicopter.Vmax then
+     begin
+       while (g_mps*tempstate.V >=Vfinal) and (not failed) do
+        if (tempstate.V >= 0) then
+          begin
+           begin
+            if Length(Result) = 0 then
+             Vytemp := VyRasp(helicopter, icG, icT, tempy, initialstate.V*g_mps)
+            else
+             Vytemp := VyRasp(helicopter, icG, icT, Result[High(Result)].y, Result[High(Result)].V*g_mps);
+
+            if (Vytemp > VyDesired) or (Abs(VyDesired) < 0.001){in case of horizontal flight} then
+              Vytemp := VyDesired;
+
+             SetAccelerationTormozh(a,tempstate, tempny, Vytemp);
+
+            g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);  
+
+                       //climb
+            tempy := tempy +  + Vytemp*dt;
+            Result[High(Result)].y := tempy;
+
+            Result[High(Result)].theta := -ArcTan(a/g_g); //pitch according to nx_temp
+
+            localTime := localTime + dt;
+           end;
+          end
+        else
+          failed := True;
+
+       if not failed then
+        Result[High(Result)].V := Vfinal/g_mps;
+
+       if failed then ShowMessage('Падение скорости до нуля!');
+     end
+
+    else
+      ShowMessage('Начальная скорость составила ' + FloatToStr(Round(initialstate.V*g_mps)) + ' км/ч. Эта скорость не может превышать  '+FloatToStr(0.95*helicopter.Vmax)+ ' км/ч');
+   end
+ else
+  ShowMessage('Конечная и начальная скорости при разгоне (торможении) не могут быть равны между собой!')
+end;
+
+function TormozhNew(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{km/h}, VyDesired{m/s} : Real; divisionsCount : Integer) : TManevrData;
+var
+  tempstate : TStateVector;
+  etape : TManevrData;
+  VfinalTemp, deltaVfinal : Real;
+begin
+ SetLength(Result,0);
+
+ if divisionsCount > 0 then
+  begin
+   tempstate := initialstate;
+   deltaVfinal := (initialstate.V*g_mps - Vfinal)/divisionsCount;
+   VfinalTemp := initialstate.V*g_mps - deltaVfinal;
+
+   while Round(tempstate.V*g_mps) > Vfinal do
+    begin
+      etape := iTormozhNew(helicopter, tempstate, icG, icT,VfinalTemp, VyDesired);
+
+      tempstate := etape[High(etape)];
+
+      AppendManevrData(Result,etape,helicopter);
+
+      VfinalTemp := VfinalTemp - deltaVfinal;
+    end;
+
+  end
+ else
+  ShowMessage('TormozhNew: Количество разбиений не может быть меньше нуля')
+
+
+end;
+
 function HorizRazgonTormozhenie(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 begin
- Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 0);
+ //Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 0);
+ //  Result:= iTormozhNew(helicopter, initialstate, icG, icT,Vfinal, 0);
+  Result:= TormozhNew(helicopter, initialstate, icG, icT,Vfinal, 0,5);
 end;
+
 
 function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}, Vy{m/s}: Real) : TManevrData;
 begin
