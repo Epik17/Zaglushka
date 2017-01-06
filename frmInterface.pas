@@ -16,8 +16,6 @@ unit frmInterface;
 
 - first V<0 message must stop all posterior calculations and appending of manoeuvres! We apparently need g_failed in appending
 
-- add TSaveDialog
-
 - fix incorrect psi in Virage (360 and self-crossing of trajectory)
 
 - HorizRazgon goes to infinity when T is 40 deg, H is about 3000, V0 is max, V1 is max, G is max  
@@ -108,8 +106,10 @@ type
     procedure ResetElementsArrays;
     procedure UpdateValuesFromTManevr;
     procedure DynamicallyUpdateICLabelValuesAndPlots(Sender: TObject);
-    procedure ExportFlightTask(manevrlist : TManevrList);
-    procedure ExportCalculatedFlightTask (FlightData : TFlightData);
+    procedure ExportFlightTask(manevrlist : TManevrList);  overload;
+    procedure ExportFlightTask(manevrlist : TManevrList; filename : string);  overload;
+    procedure ExportCalculatedFlightTask (FlightData : TFlightData);  overload;
+    procedure ExportCalculatedFlightTask (FlightData : TFlightData; filename : string); overload;
     function g_H0 () : Real;
     function g_V0 () : Real;
     function g_T () : Real;
@@ -412,9 +412,33 @@ end;
 
 
 procedure Tfrm_Interface.btn_ExportFlightTaskClick(Sender: TObject);
+
+var
+  saveDialog : TSaveDialog;
 begin
-if g_ManevrList.Count > 0 then
- ExportFlightTask(g_ManevrList)
+     //http://www.delphibasics.ru/TSaveDialog.php
+ if g_ManevrList.Count > 0 then
+   begin
+    saveDialog := TSaveDialog.Create(self);
+
+    saveDialog.Title := 'Сохранение полетного задания';
+
+    saveDialog.InitialDir := GetCurrentDir;
+
+    saveDialog.Filter := 'Текстовый файл|*.txt';
+
+    saveDialog.DefaultExt := 'txt';
+
+    saveDialog.FilterIndex := 1;
+
+    saveDialog.FileName := 'FlightTask.txt';
+
+    if saveDialog.Execute then
+     ExportFlightTask(g_ManevrList,saveDialog.FileName);
+
+    saveDialog.Free;
+   end;
+
 end;
 
 procedure Tfrm_Interface.btn_ImportFlightTaskClick(Sender: TObject);
@@ -1034,7 +1058,40 @@ begin
    ShowMessage('Полетное задание успешно сохранено в файл '+currentdir+'\FlightTask.txt');
  except
    ShowMessage('Ошибка при сохранении полетного задания');
- end; 
+ end;
+
+end;
+
+procedure Tfrm_Interface.ExportFlightTask(manevrlist : TManevrList; filename : string);
+var
+f: textfile;
+i,j : Byte;
+
+begin
+ try
+   AssignFile(f, filename);
+   Rewrite(f);
+
+   Writeln(f,cbb_HelicopterType.Items[cbb_Helicoptertype.ItemIndex]);
+   Writeln(f,FloatToStr(g_G));
+   Writeln(f,FloatToStr(g_H0));
+   Writeln(f,FloatToStr(g_T));
+   Writeln(f,FloatToStr(g_V0));
+
+   Writeln(f, manevrlist.Count);
+
+   for i:=0 to manevrlist.Count -1 do
+   begin
+    Writeln(f, ConvertManevrType(manevrlist[i].pType));
+
+    for j:=1 to Length(manevrlist[i].fParameters) do
+     Writeln(f, manevrlist[i].fParameters[j]:7:6);
+   end;
+   CloseFile(f);
+   ShowMessage('Полетное задание успешно сохранено в файл '+filename);
+ except
+   ShowMessage('Ошибка при сохранении полетного задания');
+ end;
 
 end;
 
@@ -1317,10 +1374,60 @@ begin
 
 end;
 
-procedure Tfrm_Interface.btn_ExportCalculatedTaskClick(Sender: TObject);
+procedure Tfrm_Interface.ExportCalculatedFlightTask(FlightData: TFlightData; filename : string);
+var
+f: textfile;
+i,j : Integer;
+currentdir : string;
 begin
+ currentdir := GetCurrentDir;
+ try
+   begin
+     AssignFile(f, filename);
+     Rewrite(f);
+
+     Writeln(f,cbb_HelicopterType.Items[cbb_Helicoptertype.ItemIndex]+' G = '+FloatToStr(g_G)+' H0 = ' + FloatToStr(g_H0) +' T = '+FloatToStr(g_T) );
+
+     for i:=0 to Length(g_FlightData) -1 do
+      for j := 0 to Length(g_FlightData[i]) -1 do
+        Writeln(f, StateVectorString(FlightData[i][j]));
+
+     CloseFile(f);
+     ShowMessage('Массив положений вертолета успешно сохранен в файл '+filename);
+   end;
+ except
+   ShowMessage('Ошибка при сохранении массива положений вертолета');
+ end;
+
+end;
+
+procedure Tfrm_Interface.btn_ExportCalculatedTaskClick(Sender: TObject);
+var
+  saveDialog : TSaveDialog;
+begin
+     //http://www.delphibasics.ru/TSaveDialog.php
  if Length(g_FlightData) > 1 then
-  ExportCalculatedFlightTask(g_FlightData);
+   begin
+    saveDialog := TSaveDialog.Create(self);
+
+    saveDialog.Title := 'Сохранение массива положений';
+
+    saveDialog.InitialDir := GetCurrentDir+'\blitz\lib\';
+
+    saveDialog.Filter := 'Текстовый файл|*.txt';
+
+    saveDialog.DefaultExt := 'txt';
+
+    saveDialog.FilterIndex := 1;
+
+    saveDialog.FileName := 'mavvivw.txt';
+
+    if saveDialog.Execute then
+     ExportCalculatedFlightTask(g_FlightData,saveDialog.FileName);
+
+    saveDialog.Free;
+   end;
+
 end;
 
 procedure Tfrm_Interface.RecalculateRedrawFromManevrList;
