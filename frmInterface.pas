@@ -1434,7 +1434,7 @@ end;
 procedure Tfrm_Interface.DynamicFoolProof;
 var
   cosTheta  : Real;
-  cosThetaRounded, trckbarNo,Vmax{, Vmin }: Integer;
+  cosThetaRounded, trckbarNo,Vmax, nyvvodaMaxPos: Integer;
 const
   cosCorrection = 0.02;
 
@@ -1450,16 +1450,30 @@ begin
       multipliers[2]:=1;
       multipliers[3]:=10;
  }
+  trckbarNo :=0;
 
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Пикирование') then
     begin
        //ny vvoda
-       if cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка' then
-        trckbarNo := 0
-       else
+      nyvvodaMaxPos := Round(100*RoundTo(nyMax(g_helicopter,g_G, g_T,g_H0),-2));
+
+      if nyvvodaMaxPos > 100 then
+       begin
+        g_TrackBars[trckbarNo].Enabled := True;
+        btn_AddManevr.Enabled := True;
+
+        if cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка' then
+         trckbarNo := 0
+        else
         trckbarNo := 1;
 
-       g_TrackBars[trckbarNo].Max := Round(100*RoundTo(nyMax(g_helicopter,g_G, g_T,g_H0),-2));
+        g_TrackBars[trckbarNo].Max := Round(100*RoundTo(nyMax(g_helicopter,g_G, g_T,g_H0),-2));
+       end
+      else
+       begin
+        g_TrackBars[trckbarNo].Enabled := False;
+        btn_AddManevr.Enabled := False;
+       end;
 
 
 
