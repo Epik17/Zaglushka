@@ -524,7 +524,7 @@ begin
 end;
 
  procedure SetAccelerationTormozh(var a : Real; tempstate: TStateVector; ny, Vy, V : Real);
-  const
+ { const
  knx = 0.013;
  var
    linearnx, realnx, VfinalTrick : Real;
@@ -545,7 +545,43 @@ begin
       else
        a := g_g*linearnx
 
+end;   }
+
+ const
+  knx = 0.013;
+  VfinalReper = 2;
+  thetaMax = 6;//degree
+
+var
+ linearnx, realnx,VfinalTrick : Real;
+
+begin
+   linearnx := -knx*localTime;
+
+      if Vfinal <= VfinalReper then
+       if Vfinal < 0.1
+       then
+         VfinalTrick := Vfinal+0.1
+       else
+         VfinalTrick := Vfinal
+      else
+       VfinalTrick := Vfinal - VfinalReper;
+
+   realnx := nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy)-nx(helicopter,tempny,icG, icT,tempstate.y, VfinalTrick, Vy);
+
+   if g_mps*tempstate.V < 100 then
+          if Abs(realnx) > Tan(DegToRad(thetaMax))
+          then
+            realnx := -Tan(DegToRad(thetaMax));
+
+
+   if linearnx < realnx then
+     a := g_g*realnx
+   else
+     a := g_g*linearnx
 end;
+
+
 
  procedure SetAccelerationRazgon(var a : Real; tempstate: TStateVector; ny, Vy : Real);
   const
@@ -641,7 +677,7 @@ procedure SetAccelerationTormozh(var a : Real; tempstate: TStateVector; ny, Vy :
   realnx,VfinalTrick : Real;
  const
   VfinalReper = 2;
-  thetaMax = 7;//degree
+  thetaMax = 6;//degree
 begin
       if Vfinal <= VfinalReper then
        if Vfinal < 0.1
@@ -755,9 +791,8 @@ end;
 
 function HorizRazgonTormozhenie(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{κμ/χ}: Real) : TManevrData;
 begin
- //Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 0);
- //  Result:= iTormozhNew(helicopter, initialstate, icG, icT,Vfinal, 0);
-  Result:= TormozhNew(helicopter, initialstate, icG, icT,Vfinal, 0,5);
+ Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 0);
+ // Result:= TormozhNew(helicopter, initialstate, icG, icT,Vfinal, 0,5);
 end;
 
 
