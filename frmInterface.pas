@@ -638,7 +638,7 @@ begin
 
      if (ManevrType = mtGorka) then
       begin
-       mins[0]:=110;
+       mins[0]:=101;
        mins[1]:=50;
        mins[3]:=110;
 
@@ -650,7 +650,7 @@ begin
       if (ManevrType = mtPikirovanie) then
       begin
        mins[0]:=50;
-       mins[1]:=110;
+       mins[1]:=101;
        mins[3]:=200;
 
        maxes[0]:=90;
