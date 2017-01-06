@@ -18,6 +18,7 @@ function StateVectorString (state:TStateVector):string;
 function ToXYZ1Array(FlightData : TManevrData) : TArrayOfArrayOfReal;overload;
 procedure AppendManevrData(var GlobalFlightData: TFlightData; Manevr : TManevrData; helicopter : THelicopter);overload;
 procedure AppendManevrData(var MainManevrData: TManevrData; Manevr : TManevrData; helicopter : THelicopter);overload;
+function PrependManevrDataWithStateVector (ManevrData: TManevrData; statevector : TStateVector) : TManevrData;
 
 function FlightDataToManevrData(FlightData : TFlightData; helicopter : THelicopter) : TManevrData;
 
@@ -130,6 +131,14 @@ begin
    AppendManevrData(Result,FlightData[i],helicopter)
 end;
 
-
+function PrependManevrDataWithStateVector (ManevrData: TManevrData; statevector : TStateVector) : TManevrData;
+var
+  i : Integer;
+begin
+ SetLength(Result, Length(ManevrData)+1);
+ Result[0]:= statevector;
+ for i := 0 to High(ManevrData) do
+  Result[i+1]:= ManevrData[i]
+end;
 
 end.

@@ -8,8 +8,6 @@ unit frmInterface;
 
 - add initial YAW and FRONT VIEW of trajectory
 
-- fix bugs in total manevr timing 
-
 - reliable isometric projection (equal axis scales, min/max X and Z, range, etc. !! )
 
 
@@ -164,7 +162,7 @@ implementation
 
 procedure Tfrm_Interface.FlightDataInitialization;
 begin
-   SetLength(g_FlightData,1);
+  {  SetLength(g_FlightData,1);
    SetLength(g_FlightData[0],1);
 
     with g_FlightData[0,0] do
@@ -179,7 +177,8 @@ begin
       ny :=1;
       t :=0;
      end
-
+          }
+  SetLength(g_FlightData,0);        
 end;
 
 procedure Tfrm_Interface.FormCreate(Sender: TObject);
@@ -241,7 +240,23 @@ end;
    TempManevrData : TManevrData;
    laststate : TStateVector;
  begin
-   laststate := g_FlightData[High(g_FlightData)][High(g_FlightData[High(g_FlightData)])];
+   if Length(g_FlightData) > 0 then
+    laststate := g_FlightData[High(g_FlightData)][High(g_FlightData[High(g_FlightData)])]
+   else
+    begin
+      with laststate do
+       begin
+        x :=0;
+        y := g_H0;
+        z :=0;
+        theta :=0;
+        gamma := 0;
+        psi :=DegToRad(45);
+        V := g_V0/g_mps;
+        ny :=1;
+        t :=0;
+       end;  
+    end;
 
    case tempManevr.pType of
 
@@ -290,8 +305,12 @@ end;
 
    if Length(TempManevrData) > 0 then
     //if there were no errors during the calculation of TempManevrData
-     AppendManevrData(g_FlightData,TempManevrData,g_Helicopter);
+    begin
+     if Length(g_FlightData) = 0 then
+      TempManevrData:= PrependManevrDataWithStateVector(TempManevrData,laststate);
 
+     AppendManevrData(g_FlightData,TempManevrData,g_Helicopter);
+    end;
 
  end;
 
@@ -314,7 +333,7 @@ begin
 
     //calculating task and appending it
       if g_ManevrList.Count =0 then
-        SetLength(g_FlightData,1);
+        SetLength(g_FlightData,0);
 
      temp_g_FlightDataLength := Length(g_FlightData);
 
@@ -360,7 +379,7 @@ begin
 
 
  if not failed then
-  if Length(g_FlightData)-1 = lst_Manevry.Count then
+  if Length(g_FlightData) = lst_Manevry.Count then
    ShowManevrInfo
   else
  else
@@ -409,7 +428,7 @@ begin
 
    RecalculateRedrawFromManevrList;
 
-   if Length(g_FlightData)-1 = lst_Manevry.Count then
+   if Length(g_FlightData) = lst_Manevry.Count then
     ShowManevrInfo;
  end;
 
@@ -503,7 +522,7 @@ if dlgOpenFile.Execute then
 
           RecalculateRedrawFromManevrList;
 
-          if Length(g_FlightData)-1 = lst_Manevry.Count then
+          if Length(g_FlightData) = lst_Manevry.Count then
            ShowManevrInfo;
 
          end;
@@ -716,7 +735,7 @@ begin
     MySetLength(count);
 
     multipliers[0]:=1;
-    mins[0]:=Round(1.05*g_FlightData[0][0].V*g_mps);
+    mins[0]:=0;
     names[0]:='Макс. скор., км/ч';
     maxes[0]:=Round(0.95*g_Helicopter.Vmax)-1;
 
@@ -839,12 +858,29 @@ end;
 procedure Tfrm_Interface.lst_ManevryMouseDown(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
+var
+ manevrNo : Integer;
+ prependedManevr : TManevrData;
+ initialstate : TStateVector;
+
 begin
   UpdateValuesFromTManevr;
   DrawTrajectory(cht_traj,g_FlightData);
 
- if Length(g_FlightData)-1 = lst_Manevry.Count then
-  ShowManevrInfo(g_FlightData[lst_Manevry.ItemIndex+1],1);
+ if Length(g_FlightData) = lst_Manevry.Count then
+   begin
+    manevrNo := lst_Manevry.ItemIndex;
+
+        if manevrNo = 0 then
+         ShowManevrInfo(g_FlightData[manevrNo],1)
+        else
+         begin
+          initialstate := g_FlightData[manevrNo-1][High(g_FlightData[manevrNo-1])];
+          prependedManevr:=PrependManevrDataWithStateVector(g_FlightData[manevrNo],initialstate);
+          ShowManevrInfo(prependedManevr,1)
+         end;
+   end;
+   
 end;
 
 function ManevrTypeToNumber (aType : string) : Integer;
@@ -1138,8 +1174,8 @@ begin
     while cht.SeriesCount > 0 do
       cht.Series[0].Free;
 
-  if Length(FlightData) > 1 then
-   begin 
+  if Length(FlightData) > 0 then
+   begin
     for m := 0 to High(FlightData) do
       begin
         NewSeries := TPointSeries.Create(self);
@@ -1152,7 +1188,7 @@ begin
           HorizSize := pointersize;
           VertSize := pointersize;
 
-          if (m = lst_Manevry.ItemIndex+1)  then
+          if (m = lst_Manevry.ItemIndex)  then
            begin
             HorizSize := HorizSize + 2;
             VertSize := VertSize + 2;
@@ -1351,7 +1387,7 @@ var
   saveDialog : TSaveDialog;
 begin
      //http://www.delphibasics.ru/TSaveDialog.php
- if Length(g_FlightData) > 1 then
+ if Length(g_FlightData) > 0 then
    begin
     saveDialog := TSaveDialog.Create(self);
 
@@ -1379,7 +1415,7 @@ procedure Tfrm_Interface.RecalculateRedrawFromManevrList;
 var
   i:Integer;
 begin
- SetLength(g_FlightData,1);
+ SetLength(g_FlightData,0);
 
   for i:=0 to lst_Manevry.Count - 1 do
      begin
@@ -1412,7 +1448,7 @@ begin
 
     RecalculateRedrawFromManevrList;
 
-    if Length(g_FlightData)-1 = lst_Manevry.Count then
+    if Length(g_FlightData) = lst_Manevry.Count then
      ShowManevrInfo
     else
      strngrd_ManevrInfo.Visible := False;
@@ -1810,14 +1846,30 @@ begin
 end;
 
 procedure Tfrm_Interface.ShowManevrInfo;
+var
+ prependedManevr : TManevrData;
+ initialstate : TStateVector;
+ manevrNo : Integer;
 begin
 
    begin
     if not (lst_Manevry.Count = 0) then
      begin
       strngrd_ManevrInfo.Visible := True;
-      ShowManevrInfo(g_FlightData[lst_Manevry.Count],1);
-      ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2);
+
+
+      manevrNo := lst_Manevry.Count-1;
+
+      if manevrNo = 0 then
+       ShowManevrInfo(g_FlightData[manevrNo],1)
+      else
+       begin
+        initialstate := g_FlightData[manevrNo-1][High(g_FlightData[manevrNo-1])];
+        prependedManevr:=PrependManevrDataWithStateVector(g_FlightData[manevrNo],initialstate);
+        ShowManevrInfo(prependedManevr,1)
+       end;
+
+      ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2); 
      end
     else
      strngrd_ManevrInfo.Visible := False;
