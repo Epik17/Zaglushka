@@ -2,10 +2,8 @@ unit frmInterface;
           //TODO
 {
  -----foolproof:--------------
- ny(V) dependencies:
-  - gamma(V) in Virage
 
- Vy in Razgon s naborom
+ Vy in Razgon s naborom, Spiral
  -----------------------------
 
 - add Desceleration
@@ -637,7 +635,7 @@ begin
   multipliers[0]:=1;
   mins[0]:=5;
   names[0]:='Крен';
-  maxes[0]:=45;
+  maxes[0]:=100;
  end;
 
    if (ManevrType = mtLeftForcedVirage) or (ManevrType = mtRightForcedVirage) then
@@ -721,9 +719,9 @@ begin
     maxes[1]:=720;
 
     multipliers[0]:=1;
-    mins[0]:=10;
+    mins[0]:=5;
     names[0]:='Крен';
-    maxes[0]:=45;
+    maxes[0]:=100;
 
     multipliers[2]:=0.1;
     mins[2]:=-50;
@@ -1437,6 +1435,15 @@ begin
 
      g_TrackBars[0].Min := 0{Vmin};
    end;
+
+
+   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый вираж') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый вираж')
+    or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый форсированный вираж') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый форсированный вираж')
+    or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правая спираль') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левая спираль')
+   then
+    begin
+      g_TrackBars[0].Max := Floor(gammaMax(g_helicopter,g_G, g_T,g_H0));
+    end;
 
 
 end;
