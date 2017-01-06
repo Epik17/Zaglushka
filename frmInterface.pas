@@ -4,9 +4,9 @@ unit frmInterface;
  -----foolproof:--------------
 
  Vy in Razgon s naborom, Spiral
-
- Vinitial == Vfinal check in Razgon/Tormozhenie
  -----------------------------
+
+- add initial YAW and FRONT VIEW of trajectory
 
 - fix bugs in total manevr timing 
 
@@ -14,11 +14,12 @@ unit frmInterface;
 
 - reliable isometric projection (equal axis scales, min/max X and Z, range, etc. !! )
 
-- first V<0 message must stop all posterior calculations and appending of manoeuvres! We apparently need g_failed in appending
 
-- fix incorrect psi in Virage (360 and self-crossing of trajectory)
+- ? first V<0 message must stop all posterior calculations and appending of manoeuvres! We apparently need g_failed in appending
 
-- HorizRazgon goes to infinity when T is 40 deg, H is about 3000, V0 is max, V1 is max, G is max  
+- ? fix incorrect psi in Virage (360 and self-crossing of trajectory)
+
+- ?? HorizRazgon goes to infinity when T is 40 deg, H is about 3000, V0 is max, V1 is max, G is max
 
 }
 

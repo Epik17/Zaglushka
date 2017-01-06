@@ -512,7 +512,7 @@ begin
    SetLength(Result,0)
 end;
 
-function iRazgon(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{km/h}, VyDesired{m/s} : Real) : TManevrData;
+function iRazgonTormozhenie(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{km/h}, VyDesired{m/s} : Real) : TManevrData;
 var
   localTime,tempny,a, Vytemp, tempy : Real;
   tempstate : TStateVector;
@@ -607,7 +607,7 @@ begin
     //инициализируем
  failed := False;
 
- if initialstate.V*g_mps <> Vfinal then
+ if Round(initialstate.V*g_mps) <> Vfinal then
    begin
      tempstate := initialstate;
      tempny :=1;
@@ -795,13 +795,13 @@ begin
 { if initialstate.V*g_mps < Vfinal then
    Result:= TormozhNew(helicopter, initialstate, icG, icT,Vfinal, 0,5);  // с дроблением торможения
  else }
-   Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 0);  // без дробления торможения
+   Result:= iRazgonTormozhenie(helicopter, initialstate, icG, icT,Vfinal, 0);  // без дробления торможения
 end;
 
 
 function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}, Vy{m/s}: Real) : TManevrData;
 begin
- Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, Vy);
+ Result:= iRazgonTormozhenie(helicopter, initialstate, icG, icT,Vfinal, Vy);
 end;
 
 //function HorizRazgonInputCheck(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
