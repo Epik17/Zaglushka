@@ -18,6 +18,7 @@ function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V{km/h}, Vy{
 function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real;
 
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real):Real;
+function nyMax(helicopter : THelicopter;icG, icT,icH0 : Real): Real;
 
 function VmaxOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;//на высоте h c точностью до 1 км/ч
 function VminOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;
@@ -113,8 +114,25 @@ end;
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real): Real;
 begin
   with helicopter do
-  //Result:= (TraspUZemli/ctgTotH-icH0)/(TraspUZemli-HotV(helicopter,icG, icT,V)*ctgTotH)
    Result:= (TraspUZemli/ctgTotH-icH0)/(TraspUZemli/ctgTotH-HotV(helicopter,icG, icT,V))
+
+end;
+
+function nyMax(helicopter : THelicopter;icG, icT,icH0 : Real): Real;
+var
+  i : Integer;
+  TempResult : Real;
+begin
+  Result := -100500;
+
+  for i:=0 to g_Vmax do
+    begin
+     with helicopter do
+      TempResult := ny(helicopter,icG, icT,icH0,i);
+
+     if TempResult > Result then
+      Result := TempResult
+    end;
 
 end;
 

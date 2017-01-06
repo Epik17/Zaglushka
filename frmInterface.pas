@@ -211,15 +211,15 @@ begin
    cbb_HelicopterTypeSelect(Self);
 
 
-
    FlightDataInitialization;
 
    DisableCalculateButton;
 
    CreateManevrInfoGrid;
 
- //  test := VertVzlet(g_Helicopter,g_FlightData[0,0], 11000, g_T,g_H0, 30, 1.4);
-   //ShowMessage(FloatToStr(test[High(test)].y));
+  // ShowMessage(FloatToStr(nyMax(g_helicopter, g_G, g_T,g_H0)));
+
+
 
 end;
 
