@@ -301,8 +301,10 @@ var
   tempManevr : TManevr;
   ParamArray : TParametersArray;
   temp_g_FlightDataLength : Integer;
+  failed : Boolean;
 
 begin
+ failed := False;
 
 //adding
  if g_ButtonMode = bmAdd then
@@ -322,8 +324,10 @@ begin
       
 
     if Length(g_FlightData) = temp_g_FlightDataLength then
+     begin
       ShowMessage('Уточните исходные данные либо удалите маневр из списка');
-
+      failed := True;
+     end;
 
       g_ManevrList.Add(tempManevr);
 
@@ -355,8 +359,13 @@ begin
 
  DrawTrajectory(cht_traj,g_FlightData);
 
- if Length(g_FlightData)-1 = lst_Manevry.Count then
-  ShowManevrInfo;
+
+ if not failed then
+  if Length(g_FlightData)-1 = lst_Manevry.Count then
+   ShowManevrInfo
+  else
+ else
+   strngrd_ManevrInfo.Visible := False;
 
 end;
 
