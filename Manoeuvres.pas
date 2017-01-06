@@ -791,8 +791,10 @@ end;
 
 function HorizRazgonTormozhenie(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 begin
- Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 0);
- // Result:= TormozhNew(helicopter, initialstate, icG, icT,Vfinal, 0,5);
+{ if initialstate.V*g_mps < Vfinal then
+   Result:= TormozhNew(helicopter, initialstate, icG, icT,Vfinal, 0,5);  // с дроблением торможения
+ else }
+   Result:= iRazgon(helicopter, initialstate, icG, icT,Vfinal, 0);  // без дробления торможения
 end;
 
 
