@@ -525,6 +525,8 @@ if dlgOpenFile.Execute then
           if Length(g_FlightData) = lst_Manevry.Count then
            ShowManevrInfo;
 
+         // lst_Manevry.ItemIndex := Length(g_FlightData)-1;
+
          end;
       except
         ShowMessage('Некорректная структура файла');
@@ -1414,9 +1416,11 @@ end;
 
 procedure Tfrm_Interface.RecalculateRedrawFromManevrList;
 var
-  i:Integer;
+  i, itemindex:Integer;
 begin
  SetLength(g_FlightData,0);
+
+ itemindex := lst_Manevry.ItemIndex;
 
   for i:=0 to lst_Manevry.Count - 1 do
      begin
@@ -1424,6 +1428,11 @@ begin
        UpdateValuesFromTManevr;   //setting ALL trackbars to the right positions according to g_ManevrList
        UpdateManevrList(g_ManevrList);  //little update g_ManevrList of from MODIFIED trackbars
      end;
+
+ //cbb_Manevry.ItemIndex := ManevrTypeToNumber(lst_Manevry.Items[itemindex]);
+ lst_Manevry.ItemIndex := itemindex;
+ UpdateValuesFromTManevr;
+
 
  for i:=0 to g_ManevrList.Count - 1 do
   AppendTempManevr(g_ManevrList[i]);
@@ -1438,7 +1447,8 @@ begin
  if g_ManevrList.Count > 0 then
   btn_AddManevr.Enabled := True;
 
- DisableCalculateButton; 
+ DisableCalculateButton;
+ 
 end;
 
 procedure Tfrm_Interface.FullRecalculate;
