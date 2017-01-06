@@ -31,7 +31,6 @@ function VyRasp(helicopter : THelicopter; icG, icT, h0, V{km/h}  : Real) : Real;
 
 implementation
 
-
 function HotV(helicopter : THelicopter; V: Real) : Real;
 begin
  Result := helicopter.Hdyn - Sqr(V-helicopter.ParabolaCoeff*helicopter.Vmax)*(helicopter.Hdyn-helicopter.Hst)/Sqr(helicopter.ParabolaCoeff*helicopter.Vmax)
