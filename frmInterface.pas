@@ -106,10 +106,8 @@ type
     procedure ResetElementsArrays;
     procedure UpdateValuesFromTManevr;
     procedure DynamicallyUpdateICLabelValuesAndPlots(Sender: TObject);
-    procedure ExportFlightTask(manevrlist : TManevrList);  overload;
-    procedure ExportFlightTask(manevrlist : TManevrList; filename : string);  overload;
-    procedure ExportCalculatedFlightTask (FlightData : TFlightData);  overload;
-    procedure ExportCalculatedFlightTask (FlightData : TFlightData; filename : string); overload;
+    procedure ExportFlightTask(manevrlist : TManevrList; filename : string);
+    procedure ExportCalculatedFlightTask (FlightData : TFlightData; filename : string);
     function g_H0 () : Real;
     function g_V0 () : Real;
     function g_T () : Real;
@@ -1028,40 +1026,6 @@ begin
  DynamicallyUpdateLabelValues(Self);
 end;
 
-procedure Tfrm_Interface.ExportFlightTask(manevrlist : TManevrList);
-var
-f: textfile;
-i,j : Byte;
-currentdir : string;
-begin
- currentdir := GetCurrentDir;
- try
-   AssignFile(f, currentdir+'\FlightTask.txt');
-   Rewrite(f);
-
-   Writeln(f,cbb_HelicopterType.Items[cbb_Helicoptertype.ItemIndex]);
-   Writeln(f,FloatToStr(g_G));
-   Writeln(f,FloatToStr(g_H0));
-   Writeln(f,FloatToStr(g_T));
-   Writeln(f,FloatToStr(g_V0));
-
-   Writeln(f, manevrlist.Count);
-
-   for i:=0 to manevrlist.Count -1 do
-   begin
-    Writeln(f, ConvertManevrType(manevrlist[i].pType));
-
-    for j:=1 to Length(manevrlist[i].fParameters) do
-     Writeln(f, manevrlist[i].fParameters[j]:7:6);
-   end;
-   CloseFile(f);
-   ShowMessage('Полетное задание успешно сохранено в файл '+currentdir+'\FlightTask.txt');
- except
-   ShowMessage('Ошибка при сохранении полетного задания');
- end;
-
-end;
-
 procedure Tfrm_Interface.ExportFlightTask(manevrlist : TManevrList; filename : string);
 var
 f: textfile;
@@ -1346,33 +1310,6 @@ begin
    g_nxVisited := True;
 end;
 
-procedure Tfrm_Interface.ExportCalculatedFlightTask(
-  FlightData: TFlightData);
-var
-f: textfile;
-i,j : Integer;
-currentdir : string;
-begin
- currentdir := GetCurrentDir;
- try
-   begin
-     AssignFile(f, currentdir+'\blitz\lib\massivw.txt');
-     Rewrite(f);
-
-     Writeln(f,cbb_HelicopterType.Items[cbb_Helicoptertype.ItemIndex]+' G = '+FloatToStr(g_G)+' H0 = ' + FloatToStr(g_H0) +' T = '+FloatToStr(g_T) );
-
-     for i:=0 to Length(g_FlightData) -1 do
-      for j := 0 to Length(g_FlightData[i]) -1 do
-        Writeln(f, StateVectorString(FlightData[i][j]));
-
-     CloseFile(f);
-     ShowMessage('Массив положений вертолета успешно сохранен в файл '+currentdir+'\blitz\lib\massivw.txt');
-   end;
- except
-   ShowMessage('Ошибка при сохранении массива положений вертолета');
- end;
-
-end;
 
 procedure Tfrm_Interface.ExportCalculatedFlightTask(FlightData: TFlightData; filename : string);
 var
