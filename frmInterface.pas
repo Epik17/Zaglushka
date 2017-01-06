@@ -4,7 +4,6 @@ unit frmInterface;
  -----foolproof:--------------
  ny(V) dependencies:
   - gamma(V) in Virage
-  - ny in Gorka, Pikirovanie
 
  Vy in Razgon s naborom
  -----------------------------
