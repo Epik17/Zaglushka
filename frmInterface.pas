@@ -4,7 +4,11 @@ unit frmInterface;
  -----foolproof:--------------
 
  Vy in Razgon s naborom, Spiral
+
+ Vinitial == Vfinal check in Razgon/Tormozhenie
  -----------------------------
+
+- fix bugs in total manevr timing 
 
 - add Desceleration
 
@@ -425,12 +429,23 @@ if dlgOpenFile.Execute then
       Memo1.Lines.LoadFromFile(dlgOpenFile.FileName);
       try  // run the executable to see effect!
          begin
+
+
           //reading initial conditions
-          cbb_HelicopterType.ItemIndex := HelicopterTypeToNumber(Memo1.Lines[0]);
-          trckbr_G.Position := StrToInt(Memo1.Lines[1]);
-          trckbr_H0.Position := Round(StrToFloat(Memo1.Lines[2])/deltaH0);
-          trckbr_T.Position := StrToInt(Memo1.Lines[3]);
-          trckbrV0.Position := StrToInt(Memo1.Lines[4]);
+
+            //helicopter type
+                cbb_HelicopterType.ItemIndex := HelicopterTypeToNumber(Memo1.Lines[0]);
+
+                cbb_HelicopterTypeSelect(Self);
+                SetInitialConditionsTrackbars;
+
+           //reading other initial conditions
+                trckbr_G.Position := StrToInt(Memo1.Lines[1]);
+                trckbr_H0.Position := Round(StrToFloat(Memo1.Lines[2])/deltaH0);
+                trckbr_T.Position := StrToInt(Memo1.Lines[3]);
+                trckbrV0.Position := StrToInt(Memo1.Lines[4]);
+
+
 
           //reading manoeuvres info
           g_ManevrList.Clear;
