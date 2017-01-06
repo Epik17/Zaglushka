@@ -14,6 +14,11 @@ end;
 type TManevrData = array of TStateVector;
 type TFlightData = array of TManevrData;
 
+type TManevrPropsPerebornye = record
+Vmax, Vmin, S, xmin, xmax, ymin, ymax, zmin, zmax : Real
+end;
+
+
 function StateVectorString (state:TStateVector):string;
 function ToXYZ1Array(FlightData : TManevrData) : TArrayOfArrayOfReal;overload;
 procedure AppendManevrData(var GlobalFlightData: TFlightData; Manevr : TManevrData; helicopter : THelicopter);overload;
@@ -21,6 +26,14 @@ procedure AppendManevrData(var MainManevrData: TManevrData; Manevr : TManevrData
 function PrependManevrDataWithStateVector (ManevrData: TManevrData; statevector : TStateVector) : TManevrData;
 
 function FlightDataToManevrData(FlightData : TFlightData; helicopter : THelicopter) : TManevrData;
+
+function tVypoln(Manevr : TManevrData) : Extended;
+function Vfinal(Manevr : TManevrData) : Extended;
+function deltaX(Manevr : TManevrData) : Extended;
+function deltaY(Manevr : TManevrData) : Extended;
+function deltaZ(Manevr : TManevrData) : Extended;
+function ManevrPropsPerebornye(Manevr : TManevrData) : TManevrPropsPerebornye;
+
 
 implementation
 
@@ -139,6 +152,93 @@ begin
  Result[0]:= statevector;
  for i := 0 to High(ManevrData) do
   Result[i+1]:= ManevrData[i]
+end;
+
+
+
+function tVypoln(Manevr : TManevrData) : Extended;
+{var
+ t0 : Real;  }
+begin
+ // t0 := Manevr[Low(Manevr)].t;
+
+  Result := Manevr[High(Manevr)].t - Manevr[Low(Manevr)].t;
+
+ { if t0 > dt/2 then
+   Result := Result + dt;
+     }
+end;
+
+function Vfinal(Manevr : TManevrData) : Extended;
+begin
+  Result := Manevr[High(Manevr)].V * g_mps
+end;
+
+function deltaX(Manevr : TManevrData) : Extended;
+begin
+  Result := Manevr[High(Manevr)].x - Manevr[Low(Manevr)].x
+end;
+
+function deltaY(Manevr : TManevrData) : Extended;
+begin
+  Result := Manevr[High(Manevr)].y - Manevr[Low(Manevr)].y
+end;
+
+function deltaZ(Manevr : TManevrData) : Extended;
+begin
+  Result := Manevr[High(Manevr)].z - Manevr[Low(Manevr)].z
+end;
+
+function ManevrPropsPerebornye(Manevr : TManevrData) : TManevrPropsPerebornye;
+const
+ bigNumber = 1005000;
+var
+  i : Integer;
+
+procedure FindingMin (var tempvalue : Real; var min : Real);
+ begin
+  if tempvalue < min then
+    min := tempvalue
+ end;
+
+procedure FindingMax (var tempvalue : Real; var max : Real);
+ begin
+  if tempvalue > max then
+    max := tempvalue
+ end;
+
+begin
+  Result.S := 0;
+
+  Result.xmin := bigNumber;
+  Result.ymin := bigNumber;
+  Result.zmin := bigNumber;
+  Result.Vmin := bigNumber;
+  Result.xmax := -bigNumber;
+  Result.ymax := -bigNumber;
+  Result.zmax := -bigNumber;
+  Result.Vmax := -bigNumber;
+
+  for i := 0 to High(Manevr) do
+   begin
+    if i > 0 then
+     Result.S := Result.S + Sqrt(Sqr(Manevr[i].x - Manevr[i-1].x) + Sqr(Manevr[i].y - Manevr[i-1].y) + Sqr(Manevr[i].z - Manevr[i-1].z));
+
+     FindingMin(Manevr[i].x, Result.xmin);
+     FindingMax(Manevr[i].x, Result.xmax);
+
+     FindingMin(Manevr[i].y, Result.ymin);
+     FindingMax(Manevr[i].y, Result.ymax);
+
+     FindingMin(Manevr[i].z, Result.zmin);
+     FindingMax(Manevr[i].z, Result.zmax);
+
+     FindingMin(Manevr[i].V, Result.Vmin);
+     FindingMax(Manevr[i].V, Result.Vmax);
+   end;
+
+  Result.Vmin := Result.Vmin * g_mps;
+  Result.Vmax := Result.Vmax * g_mps;
 end;
 
 end.
