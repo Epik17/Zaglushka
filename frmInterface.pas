@@ -10,8 +10,6 @@ unit frmInterface;
 
 - fix bugs in total manevr timing 
 
-- add Desceleration
-
 - reliable isometric projection (equal axis scales, min/max X and Z, range, etc. !! )
 
 
