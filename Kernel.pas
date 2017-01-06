@@ -19,6 +19,7 @@ function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real;
 
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real):Real;
 function nyMax(helicopter : THelicopter;icG, icT,icH0 : Real): Real;
+function gammaMax(helicopter : THelicopter;icG, icT,icH0 : Real): Real;
 
 function VmaxOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;//на высоте h c точностью до 1 км/ч
 function VminOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;
@@ -134,6 +135,11 @@ begin
       Result := TempResult
     end;
 
+end;
+
+function gammaMax(helicopter : THelicopter;icG, icT,icH0 : Real): Real;
+begin
+  Result := RadToDeg(ArcCos(1/nyMax(helicopter, icG, icT, icH0)));
 end;
 
 function VmaxOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;//c точностью до 1 км/ч

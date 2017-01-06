@@ -216,9 +216,7 @@ begin
 
    CreateManevrInfoGrid;
 
-  // ShowMessage(FloatToStr(nyMax(g_helicopter, g_G, g_T,g_H0)));
-
-
+  // ShowMessage(FloatToStr(Floor(gammaMax(g_helicopter, g_G, g_T,g_H0))));
 
 end;
 
