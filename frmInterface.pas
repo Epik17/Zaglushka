@@ -1401,7 +1401,7 @@ begin
 
     saveDialog.FilterIndex := 1;
 
-    saveDialog.FileName := 'mavvivw.txt';
+    saveDialog.FileName := 'massivw.txt';
 
     if saveDialog.Execute then
      ExportCalculatedFlightTask(g_FlightData,saveDialog.FileName);
