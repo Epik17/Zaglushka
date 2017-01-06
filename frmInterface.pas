@@ -874,11 +874,12 @@ begin
         if manevrNo = 0 then
          ShowManevrInfo(g_FlightData[manevrNo],1)
         else
-         begin
-          initialstate := g_FlightData[manevrNo-1][High(g_FlightData[manevrNo-1])];
-          prependedManevr:=PrependManevrDataWithStateVector(g_FlightData[manevrNo],initialstate);
-          ShowManevrInfo(prependedManevr,1)
-         end;
+          if manevrNo > 0 then
+             begin
+              initialstate := g_FlightData[manevrNo-1][High(g_FlightData[manevrNo-1])];
+              prependedManevr:=PrependManevrDataWithStateVector(g_FlightData[manevrNo],initialstate);
+              ShowManevrInfo(prependedManevr,1)
+             end;
    end;
    
 end;
