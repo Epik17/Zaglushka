@@ -610,7 +610,7 @@ begin
        mins[1]:=50;
        mins[3]:=110;
 
-       maxes[0]:=170;
+       maxes[0]:=370; //max should be greater than every possible value of parameter; we get delphi bug if not
        maxes[1]:=90;
        maxes[3]:=130;
       end;
@@ -622,7 +622,7 @@ begin
        mins[3]:=200;
 
        maxes[0]:=90;
-       maxes[1]:=170;
+       maxes[1]:=370;    //max should be greater than every possible value of parameter; we get delphi bug if not
        maxes[3]:=Round(0.95*g_Helicopter.Vmax)-1;
       end;
 
@@ -1399,6 +1399,17 @@ begin
 
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Пикирование') then
     begin
+       //ny vvoda
+       if cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка' then
+        trckbarNo := 0
+       else
+        trckbarNo := 1;
+
+       g_TrackBars[trckbarNo].Max := Round(100*RoundTo(nyMax(g_helicopter,g_G, g_T,g_H0),-2));
+
+
+
+       //ny vyvoda and theta
        if cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка' then
         trckbarNo := 1
        else
