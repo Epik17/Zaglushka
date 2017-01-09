@@ -25,7 +25,7 @@ type THelicopterParameters = array [1..14] of Real;
 function CreateHelicopter (aname: string;params: THelicopterParameters) : THelicopter;
 
 const
-mi8 : THelicopterParameters = (356,12000,10800,0.5,1.5,1.036,0.15,-100,4500,250,60,0.5,11000,12500);
+//mi8 : THelicopterParameters = (356,12000,10800,0.5,1.5,1.036,0.15,-100,4500,250,60,0.5,11000,12500);
 ansatU : THelicopterParameters = (103.8,3000,4080,0.5,2.7,0.29,0.1,3200,5200,275,30,0.382,2800,3600);
 mi26 : THelicopterParameters = (800,49600,52000,0.5,1.5,4.4,1.81,1420,4600,295,496,0.424,48000,50000);
 mi8mtv : THelicopterParameters = (356,12000,13420,0.5,1.5,1.0,0.24,3980,6000,250,120,0.37,11000,12500);

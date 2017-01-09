@@ -942,28 +942,28 @@ function HelicopterTypeToNumber (aType : string) : Integer;
 begin
 
   if aType = 'Ансат-У' then
-   Result := 6
+   Result := 5
   else
     if aType = 'Ми-26' then
-     Result := 5
+     Result := 4
     else
      if aType = 'Ка-226' then
-      Result := 7
+      Result := 6
      else
       if aType = 'Ми-28Н' then
-       Result := 4
+       Result := 3
       else
        if aType = 'Ми-8МТВ-5 (ТВ3-117ВМ)' then
-        Result := 2
+        Result := 1
        else
         if aType = 'Ми-8МТВ-5 (ВК-2500)' then
-         Result := 3
+         Result := 2
         else
-         if aType = 'Ми-8' then
+       {  if aType = 'Ми-8' then
           Result := 0
-         else
+         else   }
           if aType = 'Ми-8МТВ' then
-           Result := 1
+           Result := 0
           else
            begin
             Result := -1;
@@ -987,14 +987,14 @@ end;
 
 procedure HelicoptersInitialization;
 begin
- g_HelicopterDatabase[1] := CreateHelicopter('Ми-8',mi8);
- g_HelicopterDatabase[2] := CreateHelicopter('Ми-8МТВ',mi8mtv);
- g_HelicopterDatabase[3] := CreateHelicopter('Ми-8МТВ-5 (ТВ3-117ВМ)',mi8mtv5tv3117vm);
- g_HelicopterDatabase[4] := CreateHelicopter('Ми-8МТВ-5 (ВК-2500)',mi8mtv5vk2500);
- g_HelicopterDatabase[5] := CreateHelicopter('Ми-28Н',mi28);
- g_HelicopterDatabase[6] := CreateHelicopter('Ми-26',mi26);
- g_HelicopterDatabase[7] := CreateHelicopter('Ансат-У',ansatU);
- g_HelicopterDatabase[8] := CreateHelicopter('Ка-226',ka226);
+ //g_HelicopterDatabase[1] := CreateHelicopter('Ми-8',mi8);
+ g_HelicopterDatabase[1] := CreateHelicopter('Ми-8МТВ',mi8mtv);
+ g_HelicopterDatabase[2] := CreateHelicopter('Ми-8МТВ-5 (ТВ3-117ВМ)',mi8mtv5tv3117vm);
+ g_HelicopterDatabase[3] := CreateHelicopter('Ми-8МТВ-5 (ВК-2500)',mi8mtv5vk2500);
+ g_HelicopterDatabase[4] := CreateHelicopter('Ми-28Н',mi28);
+ g_HelicopterDatabase[5] := CreateHelicopter('Ми-26',mi26);
+ g_HelicopterDatabase[6] := CreateHelicopter('Ансат-У',ansatU);
+ g_HelicopterDatabase[7] := CreateHelicopter('Ка-226',ka226);
 end;
 
 
@@ -1008,7 +1008,7 @@ begin
    4: g_Helicopter :=g_HelicopterDatabase[5];
    5: g_Helicopter :=g_HelicopterDatabase[6];
    6: g_Helicopter :=g_HelicopterDatabase[7];
-   7: g_Helicopter :=g_HelicopterDatabase[8];
+   //7: g_Helicopter :=g_HelicopterDatabase[8];
   end;
  // if cbb_HelicopterType.ItemIndex = 5 then g_Helicopter := g_HelicopterDatabase[2];
 
