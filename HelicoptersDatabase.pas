@@ -20,7 +20,7 @@ Gmin, //минимальный полетный вес
 Gmax : Real; //максимальный полетный вес
 end;
 
-type THelicoptersDatabase = array [1..8] of THelicopter;
+type THelicoptersDatabase = array [1..7] of THelicopter;
 type THelicopterParameters = array [1..14] of Real;
 function CreateHelicopter (aname: string;params: THelicopterParameters) : THelicopter;
 
