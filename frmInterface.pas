@@ -727,7 +727,7 @@ begin
 
   multipliers[0]:=1;
   mins[0]:={Round(1.05*g_FlightData[0][0].V*g_mps)}0;
-  names[0]:='Макс. скор., км/ч';
+  names[0]:='Конечн. скор., км/ч';
   maxes[0]:=Round(0.95*g_Helicopter.Vmax)-1;
  end;
 
@@ -1489,7 +1489,7 @@ end;
 procedure Tfrm_Interface.DynamicFoolProof;
 var
   cosTheta  : Real;
-  cosThetaRounded, trckbarNo,Vmax, nyvvodaMaxPos: Integer;
+  cosThetaRounded, trckbarNo,Vmax, Vmin, nyvvodaMaxPos: Integer;
 const
   cosCorrection = 0.02;
 
@@ -1556,12 +1556,12 @@ begin
       g_TrackBars[0].Position := Vmax;   }
      g_TrackBars[0].Max := Vmax;
 
-     {Vmin := Round(1.05*trckbrV0.Position);
+     Vmin := Round(1.1*VminOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0));
 
-     if (Vmin > -0.05) and (Vmin < 0.05) then
+    { if (Vmin > -0.05) and (Vmin < 0.05) then
       Vmin := 1;}
 
-     g_TrackBars[0].Min := 0{Vmin};
+     g_TrackBars[0].Min := Vmin;
    end;
 
 
