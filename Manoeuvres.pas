@@ -568,6 +568,8 @@ begin
        VfinalTrick := Vfinal - VfinalReper;
 
    realnx := nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy)-nx(helicopter,tempny,icG, icT,tempstate.y, VfinalTrick, Vy);
+ //  ShowMessage('SetAccelerationTormozh '+  FloatToStr(nx(helicopter,tempny,icG, icT,tempstate.y,g_mps*tempstate.V, Vy)));
+ //  ShowMessage('SetAccelerationTormozh '+ FloatToStr(nx(helicopter,tempny,icG, icT,tempstate.y,VfinalTrick, Vy)));
 
    if g_mps*tempstate.V < 100 then
           if Abs(realnx) > Tan(DegToRad(thetaMax))

@@ -1311,6 +1311,7 @@ procedure Tfrm_Interface.DrawNX(var cht: TChart; helicopter: THelicopter;
   icG, icT, icH0: Real);
   const
     dny = 0.1;
+    Vmin = 0;
   var
   tempny : Real;
   V,i : Integer;
@@ -1322,7 +1323,7 @@ begin
   While cht.SeriesCount > 0 do
         cht.Series[0].Free;
 
-  cht.BottomAxis.Minimum := 50;
+  cht.BottomAxis.Minimum := Vmin;
 
   with cht.LeftAxis do
    begin
@@ -1345,7 +1346,7 @@ begin
 
      NewSeries.LinePen.Width := 1;
 
-    for V :=50 to g_Vmax do
+    for V :=Vmin to g_Vmax do
       begin
        cht.AddSeries(NewSeries);
        cht.Series[cht.SeriesCount-1].AddXY(V,nx(helicopter,tempny, icG, icT,icH0,V));
