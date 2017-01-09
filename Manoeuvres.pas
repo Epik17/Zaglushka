@@ -991,49 +991,70 @@ begin
 end;
 
 function Visenie(initialstate : TStateVector; duration : Real) : TManevrData;
+
 var
 localtime : Real;
+
 const
   ampli = 0.0349; // 2 degrees
   omega = 0.04;
+
 begin
-   SetLength(Result,0);
-   localtime := 0;
 
-  if duration>0 then
-    begin
-        while localtime < duration-dt/2 do
-         begin
-          ExtendArray(Result);
+ SetLength(Result,0);
 
-          with Result[High(Result)] do
+ if initialstate.V = 0 then
+   begin
+
+     localtime := 0;
+
+    if duration>0 then
+
+      begin
+
+          while localtime < duration-dt/2 do
+
            begin
-            x := initialstate.x;
-            y := initialstate.y;
-            z := initialstate.z;
-            V := 0;
-            psi := initialstate.psi;
-            ny := initialstate.ny;
+            ExtendArray(Result);
 
-            theta := initialstate.theta + MyOscillation (ampli, omega, Pi/2, duration, localtime);
-            gamma := initialstate.gamma + MyOscillation (ampli, omega, 0, duration, localtime);
-            t := initialstate.t + localtime + dt;
+            with Result[High(Result)] do
 
-            localtime := localtime + dt;
+             begin
+              x := initialstate.x;
+              y := initialstate.y;
+              z := initialstate.z;
+              V := 0;
+              psi := initialstate.psi;
+              ny := initialstate.ny;
+
+              theta := initialstate.theta + MyOscillation (ampli, omega, Pi/2, duration, localtime);
+              gamma := initialstate.gamma + MyOscillation (ampli, omega, 0, duration, localtime);
+              t := initialstate.t + localtime + dt;
+
+              localtime := localtime + dt;
+
+             end;
 
            end;
-         end;
 
-          with Result[High(Result)] do
-             begin
-              theta := 0;
-              gamma := 0;
-             end;
-    end
-  else
-   ShowMessage('ѕродолжительность висени€ должна быть больше нул€!');
+            with Result[High(Result)] do
+               begin
+                theta := 0;
+                gamma := 0;
+               end;
+      end
+
+    else
+
+     ShowMessage('ѕродолжительность висени€ должна быть больше нул€!');
+
+   end
+
+ else
+
+  ShowMessage('ƒл€ выполнени€ висени€ скорость должна быть равна нулю!');
+
 end;
-
 end.
 
 
