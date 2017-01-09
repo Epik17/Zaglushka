@@ -90,7 +90,7 @@ object frm_Interface: Tfrm_Interface
   object cbb_Manevry: TComboBox
     Left = 432
     Top = 8
-    Width = 177
+    Width = 209
     Height = 21
     Hint = #1042#1099#1073#1077#1088#1080#1090#1077' '#1084#1072#1085#1077#1074#1088
     Style = csDropDownList

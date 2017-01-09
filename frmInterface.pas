@@ -738,7 +738,7 @@ begin
 
     multipliers[0]:=1;
     mins[0]:=0;
-    names[0]:='Макс. скор., км/ч';
+    names[0]:='Конечн. скор., км/ч';
     maxes[0]:=Round(0.95*g_Helicopter.Vmax)-1;
 
     multipliers[1]:=0.5;
@@ -907,7 +907,7 @@ begin
         if aType = 'Разгон/торможение в горизонте' then
          Result := 5
         else
-         if aType = 'Разгон с набором высоты' then
+         if aType = 'Разгон/торможение с изм. высоты' then
           Result := 6
          else
           if aType = 'Вертикальный взлет' then
@@ -1549,7 +1549,7 @@ begin
         g_TrackBars[trckbarNo].Max := cosThetaRounded;
     end;
 
-  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон/торможение в горизонте') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон с набором высоты') then
+  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон/торможение в горизонте') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон/торможение с изм. высоты') then
    begin
      Vmax := Round(0.95*VmaxOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0));
      {if g_TrackBars[0].Position > Vmax then
@@ -1558,8 +1558,7 @@ begin
 
      Vmin := Round(1.1*VminOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0));
 
-    { if (Vmin > -0.05) and (Vmin < 0.05) then
-      Vmin := 1;}
+     if (Vmin < 0) then Vmin := 0;
 
      g_TrackBars[0].Min := Vmin;
    end;
@@ -1639,7 +1638,7 @@ begin
      ParamArray[11] :=0;
    end;
 
-     if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон с набором высоты')  then
+     if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон/торможение с изм. высоты')  then
    begin
      ParamArray[1] :=0;
      ParamArray[2] :=0;

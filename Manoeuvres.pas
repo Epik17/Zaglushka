@@ -464,7 +464,10 @@ if not failed then
       SetLength(vyvod,0);
     end
   else
-   ShowMessage('Падение скорости до нуля!');
+   begin
+    ShowMessage('Падение скорости до нуля!');
+    SetLength(Result,0);
+   end;
 end;
 
 function iiVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real; Forced : Boolean) : TManevrData;
@@ -497,6 +500,15 @@ begin
     Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, deltaPsi, Vy, True, False);
   if deltaPsi = 0 then
    SetLength(Result,0)
+end;
+
+function TakesLongTime (initialstate, tempstate : TStateVector) : Boolean;
+begin
+  Result := False;
+
+  if tempstate.t - initialstate.t > 180 then
+   Result := True;
+
 end;
 
 function iRazgonTormozhenie(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{km/h}, VyDesired{m/s} : Real) : TManevrData;
@@ -569,6 +581,14 @@ begin
      a := g_g*linearnx
 end;
 
+function ManevrName(aRazgon : Boolean): string;
+begin
+  if aRazgon then
+   Result := 'разгон'
+  else
+   Result := 'торможение'
+end;
+
 
 
  procedure SetAccelerationRazgon(var a : Real; tempstate: TStateVector; ny, Vy : Real);
@@ -595,60 +615,72 @@ begin
  failed := False;
 
  if Round(initialstate.V*g_mps) <> Vfinal then
-   begin
-     tempstate := initialstate;
-     tempny :=1;
-     localTime :=0;
-     tempomega.x:=0;
-     tempomega.y:=0;
-     tempomega.z:=0;
-     SetLength(Result,0);
-     tempy := initialstate.y;
+    begin
+         tempstate := initialstate;
+         tempny :=1;
+         localTime :=0;
+         tempomega.x:=0;
+         tempomega.y:=0;
+         tempomega.z:=0;
+         SetLength(Result,0);
+         tempy := initialstate.y;
 
 
-    if initialstate.V*g_mps < 0.95*helicopter.Vmax then
-     begin
-      //while (not (g_mps*tempstate.V >=Vfinal)) and (not failed) do
-      while ((Razgon and (g_mps*tempstate.V <=Vfinal)) or ((not Razgon) and (g_mps*tempstate.V >=Vfinal))) and (not failed) do
-        if (tempstate.V >= 0) then
-          begin
-           begin
-            if Length(Result) = 0 then
-             Vytemp := VyRasp(helicopter, icG, icT, tempy, initialstate.V*g_mps)
+      if initialstate.V*g_mps < 0.95*helicopter.Vmax then
+       begin
+          //while (not (g_mps*tempstate.V >=Vfinal)) and (not failed) do
+        while ((Razgon and (g_mps*tempstate.V <=Vfinal)) or ((not Razgon) and (g_mps*tempstate.V >=Vfinal))) and (not failed) do
+         begin
+           if TakesLongTime (initialstate, tempstate) then
+            begin
+             Break;
+             ShowMessage('Невозможно выполнить ' + ManevrName(Razgon) + ' с заданными параметрами');
+             SetLength(Result,0);
+            end;
+
+            if (tempstate.V >= 0) then
+              begin
+               begin
+                if Length(Result) = 0 then
+                 Vytemp := VyRasp(helicopter, icG, icT, tempy, initialstate.V*g_mps)
+                else
+                 Vytemp := VyRasp(helicopter, icG, icT, Result[High(Result)].y, Result[High(Result)].V*g_mps);
+
+                if (Vytemp > VyDesired) or (Abs(VyDesired) < 0.001){in case of horizontal flight} then
+                  Vytemp := VyDesired;
+
+                if Razgon then
+                 SetAccelerationRazgon(a,tempstate, tempny, Vytemp)
+                else
+                 SetAccelerationTormozh(a,tempstate, tempny, Vytemp, initialstate.V);
+
+                g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
+
+                           //climb
+                tempy := tempy +  + Vytemp*dt;
+                Result[High(Result)].y := tempy;
+
+                Result[High(Result)].theta := -ArcTan(a/g_g); //pitch according to nx_temp
+
+                localTime := localTime + dt;
+               end;
+              end
             else
-             Vytemp := VyRasp(helicopter, icG, icT, Result[High(Result)].y, Result[High(Result)].V*g_mps);
+              failed := True;
+         end;
+           if not failed then
+            Result[High(Result)].V := Vfinal/g_mps;
 
-            if (Vytemp > VyDesired) or (Abs(VyDesired) < 0.001){in case of horizontal flight} then
-              Vytemp := VyDesired;
+        if failed then
+         begin
+          ShowMessage('Падение скорости до нуля!');
+          SetLength(Result,0);
+         end;
+       end
 
-            if Razgon then
-             SetAccelerationRazgon(a,tempstate, tempny, Vytemp)
-            else
-             SetAccelerationTormozh(a,tempstate, tempny, Vytemp, initialstate.V);
-
-            g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
-
-                       //climb
-            tempy := tempy +  + Vytemp*dt;
-            Result[High(Result)].y := tempy;
-
-            Result[High(Result)].theta := -ArcTan(a/g_g); //pitch according to nx_temp
-
-            localTime := localTime + dt;
-           end;
-          end
-        else
-          failed := True;
-
-       if not failed then
-        Result[High(Result)].V := Vfinal/g_mps;
-
-       if failed then ShowMessage('Падение скорости до нуля!');
-     end
-
-    else
-      ShowMessage('Начальная скорость составила ' + FloatToStr(Round(initialstate.V*g_mps)) + ' км/ч. Эта скорость не может превышать  '+FloatToStr(0.95*helicopter.Vmax)+ ' км/ч');
-   end
+      else
+          ShowMessage('Начальная скорость составила ' + FloatToStr(Round(initialstate.V*g_mps)) + ' км/ч. Эта скорость не может превышать  '+FloatToStr(0.95*helicopter.Vmax)+ ' км/ч');
+    end
  else
   ShowMessage('Конечная и начальная скорости при разгоне (торможении) не могут быть равны между собой!')
 end;
@@ -705,6 +737,14 @@ begin
     if initialstate.V*g_mps < 0.95*helicopter.Vmax then
      begin
        while (g_mps*tempstate.V >=Vfinal) and (not failed) do
+       begin
+         if TakesLongTime (initialstate, tempstate) then
+            begin
+             Break;
+             ShowMessage('Невозможно выполнить торможение с заданными параметрами');
+             SetLength(Result,0);
+            end;
+
         if (tempstate.V >= 0) then
           begin
            begin
@@ -718,7 +758,7 @@ begin
 
              SetAccelerationTormozh(a,tempstate, tempny, Vytemp);
 
-            g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);  
+            g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
 
                        //climb
             tempy := tempy +  + Vytemp*dt;
@@ -731,11 +771,15 @@ begin
           end
         else
           failed := True;
-
+       end;
        if not failed then
         Result[High(Result)].V := Vfinal/g_mps;
 
-       if failed then ShowMessage('Падение скорости до нуля!');
+       if failed then
+         begin
+          ShowMessage('Падение скорости до нуля!');
+          SetLength(Result,0);
+         end;
      end
 
     else

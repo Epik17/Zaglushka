@@ -24,7 +24,7 @@ g_ParametersCount = 11;
 
 g_ManevrTypesCount = 14;
 g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон/торможение в горизонте',
-'Разгон с набором высоты','Вертикальный взлет','Вертикальная посадка','Висение','Левая спираль', 'Правая спираль','Левый форсированный вираж', 'Правый форсированный вираж');
+'Разгон/торможение с изм. высоты','Вертикальный взлет','Вертикальная посадка','Висение','Левая спираль', 'Правая спираль','Левый форсированный вираж', 'Правый форсированный вираж');
 
 type TManevrTypes = (mtUndefined, mtHorizFlight, mtGorka, mtPikirovanie,mtLeftVirage,mtRightVirage,
 mtHorizRazgonTormozh,mtRazgonSnaborom, mtLiftOff, mtLanding, mtHovering,mtLeftSpiral,mtRightSpiral,mtLeftForcedVirage,mtRightForcedVirage);
@@ -104,7 +104,7 @@ begin
     if aType = 'Левый вираж' then Result := mtLeftVirage;
     if aType = 'Правый вираж' then Result := mtRightVirage;
     if aType = 'Разгон/торможение в горизонте' then Result := mtHorizRazgonTormozh;
-    if aType = 'Разгон с набором высоты' then Result := mtRazgonSnaborom;
+    if aType = 'Разгон/торможение с изм. высоты' then Result := mtRazgonSnaborom;
     if aType = 'Вертикальный взлет' then Result := mtLiftOff;
     if aType = 'Вертикальная посадка' then Result := mtLanding;
     if aType = 'Висение' then Result := mtHovering;
@@ -125,7 +125,7 @@ begin
     mtLeftVirage : Result := 'Левый вираж';
     mtRightVirage :  Result := 'Правый вираж';
     mtHorizRazgonTormozh :  Result := 'Разгон/торможение в горизонте';
-    mtRazgonSnaborom :  Result := 'Разгон с набором высоты';
+    mtRazgonSnaborom :  Result := 'Разгон/торможение с изм. высоты';
     mtLiftOff :  Result := 'Вертикальный взлет';
     mtLanding :  Result := 'Вертикальная посадка';
     mtHovering :  Result := 'Висение';
