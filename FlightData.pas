@@ -113,7 +113,7 @@ begin
 
   end
  else
-  ShowMessage('Превышение разрешенной максимальной скорости (' + FloatToStr(0.95*helicopter.Vmax)+ ') км/ч')
+  ShowMessage('Ошибка при подстыковке маневра. Превышение разрешенной максимальной скорости (' + FloatToStr(0.95*helicopter.Vmax)+ ') км/ч')
 end;
 
 procedure AppendManevrData(var MainManevrData: TManevrData; Manevr : TManevrData; helicopter : THelicopter);overload;
