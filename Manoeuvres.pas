@@ -28,6 +28,7 @@ end;
 const
  dt = 0.1; //шаг по времени, с
  deltatSlope = 1.; //продолжительность ненулевого ускорени€ при взлете/посадке
+ failureMessage='ѕри заданных исходных параметрах маневр невыполним';
 
 procedure ExtendArray(var myarray: TManevrData);overload;
 begin
@@ -97,7 +98,7 @@ begin
          end;
     end
   else
-   ShowMessage('function HorizFlight: V <= 0!');
+   ShowMessage('—корость горизонтального полета должна быть больше нул€');
 end;
 
 procedure MyIntegrate(var tempstate : TStateVector; dt,a : Real;omega : TVector3D);
@@ -137,6 +138,12 @@ begin
   TempFlightData[High(TempFlightData)] := tempstate;
 end;
 
+procedure HmaxCheck (tempstate: TStateVector; var failed : Boolean);
+begin
+  if tempstate.y > 2000 then
+    failed := True;
+end;
+
 function iGorkaPikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real; Pikirovanie : Boolean) : TManevrData;
 var
  vvod,nakl,vyvod : TManevrData;
@@ -155,7 +162,7 @@ begin
      else
       begin
         omega.z :=0;
-        ShowMessage('procedure SetOmegaAndAcceleration: V <= 0!');
+        ShowMessage('ѕадение скорости до нул€!');
         Halt;
       end;
 
@@ -190,6 +197,7 @@ begin
      begin
       SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyvvoda,nx(helicopter, nyvvoda, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
       g_Etape(vvod,tempstate, helicopter, nyvvoda,tempa, tempomega);
+      HmaxCheck(tempstate, failed);
      end
     else
     failed := True;
@@ -203,7 +211,10 @@ begin
 
   while (not ((g_mps*tempstate.V <= Vvyvoda) xor Pikirovanie)) and (not failed) do
    if (tempstate.V > 0) then
-    Etape(nakl,nyslope)
+    begin
+     Etape(nakl,nyslope);
+     HmaxCheck(tempstate, failed);
+    end
    else
   failed := True;
 
@@ -212,20 +223,26 @@ begin
 
  while (not ((RadToDeg(tempstate.theta)<=0) xor Pikirovanie)) and (not failed) do
   if (tempstate.V > 0) then
-    Etape(vyvod,nyvyvoda)
+   begin
+    Etape(vyvod,nyvyvoda);
+    HmaxCheck(tempstate, failed);
+   end
   else
-  failed := True;
+   failed := True;
 
   if not failed then
    vyvod[High(vyvod)].theta := 0.;
 
-  if failed then ShowMessage('ѕри данных эксплуатационных услови€х маневр невыполним. ѕадение скорости до нул€!');
+  if failed then ShowMessage(failureMessage);
 
  //стыкуем
   SetLength(Result,0);
-  AppendManevrData(Result,vvod,helicopter);
-  AppendManevrData(Result,nakl,helicopter);
-  AppendManevrData(Result,vyvod,helicopter);
+ if not failed then
+   begin
+    AppendManevrData(Result,vvod,helicopter);
+    AppendManevrData(Result,nakl,helicopter);
+    AppendManevrData(Result,vyvod,helicopter);
+   end;
 
  //очищаем 
   SetLength(vvod,0);
@@ -326,7 +343,7 @@ begin
      else
       begin
         omega.y :=0;
-        ShowMessage('procedure SetOmegaAndAcceleration: V <= 0!'+' ' + FloatToStr(tempstate.V));
+        ShowMessage('ѕадение скорости до нул€!'+' ' + FloatToStr(tempstate.V));
         Halt;
       end;
 
@@ -362,6 +379,8 @@ begin
         Vytemp := Vy/Abs(kren)*Abs(RadToDeg(tempstate.gamma));
         vvod[High(vvod)].y := vvod[High(vvod)].y + Vytemp/2*dt;
         tempstate.y := vvod[High(vvod)].y;
+
+         HmaxCheck(tempstate,failed);
        end
     else
      begin
@@ -400,6 +419,8 @@ if not failed then
 
         constgammaUchastok[High(constgammaUchastok)].y := constgammaUchastok[High(constgammaUchastok)].y + Vytemp/2*dt;
         tempstate.y := constgammaUchastok[High(constgammaUchastok)].y;
+
+         HmaxCheck(tempstate,failed);
        end
     else
      begin
@@ -432,6 +453,8 @@ if not failed then
         Vytemp := Vy/Abs(kren)*Abs(RadToDeg(tempstate.gamma));
         vyvod[High(vyvod)].y := vyvod[High(vyvod)].y + Vytemp/2*dt;
         tempstate.y := vyvod[High(vyvod)].y;
+
+        HmaxCheck(tempstate,failed);
      end
    else
     begin
@@ -465,7 +488,7 @@ if not failed then
     end
   else
    begin
-    ShowMessage('ѕадение скорости до нул€!');
+    ShowMessage(failureMessage);
     SetLength(Result,0);
    end;
 end;
@@ -665,6 +688,8 @@ begin
                 Result[High(Result)].theta := -ArcTan(a/g_g); //pitch according to nx_temp
 
                 localTime := localTime + dt;
+
+                HmaxCheck(Result[High(Result)], failed);
                end;
               end
             else
@@ -675,7 +700,7 @@ begin
 
         if failed then
          begin
-          ShowMessage('ѕадение скорости до нул€!');
+          ShowMessage(failureMessage);
           SetLength(Result,0);
          end;
        end
@@ -974,9 +999,11 @@ end;
 function iVertVzletPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltay, Vdesired : Real) : TManevrData;
 var
   deltat, localt : Real;
+  failed : Boolean;
 
 begin
  SetLength(Result,0);
+ failed := False;
 
  if Vdesired <= VertVzletPosadkaVmax (helicopter,icG, icT,initialstate.y,deltay) then
    if deltay <> 0 then
@@ -988,7 +1015,7 @@ begin
          begin
           localt := -dt;
 
-          while localt < deltat + 2*deltatSlope do
+          while (localt < deltat + 2*deltatSlope) and (not failed) do
            begin
 
 
@@ -1005,12 +1032,24 @@ begin
                   y := initialstate.y + VertVzletPosadkay (deltay, Vdesired, localt);
                   V := VertVzletPosadkaV (deltay, Vdesired, localt);
                   t := localt
-                 end;
+                 end; 
+
+                 HmaxCheck(Result[High(Result)], failed);
               end;
 
            end;
 
-          Result[High(Result)].V := 0;
+           if not failed then
+            begin
+              Result[High(Result)].V := 0;
+            end
+
+           else
+            begin
+             SetLength(Result,0);
+             ShowMessage(failureMessage);
+            end;
+
          end
         else
          ShowMessage('function iVertVzletPosadka: deltat error ')
@@ -1020,7 +1059,8 @@ begin
    else
     ShowMessage('ѕеремещение не должно быть равно нулю!')
  else
-  ShowMessage('«аданна€ вертикальна€ скорость не может быть достигнута')
+  ShowMessage('«аданна€ вертикальна€ скорость не может быть достигнута');
+
 end;
 
 function VertVzlet(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
