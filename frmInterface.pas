@@ -1043,7 +1043,7 @@ begin
   h0 := Hdefault;
 
  if Length(g_FlightData) = 0 then  //v0 and T doesn't change when changing helicopter after calculating some manoeuvres
-  begin
+  begin                              //it's a bit more complicated for H0
    v0 := 0;
    t := Tdefault;
   end
