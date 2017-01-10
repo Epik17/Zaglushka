@@ -8,6 +8,8 @@ unit frmInterface;
 
 - check Gorka
 
+- trajectory is not smooth when appending razgon s naborom (theta is not right)
+
 - add initial YAW and FRONT VIEW of trajectory ?
 
 - reliable isometric projection (equal axis scales, min/max X and Z, range, etc. !! )
