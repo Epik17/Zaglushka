@@ -964,7 +964,7 @@ begin
        if (t>deltatSlope) and (t < deltatSlope+deltat) then //slope
         Result := Vmax*(t - deltatSlope/2)
        else //second parabola
-        Result := (0.5*a)*Sqr(t-deltatSlope-deltat)+Vmax*(t-deltatSlope-deltat)+Vmax*(0.5*deltatSlope+deltat)
+        Result := (-0.5*a)*Sqr(t-deltatSlope-deltat)+Vmax*(t-deltatSlope-deltat)+Vmax*(0.5*deltatSlope+deltat)
      end
     else
      ShowMessage('«аданное врем€ превышает врем€ выполнени€ маневра');
