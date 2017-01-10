@@ -5,7 +5,7 @@ uses SysUtils,MyTypes, Math, GlobalConstants, HelicoptersDatabase,Dialogs;
 
 type TStateVector = record
 x,y,z,{m}
-theta,gamma,psi,{rad}
+theta{trajectory slope}, thetaVisual{helicopter pitch}, gamma, psi,{rad}
 V{m/s},
 ny,
 t{s} : Real;
@@ -49,12 +49,13 @@ begin
    MyFloatToStrF(x)+' '+
    MyFloatToStrF(y)+' '+
    MyFloatToStrF(z)+' '+
-   MyFloatToStrF(RadToDeg(theta))+' '+
+   MyFloatToStrF(RadToDeg(thetaVisual))+' '+
    MyFloatToStrF(-{for Blitz3D}RadToDeg(gamma))+' '+
    MyFloatToStrF(RadToDeg(psi))+' '+
    MyFloatToStrF(V*g_mps)+' '+
    MyFloatToStrF(ny)+' '+
-   MyFloatToStrF(t)+' '
+   MyFloatToStrF(t)+' '+
+   MyFloatToStrF(RadToDeg(theta))+' '
 end;
 
 function ToXYZ1Array(statevector : TStateVector) : TArrayOfReal; overload;
