@@ -540,10 +540,13 @@ end;
 
 function iRazgonTormozhenie(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{km/h}, VyDesired{m/s} : Real) : TManevrData;
 var
-  localTime,tempny,a, Vytemp, tempy, VstartThetaCorr, ThetastartThetaCorr : Real;
+  localTime,tempny,a, Vytemp, tempy, VstartThetaCorr, ThetastartThetaCorr, VytempCorrected, VbeginCorr, VendCorr : Real;
   tempstate : TStateVector;
   tempomega : TVector3D;
   failed : Boolean;
+
+const
+   Vfactor = 0.2;
 
 function Razgon() : Boolean;
 begin
@@ -578,6 +581,7 @@ end;   }
   knx = 0.005;
   VfinalReper = 2;
   thetaMax = 6;//degree
+
 
 var
  linearnx, realnx,VfinalTrick : Real;
@@ -644,6 +648,7 @@ begin
  failed := False;
  VstartThetaCorr := 0;
  ThetastartThetaCorr := 0;
+ VytempCorrected := 0;
 
  if Round(initialstate.V*g_mps) <> Vfinal then
     begin
@@ -672,6 +677,9 @@ begin
             if (tempstate.V >= 0) then
               begin
                begin
+
+
+                    //calculating Vy
                 if Length(Result) = 0 then
                  Vytemp := VyRasp(helicopter, icG, icT, tempy, initialstate.V*g_mps)
                 else
@@ -680,17 +688,50 @@ begin
                 if (Vytemp > VyDesired) or (Abs(VyDesired) < 0.001){in case of horizontal flight} then
                   Vytemp := VyDesired;
 
+
+                  if Razgon then
+                    begin
+                     VbeginCorr := initialstate.V + Vfactor*Abs(Vfinal/g_mps - initialstate.V) ;  // m/s
+                     VendCorr :=  Vfinal/g_mps - Vfactor*Abs(Vfinal/g_mps - initialstate.V)
+                    end
+                  else
+                    begin
+                     VbeginCorr := initialstate.V - Vfactor*Abs(Vfinal/g_mps - initialstate.V);
+                     VendCorr :=  Vfinal/g_mps + Vfactor*Abs(Vfinal/g_mps - initialstate.V)
+                    end;
+
+                if  Abs(Abs(tempstate.V)-Abs(initialstate.V))*g_mps < Vfactor*Abs(Abs(Vfinal)-g_mps*Abs(initialstate.V)) then
+                 //beginning
+                   VytempCorrected := ProportionalTo(tempstate.V, initialstate.V, VbeginCorr, 0, Vytemp);
+
+                if Abs(Abs(Vfinal)-Abs(tempstate.V)*g_mps) < Vfactor*Abs(Abs(Vfinal)-g_mps*Abs(initialstate.V)) then
+                   //ending
+                   VytempCorrected := ProportionalTo(tempstate.V, VendCorr, Vfinal/g_mps, Vytemp, 0);
+
+
+
                 if Razgon then
-                 SetAccelerationRazgon(a,tempstate, tempny, Vytemp)
+                 SetAccelerationRazgon(a,tempstate, tempny, {Vytemp}VytempCorrected)
                 else
-                 SetAccelerationTormozh(a,tempstate, tempny, Vytemp, initialstate.V);
+                 SetAccelerationTormozh(a,tempstate, tempny, {Vytemp}VytempCorrected, initialstate.V);
+
+
+
+
 
                 g_Etape(Result,tempstate, helicopter, tempny,a, tempomega);
 
+
+
+
                            //climb
-                tempy := tempy +  + Vytemp*dt;
+                tempy := tempy + {Vytemp}VytempCorrected*dt;
                 Result[High(Result)].y := tempy;
 
+
+
+
+                 //thetaVisual correction
                 Result[High(Result)].thetaVisual := DegToRad(g_thetaVisualdefault)-0.6*ArcTan(a/g_g); //pitch according to nx_temp
 
                 if Abs(Abs(tempstate.V) - Abs(initialstate.V))*g_mps > 0.7*Abs(Abs(Vfinal) - Abs(initialstate.V)) then
@@ -703,6 +744,9 @@ begin
 
                   Result[High(Result)].thetaVisual := ProportionalTo(tempstate.V*g_mps, VstartThetaCorr, Vfinal, ThetastartThetaCorr, DegToRad(g_thetaVisualdefault))
                  end;
+
+
+
 
                 localTime := localTime + dt;
 
