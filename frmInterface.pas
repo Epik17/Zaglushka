@@ -6,7 +6,9 @@ unit frmInterface;
  Vy in Razgon s naborom, Spiral
  -----------------------------
 
-- add initial YAW and FRONT VIEW of trajectory
+- check Gorka
+
+- add initial YAW and FRONT VIEW of trajectory ?
 
 - reliable isometric projection (equal axis scales, min/max X and Z, range, etc. !! )
 
@@ -725,10 +727,10 @@ begin
     names[0]:='Конечн. скор., км/ч';
     maxes[0]:=Round(0.95*g_Helicopter.Vmax)-1;
 
-    multipliers[1]:=0.5;
-    mins[1]:=2;
+    multipliers[1]:=0.1;
+    mins[1]:=-50;
     names[1]:='Верт. скор., м/с';
-    maxes[1]:=10;
+    maxes[1]:=50;
    end;
 
   if (ManevrType = mtLiftOff) or (ManevrType = mtLanding) then
