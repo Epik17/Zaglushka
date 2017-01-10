@@ -1096,7 +1096,7 @@ begin
                  begin
                   y := initialstate.y + VertVzletPosadkay (deltay, Vdesired, localt);
                   V := VertVzletPosadkaV (deltay, Vdesired, localt);
-                  t := localt
+                  t := initialstate.t + localt
                  end; 
 
                  HmaxCheck(Result[High(Result)], failed);
