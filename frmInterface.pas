@@ -146,6 +146,7 @@ Tdefault = 15; //default outboard temperature
 deltaH0 = 25; //H0 increment
 Hmin = 50;
 Hdefault = 400;
+Hmax = 2000;
 
 
 
@@ -164,22 +165,6 @@ implementation
 
 procedure Tfrm_Interface.FlightDataInitialization;
 begin
-  {  SetLength(g_FlightData,1);
-   SetLength(g_FlightData[0],1);
-
-    with g_FlightData[0,0] do
-     begin
-      x :=0;
-      y := g_H0;
-      z :=0;
-      theta :=0;
-      gamma := 0;
-      psi :=DegToRad(45);
-      V := g_V0/g_mps;
-      ny :=1;
-      t :=0;
-     end
-          }
   SetLength(g_FlightData,0);        
 end;
 
@@ -187,14 +172,12 @@ procedure Tfrm_Interface.FormCreate(Sender: TObject);
 var
   i : Byte;
  // test : TManevrData;
-begin   
+begin
 
  for i:=1 to Length(g_ManevrNames) do
    cbb_Manevry.Items.Add(g_ManevrNames[i]);
 
  g_ManevrList := TManevrList.Create;
-
-
 
    ResetElementsArrays;
 
@@ -205,8 +188,8 @@ begin
   for i:=1 to Length(g_HelicopterDatabase) do
    cbb_HelicopterType.Items.Add(g_HelicopterDatabase[i].Name);
 
-
    cbb_HelicopterType.ItemIndex :=6;
+
    cbb_HelicopterTypeSelect(Self);
 
 
@@ -216,7 +199,6 @@ begin
 
    CreateManevrInfoGrid;
 
-  // ShowMessage(FloatToStr(Floor(gammaMax(g_helicopter, g_G, g_T,g_H0))));
 
 end;
 
@@ -1041,7 +1023,7 @@ var
 
 begin
   h0 := Hdefault;
-
+ //  ShowMessage('SetInitialConditionsTrackbars 1: '+FloatToStr(trckbr_H0.Max));
  if Length(g_FlightData) = 0 then  //v0 and T doesn't change when changing helicopter after calculating some manoeuvres
   begin                              //it's a bit more complicated for H0
    v0 := 0;
@@ -1052,25 +1034,27 @@ begin
    v0 := g_V0;
    t := g_T;
 
-   if g_H0 < 0.9*g_Helicopter.Hdyn then
+   if g_H0 < Hmax then
     h0 := g_H0
    else
-    h0 := 0.9*g_Helicopter.Hdyn;
+    h0 := Hmax;
   end;
 
-  SetICTrackbar(trckbr_H0,Hmin/deltaH0,0.9*g_Helicopter.Hdyn/deltaH0,h0/deltaH0);
+ SetICTrackbar(trckbr_H0,Hmin/deltaH0,Hmax/deltaH0,h0/deltaH0);
 
  SetICTrackbar(trckbrV0,0,0.95*g_Helicopter.Vmax-1,v0);
+
  SetICTrackbar(trckbr_G,g_Helicopter.Gmin,g_Helicopter.Gmax,g_Helicopter.Gnorm);
 
  trckbr_G.Min := Round(g_Helicopter.Gmin); //(setting Min explicitly; fixing delphi's bug)
+
  SetICTrackbar(trckbr_T,Tmin,Tmax,t);
 
 end;
 
 procedure Tfrm_Interface.DynamicallyUpdateICLabelValuesAndPlots(Sender: TObject);
 begin
- DynamicallyChangeV0max;
+  DynamicallyChangeV0max;
 
  lbl_H0value.Caption := FloatToStr(g_H0);
  lbl_Gvalue.Caption := FloatToStr(g_G);
@@ -1760,19 +1744,19 @@ end;
 
 procedure Tfrm_Interface.DynamicallyChangeV0max;
 var
-  maxV0, minV0, realHstat  : Integer;
+  maxV0, minV0  : Integer;
 
 const
  defaultVMin = 0;
 begin
  // updating Hst
-  realHstat := Round(RealHst(g_Helicopter,g_G,g_T));
+{  realHstat := Round(RealHst(g_Helicopter,g_G,g_T));
 
   if realHstat < deltaH0*trckbr_H0.Position then
    trckbr_H0.Position := Round(0.9*realHstat/deltaH0);
 
   trckbr_H0.Max := Round(0.9*realHstat/deltaH0);
-
+   }
 
  // updating maxV0
   maxV0 := VmaxOnAGivenHeight(g_Helicopter,g_G,g_T,g_H0);

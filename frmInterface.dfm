@@ -159,6 +159,7 @@ object frm_Interface: Tfrm_Interface
     Top = 88
     Width = 97
     Height = 17
+    Max = 10000
     Position = 5
     TabOrder = 8
     ThumbLength = 10
@@ -169,6 +170,7 @@ object frm_Interface: Tfrm_Interface
     Top = 120
     Width = 97
     Height = 17
+    Max = 100000
     Position = 5
     TabOrder = 9
     ThumbLength = 10
@@ -179,6 +181,7 @@ object frm_Interface: Tfrm_Interface
     Top = 152
     Width = 97
     Height = 17
+    Max = 100
     Position = 5
     TabOrder = 7
     ThumbLength = 10
@@ -319,6 +322,7 @@ object frm_Interface: Tfrm_Interface
     Top = 184
     Width = 97
     Height = 17
+    Max = 10000
     Position = 5
     TabOrder = 16
     ThumbLength = 10
