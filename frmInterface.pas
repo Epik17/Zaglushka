@@ -144,6 +144,8 @@ Tmin = -40; //minimal outboard temperature
 Tmax = 40;  //maximal outboard temperature
 Tdefault = 15; //default outboard temperature
 deltaH0 = 25; //H0 increment
+Hmin = 50;
+Hdefault = 400;
 
 
 
@@ -1035,22 +1037,34 @@ end;
 
 procedure Tfrm_Interface.SetInitialConditionsTrackbars;
 var
-  v0 : Real;
+  v0, t, h0 : Real;
 
 begin
+  h0 := Hdefault;
 
- SetICTrackbar(trckbr_H0,50{meters}/deltaH0,0.9*g_Helicopter.Hdyn/deltaH0,400/deltaH0);
-
- if Length(g_FlightData) = 0 then  //v0 doesn't change when changing helicopter after calculating some manoeuvres
-  v0 := 0
+ if Length(g_FlightData) = 0 then  //v0 and T doesn't change when changing helicopter after calculating some manoeuvres
+  begin
+   v0 := 0;
+   t := Tdefault;
+  end
  else
-  v0 := g_V0;
+  begin
+   v0 := g_V0;
+   t := g_T;
+
+   if g_H0 < 0.9*g_Helicopter.Hdyn then
+    h0 := g_H0
+   else
+    h0 := 0.9*g_Helicopter.Hdyn;
+  end;
+
+  SetICTrackbar(trckbr_H0,Hmin/deltaH0,0.9*g_Helicopter.Hdyn/deltaH0,h0/deltaH0);
 
  SetICTrackbar(trckbrV0,0,0.95*g_Helicopter.Vmax-1,v0);
  SetICTrackbar(trckbr_G,g_Helicopter.Gmin,g_Helicopter.Gmax,g_Helicopter.Gnorm);
 
  trckbr_G.Min := Round(g_Helicopter.Gmin); //(setting Min explicitly; fixing delphi's bug)
- SetICTrackbar(trckbr_T,Tmin,Tmax,Tdefault);
+ SetICTrackbar(trckbr_T,Tmin,Tmax,t);
 
 end;
 
