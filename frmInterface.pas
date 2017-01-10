@@ -531,7 +531,7 @@ if dlgOpenFile.Execute then
 
          end;
       except
-        ShowMessage('Некорректная структура файла');
+        ShowMessage('Некорректная структура файла. Необходимо указать текстовый файл, содержащий параметры полетного задания');
       end
 
     end;
@@ -969,7 +969,7 @@ begin
           else
            begin
             Result := -1;
-            ShowMessage('function HelicopterTypeToNumber: некорректное название вертолета');
+            //ShowMessage('function HelicopterTypeToNumber: некорректное название вертолета');
            end;     
 end;
 
