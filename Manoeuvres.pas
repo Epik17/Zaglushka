@@ -122,6 +122,7 @@ begin
  tempstate.gamma := angles.x;
  tempstate.psi := angles.y;
  tempstate.theta := angles.z;
+ tempstate.thetaVisual := tempstate.theta + DegToRad(g_thetaVisualdefault);
  tempstate.V := tempstate.V + dV;
  tempstate.t := tempstate.t + dt;
  tempstate.x := tempstate.x + dr.x;
@@ -231,7 +232,10 @@ begin
    failed := True;
 
   if not failed then
+  begin
    vyvod[High(vyvod)].theta := 0.;
+   vyvod[High(vyvod)].thetaVisual := DegToRad(g_thetaVisualdefault);
+  end;
 
   if failed then ShowMessage(failureMessage);
 
@@ -536,7 +540,7 @@ end;
 
 function iRazgonTormozhenie(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{km/h}, VyDesired{m/s} : Real) : TManevrData;
 var
-  localTime,tempny,a, Vytemp, tempy : Real;
+  localTime,tempny,a, Vytemp, tempy, VstartThetaCorr, ThetastartThetaCorr : Real;
   tempstate : TStateVector;
   tempomega : TVector3D;
   failed : Boolean;
@@ -571,7 +575,7 @@ begin
 end;   }
 
  const
-  knx = 0.013;
+  knx = 0.005;
   VfinalReper = 2;
   thetaMax = 6;//degree
 
@@ -618,7 +622,7 @@ end;
 
  procedure SetAccelerationRazgon(var a : Real; tempstate: TStateVector; ny, Vy : Real);
   const
- knx = 0.013;
+ knx = 0.005;
 
  var
    linearnx, realnx : Real;
@@ -638,12 +642,14 @@ end;
 begin
     //инициализируем
  failed := False;
+ VstartThetaCorr := 0;
+ ThetastartThetaCorr := 0;
 
  if Round(initialstate.V*g_mps) <> Vfinal then
     begin
          tempstate := initialstate;
          tempny :=1;
-         localTime :=0;
+         localTime :=0.1;
          tempomega.x:=0;
          tempomega.y:=0;
          tempomega.z:=0;
@@ -685,7 +691,18 @@ begin
                 tempy := tempy +  + Vytemp*dt;
                 Result[High(Result)].y := tempy;
 
-                Result[High(Result)].theta := -ArcTan(a/g_g); //pitch according to nx_temp
+                Result[High(Result)].thetaVisual := DegToRad(g_thetaVisualdefault)-0.6*ArcTan(a/g_g); //pitch according to nx_temp
+
+                if Abs(Abs(tempstate.V) - Abs(initialstate.V))*g_mps > 0.7*Abs(Abs(Vfinal) - Abs(initialstate.V)) then
+                 begin
+                  if VstartThetaCorr = 0 then
+                    begin
+                     VstartThetaCorr := tempstate.V*g_mps;
+                     ThetastartThetaCorr := Result[High(Result)].thetaVisual;
+                    end;
+
+                  Result[High(Result)].thetaVisual := ProportionalTo(tempstate.V*g_mps, VstartThetaCorr, Vfinal, ThetastartThetaCorr, DegToRad(g_thetaVisualdefault))
+                 end;
 
                 localTime := localTime + dt;
 
@@ -696,7 +713,10 @@ begin
               failed := True;
          end;
            if not failed then
+           begin
             Result[High(Result)].V := Vfinal/g_mps;
+            Result[High(Result)].thetaVisual := DegToRad(g_thetaVisualdefault);
+           end;
 
         if failed then
          begin
@@ -1118,7 +1138,7 @@ begin
               psi := initialstate.psi;
               ny := initialstate.ny;
 
-              theta := initialstate.theta + MyOscillation (ampli, omega, Pi/2, duration, localtime);
+              thetaVisual := initialstate.thetaVisual + MyOscillation (ampli, omega, Pi/2, duration, localtime);
               gamma := initialstate.gamma + MyOscillation (ampli, omega, 0, duration, localtime);
               t := initialstate.t + localtime + dt;
 
@@ -1130,7 +1150,7 @@ begin
 
             with Result[High(Result)] do
                begin
-                theta := 0;
+                thetaVisual := DegToRad(g_thetaVisualdefault);
                 gamma := 0;
                end;
       end

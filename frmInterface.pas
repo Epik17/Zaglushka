@@ -238,6 +238,7 @@ end;
         y := g_H0;
         z :=0;
         theta :=0;
+        thetaVisual := DegToRad(g_thetaVisualdefault);
         gamma := 0;
         psi :=DegToRad(45);
         V := g_V0/g_mps;
@@ -1101,7 +1102,7 @@ begin
      Writeln(f, manevrlist[i].fParameters[j]:7:6);
    end;
    CloseFile(f);
-   ShowMessage('Полетное задание успешно сохранено в файл '+filename);
+   //ShowMessage('Полетное задание успешно сохранено в файл '+filename);
  except
    ShowMessage('Ошибка при сохранении полетного задания');
  end;
@@ -1380,7 +1381,7 @@ begin
         Writeln(f, StateVectorString(FlightData[i][j]));
 
      CloseFile(f);
-     ShowMessage('Массив положений вертолета успешно сохранен в файл '+filename);
+    // ShowMessage('Массив положений вертолета успешно сохранен в файл '+filename);
    end;
  except
    ShowMessage('Ошибка при сохранении массива положений вертолета');
