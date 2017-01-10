@@ -6,7 +6,7 @@ unit frmInterface;
  Vy in Razgon s naborom, Spiral
  -----------------------------
 
-- check Gorka
+- check Gorka (V seems to be decreasing too quickly)
 
 - trajectory is not smooth when appending razgon s naborom (theta is not right)
 
