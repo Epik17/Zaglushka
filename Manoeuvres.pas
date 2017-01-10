@@ -990,18 +990,23 @@ begin
 
           while localt < deltat + 2*deltatSlope do
            begin
-            ExtendArray(Result);
 
-            Result[High(Result)] := initialstate;
 
             localt := localt + dt;
 
-            with Result[High(Result)] do
-             begin
-              y := initialstate.y + VertVzletPosadkay (deltay, Vdesired, localt);
-              V := VertVzletPosadkaV (deltay, Vdesired, localt);
-              t := localt
-             end;
+            if localt > 0 then
+              begin
+                ExtendArray(Result);
+
+                Result[High(Result)] := initialstate;
+
+                with Result[High(Result)] do
+                 begin
+                  y := initialstate.y + VertVzletPosadkay (deltay, Vdesired, localt);
+                  V := VertVzletPosadkaV (deltay, Vdesired, localt);
+                  t := localt
+                 end;
+              end;
 
            end;
 
