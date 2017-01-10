@@ -81,6 +81,7 @@ begin
             V := initialstate.V;
             psi := initialstate.psi;
             theta := initialstate.theta;
+            thetaVisual := initialstate.thetaVisual;
             gamma := initialstate.gamma;
             ny := initialstate.ny;
 
