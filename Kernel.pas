@@ -7,7 +7,6 @@ uses HelicoptersDatabase, Dialogs,Sysutils,World, GlobalConstants, Math;
 
 type TDiapason = array [0..g_Vmax] of Real;
 
-function HotV(helicopter : THelicopter; V: Real) : Real; overload; //характеризует диапазон высот и скоростей для нормальных условий
 function HotV(helicopter : THelicopter; icG, icT,V: Real) : Real; overload; //характеризует диапазон высот и скоростей с учетом полетного веса и температуры
 
 function Diapason(helicopter : THelicopter; icG, icT : Real) : TDiapason;overload; //просто сетка для визуализации скорректированного диапазона
@@ -31,7 +30,8 @@ function VyRasp(helicopter : THelicopter; icG, icT, h0, V{km/h}  : Real) : Real;
 
 implementation
 
-function HotV(helicopter : THelicopter; V: Real) : Real;
+function HotV(helicopter : THelicopter; V: Real) : Real;overload;
+//характеризует диапазон высот и скоростей для нормальных условий
 begin
  Result := helicopter.Hdyn - Sqr(V-helicopter.ParabolaCoeff*helicopter.Vmax)*(helicopter.Hdyn-helicopter.Hst)/Sqr(helicopter.ParabolaCoeff*helicopter.Vmax)
 end;
@@ -91,7 +91,7 @@ begin
   ShowMessage('При вычислении тангенциальной перегрузки обнаружено некорректное значение скорости '+FloatToStr(V));
 end;
 
-function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V : Real) : Real;
+function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V : Real) : Real; overload;
 //с учетом полетного веса и температуры
  begin
    Result := inx (helicopter, ny, icG, icT,hManevraCurrent,V{km/h}, 0);
