@@ -138,7 +138,12 @@ end;
 
 function gammaMax(helicopter : THelicopter;icG, icT,icH0 : Real): Real;
 begin
-  Result := RadToDeg(ArcCos(1/nyMax(helicopter, icG, icT, icH0)));
+  try
+   Result := RadToDeg(ArcCos(1/nyMax(helicopter, icG, icT, icH0)))
+  except
+   Result := 0;
+   //ShowMessage('ѕри заданных услови€х невозможно вычислить допустимый угол крена');
+  end;
 end;
 
 function VmaxOnAGivenHeight(helicopter : THelicopter; icG, icT, h : Real) : Integer;//c точностью до 1 км/ч
