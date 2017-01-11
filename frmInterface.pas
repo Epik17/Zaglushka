@@ -1803,8 +1803,8 @@ begin
  else
   trckbrV0.Min := minV0;
 
-  if trckbrV0.Position < defaultVMin then
-    trckbrV0.Position := defaultVMin;
+  if trckbrV0.Position < minV0 then
+    trckbrV0.Position := minV0;
 end;
 
 
