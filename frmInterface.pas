@@ -1577,8 +1577,11 @@ begin
    then
     begin
       g_TrackBars[0].Max := Floor(gammaMax(g_helicopter,g_G, g_T,g_H0));
+
     end;
 
+   // if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правая спираль') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левая спираль') then
+  // g_TrackBars[2].Max:=Floor(VyRasp(helicopter, icG, icT, tempy, initialstate.V*g_mps))
 
    if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Вертикальный взлет') then
     begin

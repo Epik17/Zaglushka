@@ -366,8 +366,12 @@ end;
 begin
  failed := False;
 
- if 1/Cos(DegToRad(kren)) <= ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps) then
+ if (1/Cos(DegToRad(kren)) <= ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps))
+    and (Vy <= VyRasp(helicopter, icG, icT, initialstate.y, initialstate.V*g_mps))
+ then
   begin
+   // ShowMessage('iVirage: VyRasp = ' + FloatToStr(VyRasp(helicopter, icG, icT, initialstate.y, initialstate.V*g_mps)));
+
       //инициализируем
    tempstate := initialstate;
    tempny :=1;
