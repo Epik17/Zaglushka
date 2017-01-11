@@ -17,7 +17,7 @@ function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG,
 function Visenie(initialstate : TStateVector; duration : Real) : TManevrData;
 function ForcedVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 
-
+function VertVzletPosadkaVmax (helicopter : THelicopter;icG, icT,icH0, deltay : Real) : Real;
 
 implementation
 

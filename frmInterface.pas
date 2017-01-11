@@ -1493,7 +1493,7 @@ end;
 procedure Tfrm_Interface.DynamicFoolProof;
 var
   cosTheta  : Real;
-  cosThetaRounded, trckbarNo,Vmax, Vmin, nyvvodaMaxPos : Integer;
+  cosThetaRounded, trckbarNo,Vmax, Vmin, nyvvodaMaxPos, VyMaxPos : Integer;
 const
   cosCorrection = 0.02;
 
@@ -1579,6 +1579,23 @@ begin
       g_TrackBars[0].Max := Floor(gammaMax(g_helicopter,g_G, g_T,g_H0));
     end;
 
+
+   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Вертикальный взлет') then
+    begin
+     VyMaxPos := Round(10*VertVzletPosadkaVmax (g_helicopter,g_G, g_T,g_H0,0))-1;
+
+     if VyMaxPos > 1 then
+      begin
+       g_TrackBars[0].Enabled := True;
+       btn_AddManevr.Enabled := True;
+       g_TrackBars[0].Max := VyMaxPos; 
+      end
+     else
+      begin
+       g_TrackBars[0].Enabled := False;
+       btn_AddManevr.Enabled := False;
+      end;
+    end;
 
 end;
 
