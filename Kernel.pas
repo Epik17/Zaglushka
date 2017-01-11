@@ -88,7 +88,7 @@ begin
   with helicopter do
    Result := (540/Gnorm)*((TraspUZemli*(1-ny)/ctgTotH+HotV(helicopter,icG, icT,tempV)*ny-hManevraCurrent)*ctgNotH -0.0066*icG*Vy/2)/tempV
  else
-  ShowMessage('function nx: некорректное значение скорости '+FloatToStr(V));
+  ShowMessage('При вычислении тангенциальной перегрузки обнаружено некорректное значение скорости '+FloatToStr(V));
 end;
 
 function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V : Real) : Real;
@@ -112,9 +112,18 @@ begin
 end;
 
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real): Real;
+var
+  denominator : Real;
 begin
+  Result :=1;
   with helicopter do
-   Result:= (TraspUZemli/ctgTotH-icH0)/(TraspUZemli/ctgTotH-HotV(helicopter,icG, icT,V))
+   denominator := (TraspUZemli/ctgTotH-HotV(helicopter,icG, icT,V));
+
+  if Abs(denominator) > 0.00001 then
+   with helicopter do
+    Result:= (TraspUZemli/ctgTotH-icH0)/(TraspUZemli/ctgTotH-HotV(helicopter,icG, icT,V))
+  else
+    ShowMessage('При заданных условиях невозможно определить нормальную перегрузку');
 
 end;
 

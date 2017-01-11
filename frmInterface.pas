@@ -1493,7 +1493,7 @@ end;
 procedure Tfrm_Interface.DynamicFoolProof;
 var
   cosTheta  : Real;
-  cosThetaRounded, trckbarNo,Vmax, Vmin, nyvvodaMaxPos, VyMaxPos : Integer;
+  cosThetaRounded, trckbarNo,Vmax, Vmin, nyvvodaMaxPos, VyMaxPos, gammaMaxPos : Integer;
 const
   cosCorrection = 0.02;
 
@@ -1576,7 +1576,19 @@ begin
     or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правая спираль') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левая спираль')
    then
     begin
-      g_TrackBars[0].Max := Floor(gammaMax(g_helicopter,g_G, g_T,g_H0));
+      gammaMaxPos := Floor(gammaMax(g_helicopter,g_G, g_T,g_H0));
+
+      if gammaMaxPos > 1 then
+       begin
+        g_TrackBars[0].Enabled := True;
+        btn_AddManevr.Enabled := True;
+        g_TrackBars[0].Max := gammaMaxPos;
+       end
+      else
+       begin
+        g_TrackBars[0].Enabled := False;
+        btn_AddManevr.Enabled := False;
+       end;
 
     end;
 
@@ -1591,7 +1603,7 @@ begin
       begin
        g_TrackBars[0].Enabled := True;
        btn_AddManevr.Enabled := True;
-       g_TrackBars[0].Max := VyMaxPos; 
+       g_TrackBars[0].Max := VyMaxPos;
       end
      else
       begin

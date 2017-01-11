@@ -315,7 +315,12 @@ var
   k : Real;
 begin
   k := (parameterFinal-parameterStart)/(orientirFinal-orientirStart);
+  try
   Result := k * orientirTemp + parameterStart - orientirStart*k;
+  except
+   Result := 0;
+   ShowMessage('Ошибка вычисления пропорциональной величины');
+  end;
 end;
 
 
@@ -1152,10 +1157,15 @@ end;
 
 function MyOscillation (A, Omega, phi, duration, t : Real) : Real;
 begin
-  if t<=duration/2 then
+  Result := 0;
+
+  if duration > 0.001 then
+   if t<=duration/2 then
     Result := (2/duration)* t * A * Cos(Omega * t + phi)
-  else
+   else
     Result := ((-2/duration)* t + 2) * A * Cos(Omega * t + phi)
+  else
+   ShowMessage('Продолжительность висения должна быть больше нуля');
 end;
 
 function Visenie(initialstate : TStateVector; duration : Real) : TManevrData;
