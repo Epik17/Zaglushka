@@ -149,7 +149,7 @@ function gammaMax(helicopter : THelicopter;icG, icT,icH0 : Real): Real;
 begin
   try
    Result := RadToDeg(ArcCos(1/nyMax(helicopter, icG, icT, icH0)))
-  except
+  except                                                          // run executable to see effect of try-except!
    Result := 0;
    //ShowMessage('При заданных условиях невозможно вычислить допустимый угол крена');
   end;
