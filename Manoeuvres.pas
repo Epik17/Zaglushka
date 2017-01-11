@@ -184,77 +184,81 @@ end;
 
 
 begin
-   //инициализируем
-   tempstate := initialstate;
+     //инициализируем
 
-   dnxa := nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*g_mps);  //переводим скорость в км/ч
+     SetLength(Result,0);
 
-   failed := False;
+     failed := False;
 
- //ввод
-   SetLength(vvod,0);
+ if not ((nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) or (nyvyvoda > ny(helicopter, icG, icT,initialstate.y-200,Vvyvoda))) then
+  begin
+     dnxa := nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*g_mps);  //переводим скорость в км/ч
 
-  while (not ((RadToDeg(tempstate.theta)>=thetaSlope) xor Pikirovanie)) and (not failed) do
+     tempstate := initialstate;
+
+   //ввод
+     SetLength(vvod,0);
+
+    while (not ((RadToDeg(tempstate.theta)>=thetaSlope) xor Pikirovanie)) and (not failed) do
+      if (tempstate.V > 0) then
+       begin
+        SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyvvoda,nx(helicopter, nyvvoda, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
+        g_Etape(vvod,tempstate, helicopter, nyvvoda,tempa, tempomega);
+        HmaxCheck(tempstate, failed);
+       end
+      else
+      failed := True;
+
+    vvod[High(vvod)].theta := DegToRad(thetaSlope);
+
+   //наклонный участок
+     SetLength(nakl,0);
+
+     nyslope := Cos(tempstate.theta);
+
+    while (not ((g_mps*tempstate.V <= Vvyvoda) xor Pikirovanie)) and (not failed) do
+     if (tempstate.V > 0) then
+      begin
+       Etape(nakl,nyslope);
+       HmaxCheck(tempstate, failed);
+      end
+     else
+    failed := True;
+
+   //вывод  
+     SetLength(vyvod,0);
+
+   while (not ((RadToDeg(tempstate.theta)<=0) xor Pikirovanie)) and (not failed) do
     if (tempstate.V > 0) then
      begin
-      SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyvvoda,nx(helicopter, nyvvoda, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
-      g_Etape(vvod,tempstate, helicopter, nyvvoda,tempa, tempomega);
+      Etape(vyvod,nyvyvoda);
       HmaxCheck(tempstate, failed);
      end
     else
-    failed := True;
-
-  vvod[High(vvod)].theta := DegToRad(thetaSlope);
-
- //наклонный участок
-   SetLength(nakl,0);
-
-   nyslope := Cos(tempstate.theta);
-
-  while (not ((g_mps*tempstate.V <= Vvyvoda) xor Pikirovanie)) and (not failed) do
-   if (tempstate.V > 0) then
-    begin
-     Etape(nakl,nyslope);
-     HmaxCheck(tempstate, failed);
-    end
-   else
+     failed := True;
+  end
+ else
   failed := True;
 
- //вывод  
-   SetLength(vyvod,0);
-
- while (not ((RadToDeg(tempstate.theta)<=0) xor Pikirovanie)) and (not failed) do
-  if (tempstate.V > 0) then
-   begin
-    Etape(vyvod,nyvyvoda);
-    HmaxCheck(tempstate, failed);
-   end
-  else
-   failed := True;
-
-  if not failed then
-  begin
-   vyvod[High(vyvod)].theta := 0.;
-   vyvod[High(vyvod)].thetaVisual := DegToRad(g_thetaVisualdefault);
-  end;
-
-  if failed then ShowMessage(failureMessage);
-
  //стыкуем
-  SetLength(Result,0);
- if not failed then
-   begin
-    AppendManevrData(Result,vvod,helicopter);
-    AppendManevrData(Result,nakl,helicopter);
-    AppendManevrData(Result,vyvod,helicopter);
-   end;
+  if not failed then
+    begin
+     vyvod[High(vyvod)].theta := 0.;
+     vyvod[High(vyvod)].thetaVisual := DegToRad(g_thetaVisualdefault);
 
- //очищаем 
+     AppendManevrData(Result,vvod,helicopter);
+     AppendManevrData(Result,nakl,helicopter);
+     AppendManevrData(Result,vyvod,helicopter);
+    end
+  else
+   ShowMessage(failureMessage);
+
+
+ //очищаем
   SetLength(vvod,0);
   SetLength(nakl,0);
   SetLength(vyvod,0);
-
-  //ShowMessage(FloatToStr(ManevrPropsPerebornye(Result).zmax));
+  
 end;
 
 procedure VErrorMessage(temp,min,max: Real; Pikirovanie : boolean);
@@ -362,120 +366,124 @@ end;
 begin
  failed := False;
 
-   //инициализируем
- tempstate := initialstate;
- tempny :=1;
- Vytemp := 0;
- dnxa:= nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*g_mps);
+ if 1/Cos(DegToRad(kren)) <= ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps) then
+  begin
+      //инициализируем
+   tempstate := initialstate;
+   tempny :=1;
+   Vytemp := 0;
+   dnxa:= nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*g_mps);
 
- //ввод
-   SetLength(vvod,0);
+   //ввод
+     SetLength(vvod,0);
 
- if not failed then
-   while not (Abs(RadToDeg(tempstate.gamma)) >=Abs(kren)) do
-    if (tempstate.V > 0)  then
+   if not failed then
+     while not (Abs(RadToDeg(tempstate.gamma)) >=Abs(kren)) do
+      if (tempstate.V > 0)  then
+         begin
+          tempny := 1/Cos(tempstate.gamma);
+
+          SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny, dnxa, Left, Forced, False);
+          g_Etape(vvod,tempstate, helicopter, tempny,tempa, tempomega);
+
+           //for spiral
+          Vytemp := Vy/Abs(kren)*Abs(RadToDeg(tempstate.gamma));
+          vvod[High(vvod)].y := vvod[High(vvod)].y + Vytemp/2*dt;
+          tempstate.y := vvod[High(vvod)].y;
+
+           HmaxCheck(tempstate,failed);
+         end
+      else
        begin
-        tempny := 1/Cos(tempstate.gamma);
+        failed:= True;
+        Break;
+       end;
 
-        SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny, dnxa, Left, Forced, False);
-        g_Etape(vvod,tempstate, helicopter, tempny,tempa, tempomega);
+   //  ShowMessage('iVirage: y = ' + FloatToStr(vvod[High(vvod)].y));
 
-         //for spiral
-        Vytemp := Vy/Abs(kren)*Abs(RadToDeg(tempstate.gamma));
-        vvod[High(vvod)].y := vvod[High(vvod)].y + Vytemp/2*dt;
-        tempstate.y := vvod[High(vvod)].y;
-
-         HmaxCheck(tempstate,failed);
-       end
+  if not failed then
+   if (tempstate.V > 0) then
+    if vvod[High(vvod)].gamma >= 0 then
+     vvod[High(vvod)].gamma := DegToRad(kren)
     else
-     begin
-      failed:= True;
-      Break;
-     end;
-
- //  ShowMessage('iVirage: y = ' + FloatToStr(vvod[High(vvod)].y));
-
-if not failed then
- if (tempstate.V > 0) then
-  if vvod[High(vvod)].gamma >= 0 then
-   vvod[High(vvod)].gamma := DegToRad(kren)
-  else
- if (tempstate.V > 0) and not failed then
-   vvod[High(vvod)].gamma := -DegToRad(kren);
+   if (tempstate.V > 0) and not failed then
+     vvod[High(vvod)].gamma := -DegToRad(kren);
 
 
- //участок c постоянным креном
-   SetLength(constgammaUchastok,0);
-   tempomega.x := 0;
-   dpsiVvod := tempstate.psi-initialstate.psi;
+   //участок c постоянным креном
+     SetLength(constgammaUchastok,0);
+     tempomega.x := 0;
+     dpsiVvod := tempstate.psi-initialstate.psi;
 
- if not failed then
-   while not (Abs(tempstate.psi-initialstate.psi) >= Abs((DegToRad(deltaPsi))-Abs(dpsiVvod))) do
-    if (tempstate.V > 0) then
+   if not failed then
+     while not (Abs(tempstate.psi-initialstate.psi) >= Abs((DegToRad(deltaPsi))-Abs(dpsiVvod))) do
+      if (tempstate.V > 0) then
+         begin
+          SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny, dnxa, Left,Forced,True);
+
+          g_Etape(constgammaUchastok,tempstate, helicopter, tempny,tempa, tempomega);
+
+          //коррекция излишков курса
+          {if Abs(tempstate.psi) > Abs(initialstate.psi + DegToRad(deltaPsi)) then
+           constgammaUchastok[High(constgammaUchastok)].psi := initialstate.psi + DegToRad(deltaPsi);
+           }
+
+          constgammaUchastok[High(constgammaUchastok)].y := constgammaUchastok[High(constgammaUchastok)].y + Vytemp/2*dt;
+          tempstate.y := constgammaUchastok[High(constgammaUchastok)].y;
+
+           HmaxCheck(tempstate,failed);
+         end
+      else
        begin
-        SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny, dnxa, Left,Forced,True);
+        failed:= True;
+        Break;
+       end;
 
-        g_Etape(constgammaUchastok,tempstate, helicopter, tempny,tempa, tempomega);
+   //вывод
+     SetLength(vyvod,0);
+
+   prevgamma := 0;
+
+   if not failed then
+   begin
+    while not (tempstate.gamma*prevgamma < 0) do
+     if (tempstate.V > 0) then
+       begin
+         tempny := 1/Cos(tempstate.gamma);
+
+        SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny,dnxa,Left, Forced, False);
+        tempomega.x := -tempomega.x;
+        prevgamma := tempstate.gamma;
+        g_Etape(vyvod,tempstate, helicopter, tempny,tempa, tempomega);
 
         //коррекция излишков курса
-        {if Abs(tempstate.psi) > Abs(initialstate.psi + DegToRad(deltaPsi)) then
-         constgammaUchastok[High(constgammaUchastok)].psi := initialstate.psi + DegToRad(deltaPsi);
-         }
+       { if Abs(tempstate.psi) > Abs(initialstate.psi + DegToRad(deltaPsi)) then
+           vyvod[High(vyvod)].psi := initialstate.psi + DegToRad(deltaPsi); }
 
-        constgammaUchastok[High(constgammaUchastok)].y := constgammaUchastok[High(constgammaUchastok)].y + Vytemp/2*dt;
-        tempstate.y := constgammaUchastok[High(constgammaUchastok)].y;
+          //for spiral
+          Vytemp := Vy/Abs(kren)*Abs(RadToDeg(tempstate.gamma));
+          vyvod[High(vyvod)].y := vyvod[High(vyvod)].y + Vytemp/2*dt;
+          tempstate.y := vyvod[High(vyvod)].y;
 
-         HmaxCheck(tempstate,failed);
+          HmaxCheck(tempstate,failed);
        end
-    else
-     begin
-      failed:= True;
-      Break;
-     end;
+     else
+      begin
+       failed:= True;
+       Break;
+      end;
 
- //вывод
-   SetLength(vyvod,0);
+            //коррекция остатков крена
+        if (Abs(tempstate.gamma) > 0.001)  then
+         if (tempstate.gamma*prevgamma < 0) then
+          SetLength(vyvod,Length(vyvod)-1)
+         else
+           vyvod[High(vyvod)].gamma := 0;
 
- prevgamma := 0;
-
- if not failed then
- begin
-  while not (tempstate.gamma*prevgamma < 0) do
-   if (tempstate.V > 0) then
-     begin
-       tempny := 1/Cos(tempstate.gamma);
-
-      SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny,dnxa,Left, Forced, False);
-      tempomega.x := -tempomega.x;
-      prevgamma := tempstate.gamma;
-      g_Etape(vyvod,tempstate, helicopter, tempny,tempa, tempomega);
-
-      //коррекция излишков курса
-     { if Abs(tempstate.psi) > Abs(initialstate.psi + DegToRad(deltaPsi)) then
-         vyvod[High(vyvod)].psi := initialstate.psi + DegToRad(deltaPsi); }
-
-        //for spiral
-        Vytemp := Vy/Abs(kren)*Abs(RadToDeg(tempstate.gamma));
-        vyvod[High(vyvod)].y := vyvod[High(vyvod)].y + Vytemp/2*dt;
-        tempstate.y := vyvod[High(vyvod)].y;
-
-        HmaxCheck(tempstate,failed);
-     end
-   else
-    begin
-     failed:= True;
-     Break;
-    end;
-
-          //коррекция остатков крена
-      if (Abs(tempstate.gamma) > 0.001)  then
-       if (tempstate.gamma*prevgamma < 0) then
-        SetLength(vyvod,Length(vyvod)-1)
-       else
-         vyvod[High(vyvod)].gamma := 0;
-
- end;
-
+   end;
+  end
+ else
+  failed:= True;
 
 
   //ShowMessage('iVirage: Vy = ' + FloatToStr(Vytemp));

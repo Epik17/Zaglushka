@@ -669,11 +669,11 @@ begin
       begin
        mins[0]:=50;
        mins[1]:=101;
-       mins[3]:=200;
+       mins[3]:={Round(0.55*g_Helicopter.Vmax)} Round(0.7*VmaxOnAGivenHeight(g_helicopter, g_G, g_T, g_H0));;
 
        maxes[0]:=90;
        maxes[1]:=370;    //max should be greater than every possible value of parameter; we get delphi bug if not
-       maxes[3]:=Round(0.95*g_Helicopter.Vmax)-1;
+       maxes[3]:={Round(0.95*g_Helicopter.Vmax)-1} Round(0.9*VmaxOnAGivenHeight(g_helicopter, g_G, g_T, g_H0));
       end;
 
 
@@ -1493,7 +1493,7 @@ end;
 procedure Tfrm_Interface.DynamicFoolProof;
 var
   cosTheta  : Real;
-  cosThetaRounded, trckbarNo,Vmax, Vmin, nyvvodaMaxPos: Integer;
+  cosThetaRounded, trckbarNo,Vmax, Vmin, nyvvodaMaxPos : Integer;
 const
   cosCorrection = 0.02;
 
@@ -1551,6 +1551,9 @@ begin
          g_TrackBars[trckbarNo].Position := cosThetaRounded;
 
         g_TrackBars[trckbarNo].Max := cosThetaRounded;
+
+
+
     end;
 
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон/торможение в горизонте') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон/торможение с изм. высоты') then
