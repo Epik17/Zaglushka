@@ -1,9 +1,11 @@
 object frm_Interface: Tfrm_Interface
   Left = 453
   Top = 237
-  Width = 855
-  Height = 699
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
   Caption = #1055#1088#1086#1075#1088#1072#1084#1084#1072' '#1076#1083#1103' '#1084#1086#1076#1077#1083#1080#1088#1086#1074#1072#1085#1080#1103' '#1087#1086#1083#1077#1090#1085#1086#1075#1086' '#1079#1072#1076#1072#1085#1080#1103' '#1074#1077#1088#1090#1086#1083#1077#1090#1072
+  ClientHeight = 661
+  ClientWidth = 839
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
