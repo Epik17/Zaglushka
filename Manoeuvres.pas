@@ -244,7 +244,7 @@ begin
   if not failed then
     begin
      vyvod[High(vyvod)].theta := 0.;
-     vyvod[High(vyvod)].thetaVisual := DegToRad(g_thetaVisualdefault);
+     vyvod[High(vyvod)].thetaVisual :=DegToRad(g_thetaVisualdefault);
 
      AppendManevrData(Result,vvod,helicopter);
      AppendManevrData(Result,nakl,helicopter);

@@ -29,7 +29,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls,InterfaceClasses, HelicoptersDatabase,FlightData,Manoeuvres,Menus, Grids, ComCtrls,
-  ExtCtrls,Kernel, TeeProcs, TeEngine, Chart, Series,Matrix_preobraz,Matrixes,MyTypes,Math,shellapi, GlobalConstants;
+  ExtCtrls,Kernel, TeeProcs, TeEngine, Chart, Series,Matrix_preobraz,Matrixes,MyTypes,Math,shellapi, GlobalConstants, DeveloperTools;
 
 
 type TButtonMode = (bmAdd,bmUpdate);
@@ -1392,7 +1392,23 @@ end;
 procedure Tfrm_Interface.btn_ExportCalculatedTaskClick(Sender: TObject);
 var
   saveDialog : TSaveDialog;
+  dif : TStateVector;
 begin
+ dif := MaxRelativeDifferencies(g_FlightData, g_helicopter);
+
+ ShowMessage(
+  FloatToStr(dif.x) + ' '+
+  FloatToStr(dif.y) + ' '+
+  FloatToStr(dif.z) + ' '+
+  FloatToStr(dif.theta) + ' '+
+  FloatToStr(dif.thetaVisual) + ' '+
+  FloatToStr(dif.gamma) + ' '+
+  FloatToStr(dif.psi) + ' '+
+  FloatToStr(dif.v) + ' '+
+  FloatToStr(dif.ny) + ' '+
+  FloatToStr(dif.t) + ' '
+ );
+
      //http://www.delphibasics.ru/TSaveDialog.php
  if Length(g_FlightData) > 0 then
    begin
@@ -1413,7 +1429,7 @@ begin
     if saveDialog.Execute then
      ExportCalculatedFlightTask(g_FlightData,saveDialog.FileName);
 
-    saveDialog.Free;
+    saveDialog.Free;   
    end;
 
 end;

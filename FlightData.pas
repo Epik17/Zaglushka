@@ -33,6 +33,7 @@ function deltaX(Manevr : TManevrData) : Extended;
 function deltaY(Manevr : TManevrData) : Extended;
 function deltaZ(Manevr : TManevrData) : Extended;
 function ManevrPropsPerebornye(Manevr : TManevrData) : TManevrPropsPerebornye;
+procedure FindingMax (tempvalue : Real; var max : Real);
 
 
 implementation
@@ -190,35 +191,39 @@ begin
   Result := Manevr[High(Manevr)].z - Manevr[Low(Manevr)].z
 end;
 
+
+procedure FindingMin (tempvalue : Real; var min : Real);
+ begin
+  if tempvalue < min then
+    min := tempvalue
+ end;
+
+procedure FindingMax (tempvalue : Real; var max : Real);
+ begin
+  if tempvalue > max then
+    max := tempvalue
+ end;
+
 function ManevrPropsPerebornye(Manevr : TManevrData) : TManevrPropsPerebornye;
 const
  bigNumber = 1005000;
 var
   i : Integer;
 
-procedure FindingMin (var tempvalue : Real; var min : Real);
- begin
-  if tempvalue < min then
-    min := tempvalue
- end;
-
-procedure FindingMax (var tempvalue : Real; var max : Real);
- begin
-  if tempvalue > max then
-    max := tempvalue
- end;
-
 begin
   Result.S := 0;
 
-  Result.xmin := bigNumber;
-  Result.ymin := bigNumber;
-  Result.zmin := bigNumber;
-  Result.Vmin := bigNumber;
-  Result.xmax := -bigNumber;
-  Result.ymax := -bigNumber;
-  Result.zmax := -bigNumber;
-  Result.Vmax := -bigNumber;
+  with Result do
+   begin
+     xmin := bigNumber;
+     ymin := bigNumber;
+     zmin := bigNumber;
+     Vmin := bigNumber;
+     xmax := -bigNumber;
+     ymax := -bigNumber;
+     zmax := -bigNumber;
+     Vmax := -bigNumber;
+   end;
 
   for i := 0 to High(Manevr) do
    begin

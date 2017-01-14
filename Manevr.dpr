@@ -14,7 +14,8 @@ uses
   MyTypes in 'MyTypes.pas',
   JmTypes in 'JmTypes.pas',
   JmGeometry in 'JmGeometry.pas',
-  GlobalConstants in 'GlobalConstants.pas';
+  GlobalConstants in 'GlobalConstants.pas',
+  DeveloperTools in 'DeveloperTools.pas';
 
 {$R *.res}
 
