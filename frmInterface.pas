@@ -68,6 +68,8 @@ type
     trckbrV0: TTrackBar;
     lbl_RecalcNeeded: TLabel;
     strngrd_ManevrInfo: TStringGrid;
+    chk_developer: TCheckBox;
+    lbl_developer: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure cbb_ManevryChange(Sender: TObject);
     procedure btn_AddManevrClick(Sender: TObject);
@@ -1394,24 +1396,15 @@ var
   saveDialog : TSaveDialog;
   dif : TStateVector;
 begin
- dif := MaxRelativeDifferencies(g_FlightData, g_helicopter);
-
- ShowMessage(
-  FloatToStr(dif.x) + ' '+
-  FloatToStr(dif.y) + ' '+
-  FloatToStr(dif.z) + ' '+
-  FloatToStr(dif.theta) + ' '+
-  FloatToStr(dif.thetaVisual) + ' '+
-  FloatToStr(dif.gamma) + ' '+
-  FloatToStr(dif.psi) + ' '+
-  FloatToStr(dif.v) + ' '+
-  FloatToStr(dif.ny) + ' '+
-  FloatToStr(dif.t) + ' '
- );
-
      //http://www.delphibasics.ru/TSaveDialog.php
  if Length(g_FlightData) > 0 then
    begin
+    if chk_developer.Checked then
+      begin
+       dif := MaxRelativeDifferencies(g_FlightData, g_helicopter);
+       ShowMessage(FormatDif(dif));
+      end;
+
     saveDialog := TSaveDialog.Create(self);
 
     saveDialog.Title := 'Сохранение массива положений';

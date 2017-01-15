@@ -5,7 +5,7 @@ object frm_Interface: Tfrm_Interface
   BorderStyle = bsSingle
   Caption = #1055#1088#1086#1075#1088#1072#1084#1084#1072' '#1076#1083#1103' '#1084#1086#1076#1077#1083#1080#1088#1086#1074#1072#1085#1080#1103' '#1087#1086#1083#1077#1090#1085#1086#1075#1086' '#1079#1072#1076#1072#1085#1080#1103' '#1074#1077#1088#1090#1086#1083#1077#1090#1072
   ClientHeight = 661
-  ClientWidth = 839
+  ClientWidth = 836
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -78,6 +78,13 @@ object frm_Interface: Tfrm_Interface
     Width = 280
     Height = 13
     Caption = #1058#1088#1077#1073#1091#1077#1090#1089#1103' '#1087#1086#1083#1085#1099#1081' '#1087#1077#1088#1077#1089#1095#1077#1090' '#1074#1089#1077#1075#1086' '#1087#1086#1083#1077#1090#1085#1086#1075#1086' '#1079#1072#1076#1072#1085#1080#1103'.'
+  end
+  object lbl_developer: TLabel
+    Left = 752
+    Top = 600
+    Width = 89
+    Height = 13
+    Caption = 'Developer mode'
   end
   object lst_Manevry: TListBox
     Left = 656
@@ -339,6 +346,14 @@ object frm_Interface: Tfrm_Interface
     RowCount = 10
     TabOrder = 17
     Visible = False
+  end
+  object chk_developer: TCheckBox
+    Left = 732
+    Top = 598
+    Width = 17
+    Height = 17
+    Caption = 'chk_developer'
+    TabOrder = 18
   end
   object pm_Manevry: TPopupMenu
     AutoPopup = False

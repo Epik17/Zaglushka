@@ -5,8 +5,8 @@ interface
 uses FlightData, HelicoptersDatabase, Dialogs, SysUtils;
 
 
-function MaxRelativeDifferencies(flightdata : TFlightData;helicopter : THelicopter) : TStateVector;overload;
-
+function MaxRelativeDifferencies(flightdata : TFlightData;helicopter : THelicopter) : TStateVector;overload; //во сколько раз максимальное приращение величины больше среднего. Норма: 1-2 раза
+function FormatDif(difs : TStateVector) : string;
 
 implementation
 
@@ -45,9 +45,26 @@ end;
 
 function AbsoluteDifferenciesAverageSum (differencies : TManevrData) : TStateVector;
 var
-  i, len : Integer;
+  i: Integer;
+  counters : TStateVector;
+const
+  smallnumber = 0.00001;
 begin
   with Result do
+   begin
+     x := 0;
+     y := 0;
+     z := 0;
+     theta := 0;
+     thetaVisual := 0;
+     gamma := 0;
+     psi := 0;
+     V := 0;
+     ny := 0;
+     t := 0;
+   end;
+
+  with counters do
    begin
      x := 0;
      y := 0;
@@ -64,35 +81,99 @@ begin
  for i := Low(differencies) to High(differencies) do
   begin
     Result.x := Result.x + differencies[i].x;
+    if differencies[i].x > smallnumber then
+     counters.x := counters.x + 1;
+
     Result.y := Result.y + differencies[i].y;
+    if differencies[i].y > smallnumber then
+     counters.y := counters.y + 1;
+
     Result.z := Result.z + differencies[i].z;
+    if differencies[i].z > smallnumber then
+     counters.z := counters.z + 1;
+
     Result.theta := Result.theta + differencies[i].theta;
+    if differencies[i].theta > smallnumber then
+     counters.theta := counters.theta + 1;
+
     Result.thetaVisual := Result.thetaVisual + differencies[i].thetaVisual;
+    if differencies[i].thetaVisual > smallnumber then
+     counters.thetaVisual := counters.thetaVisual + 1;
+
     Result.gamma := Result.gamma + differencies[i].gamma;
+    if differencies[i].gamma > smallnumber then
+     counters.gamma := counters.gamma + 1;
+
     Result.psi := Result.psi + differencies[i].psi;
+    if differencies[i].psi > smallnumber then
+     counters.psi := counters.psi + 1;
+
     Result.V := Result.V + differencies[i].V;
+    if differencies[i].V > smallnumber then
+     counters.V := counters.V + 1;
+
     Result.ny := Result.ny + differencies[i].ny;
+    if differencies[i].ny > smallnumber then
+     counters.ny := counters.ny + 1;
+
     Result.t := Result.t + differencies[i].t;
+    if differencies[i].t > smallnumber then
+     counters.t := counters.t + 1;
   end;
 
-   len := Length(differencies);
-
-   if len > 0 then
     with Result do
      begin
-       x := x/len;
-       y := y/len;
-       z := z/len;
-       theta := theta/len;
-       thetaVisual := thetaVisual/len;
-       gamma := gamma/len;
-       psi := psi/len;
-       V := V/len;
-       ny := ny/len;
-       t := t/len;
+       if counters.x <> 0 then
+        x := x/counters.x
+       else
+        x := 0;
+
+       if counters.y <> 0 then
+        y := y/counters.y
+       else
+        y := 0;
+
+       if counters.z <> 0 then
+        z := z/counters.z
+       else
+        z := 0;
+
+       if counters.theta <> 0 then
+        theta := theta/counters.theta
+       else
+        theta := 0;
+
+       if counters.thetaVisual <> 0 then
+        thetaVisual := thetaVisual/counters.thetaVisual
+       else
+        thetaVisual := 0;
+
+       if counters.gamma <> 0 then
+        gamma := gamma/counters.gamma
+       else
+        gamma := 0;
+
+
+       if counters.psi <> 0 then
+        psi := psi/counters.psi
+       else
+        psi := 0;
+
+       if counters.V <> 0 then
+        V := V/counters.V
+       else
+        V := 0;
+
+       if counters.ny <> 0 then
+        ny := ny/counters.ny
+       else
+        ny := 0;
+
+       if counters.t <> 0 then
+        t := t/counters.t
+       else
+        t := 0;
      end
-   else
-    ShowMessage('DeveloperTools`AbsoluteDifferenciesAverageSum: Devision by zero!');
 
 end;
 
@@ -167,8 +248,28 @@ begin
  AbsDifferencies := AbsoluteDifferencies (FlightDataToManevrData(FlightData, helicopter));
 
  Result := MaxRelativeDifferencies(AbsDifferencies, AbsoluteDifferenciesAverageSum (AbsDifferencies))
+end;
 
- 
+function FormatDif(difs : TStateVector) : string;
+
+function MyFloatToStrF(value:Real):string;
+  begin  //auxiliary function
+    Result := FloatToStrF(value,FfFixed,20,1)
+  end;
+begin
+
+  Result:=
+  'dx = ' + MyFloatToStrF(difs.x) +
+  '; dy = ' +  MyFloatToStrF(difs.y) +
+  '; dz = ' +   MyFloatToStrF(difs.z) +
+  '; dtheta = ' +   MyFloatToStrF(difs.theta) +
+  '; dthetaVisual = ' +   MyFloatToStrF(difs.thetaVisual) +
+  '; dgamma = ' +   MyFloatToStrF(difs.gamma) +
+  '; dpsi = ' +   MyFloatToStrF(difs.psi) +
+  '; dV = ' +   MyFloatToStrF(difs.V) +
+  '; dny = ' +   MyFloatToStrF(difs.ny) +
+  '; dt = ' +   MyFloatToStrF(difs.t)
+
 end;
 
 end.
