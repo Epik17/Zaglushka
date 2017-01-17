@@ -82,7 +82,7 @@ object frm_Interface: Tfrm_Interface
   object lbl_developer: TLabel
     Left = 752
     Top = 600
-    Width = 89
+    Width = 78
     Height = 13
     Caption = 'Developer mode'
   end
@@ -262,6 +262,11 @@ object frm_Interface: Tfrm_Interface
       '')
     Title.Visible = False
     BottomAxis.Visible = False
+    LeftAxis.Automatic = False
+    LeftAxis.AutomaticMaximum = False
+    LeftAxis.AutomaticMinimum = False
+    LeftAxis.Maximum = 2100.000000000000000000
+    LeftAxis.Minimum = -500.000000000000000000
     LeftAxis.Visible = False
     Legend.Visible = False
     RightAxis.Visible = False

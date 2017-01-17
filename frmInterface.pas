@@ -1220,15 +1220,16 @@ begin
 
           chopped := TMatrix.Create(xyz1s);
 
-          if rg_view.ItemIndex = 2 then //isometric
+          if (rg_view.ItemIndex = 2) then //isometric
              begin
                cht.LeftAxis.Visible := False;
                cht.BottomAxis.Visible := False;
-               rotated := chopped.Mult(IsometryMatrix(-DegToRad(29.52),-DegToRad(26.23)))
+               rotated := chopped.Mult(IsometryMatrix(-DegToRad(29.52),-DegToRad(26.23)));
              end
           else
             begin
              rotated := chopped;  //not rotated
+             cht.LeftAxis.Automatic := False;
              cht.LeftAxis.Visible := True;
              cht.BottomAxis.Visible := True;
             end;
@@ -1236,7 +1237,7 @@ begin
          if (rg_view.ItemIndex = 1) then
           with cht.LeftAxis do
            begin
-            Automatic := True;
+            Automatic := False;
             Minimum := 0;
             Maximum := Round(1.4*g_H0);
            end
