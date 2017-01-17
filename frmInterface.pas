@@ -194,7 +194,7 @@ begin
   for i:=1 to Length(g_HelicopterDatabase) do
    cbb_HelicopterType.Items.Add(g_HelicopterDatabase[i].Name);
 
-   cbb_HelicopterType.ItemIndex :=6;
+   cbb_HelicopterType.ItemIndex :=1;
 
    cbb_HelicopterTypeSelect(Self);
 
