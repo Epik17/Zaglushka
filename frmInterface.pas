@@ -1234,10 +1234,10 @@ begin
              cht.BottomAxis.Visible := True;
             end;
 
-         if (rg_view.ItemIndex = 1) then
+         if (rg_view.ItemIndex = 1) then //left view
           with cht.LeftAxis do
            begin
-            Automatic := False;
+            Automatic := False;    //Automatic = True causes crash when h0=Hmax in HorizFlight!
             Minimum := g_H0-500;
             Maximum := Round(1.4*g_H0)+200;
            end
