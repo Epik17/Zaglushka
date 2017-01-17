@@ -1238,8 +1238,8 @@ begin
           with cht.LeftAxis do
            begin
             Automatic := False;
-            Minimum := 0;
-            Maximum := Round(1.4*g_H0);
+            Minimum := g_H0-500;
+            Maximum := Round(1.4*g_H0)+200;
            end
          else
           cht.LeftAxis.Automatic := True;
