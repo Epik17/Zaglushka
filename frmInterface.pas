@@ -459,11 +459,19 @@ end;
 
 procedure Tfrm_Interface.btn_ImportFlightTaskClick(Sender: TObject);
 var
-  i:Integer;
+  i, HelicopterTypeItemIndex, Gpos, H0pos, V0pos, Tpos :Integer;
   ManevrsLines : TArrayOfString;
 const
   manevrInfoStartLineIndex = 5;
 begin
+
+  // создаем резервную копию параметров; она нужна при срабатывании исключения
+  HelicopterTypeItemIndex :=  cbb_HelicopterType.ItemIndex;
+  Gpos := trckbr_G.Position;
+  H0pos := trckbr_H0.Position;
+  V0pos := trckbrV0.Position;
+  Tpos := trckbr_T.Position;
+
 if dlgOpenFile.Execute then
     begin
       Memo1.Lines.LoadFromFile(dlgOpenFile.FileName);
@@ -520,7 +528,19 @@ if dlgOpenFile.Execute then
 
          end;
       except
+
+        //почему-то в случае указания неверного файла сбрасывается выпадающий список типа вертолета
+         // используем резервную копию
+          cbb_HelicopterType.ItemIndex := HelicopterTypeItemIndex;
+          cbb_HelicopterTypeSelect(Self);
+
+          trckbr_G.Position := Gpos;
+          trckbr_H0.Position := H0pos;
+          trckbrV0.Position := V0pos;
+          trckbr_T.Position := Tpos;
+
         ShowMessage('Некорректная структура файла. Необходимо указать текстовый файл, содержащий параметры полетного задания');
+
       end
 
     end;
@@ -1238,8 +1258,8 @@ begin
           with cht.LeftAxis do
            begin
             Automatic := False;    //Automatic = True causes crash when h0=Hmax in HorizFlight!
-            Minimum := g_H0-500;
-            Maximum := Round(1.4*g_H0)+200;
+            Minimum := -500;
+            Maximum := 2100;
            end
          else
           cht.LeftAxis.Automatic := True;
@@ -1936,4 +1956,5 @@ begin
 end;
 
 end.
+
 
