@@ -1278,6 +1278,167 @@ begin
   ShowMessage('Для выполнения висения скорость должна быть равна нулю!');
 
 end;
+
+
+
+
+
+function iNaklon (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,hvyvoda : Real; Pikirovanie : Boolean) : TManevrData;
+var
+ vvod,nakl,vyvod : TManevrData;
+ nyslope,tempa : Real;
+ tempstate : TStateVector;
+ tempomega : TVector3D;
+ failed : Boolean;
+
+procedure SetOmegaAndAccelerationVvodVyvod(var omega : TVector3D; var a : Real; tempstate: TStateVector; ny, nxOtXvr : Real);
+var
+  nx : Real;
+begin
+     a := 0;
+
+     nx := (Sin(tempstate.theta)*(1+ny)+nxOtXvr)/Cos(tempstate.theta);
+
+     omega.x:=0;
+     omega.y:=0;
+     if tempstate.V>=0 then
+      omega.z := ((ny-1)*Cos(tempstate.theta)-nx*Sin(tempstate.theta))*g_g/tempstate.V   //rad
+     else
+      begin
+        omega.z :=0;
+        ShowMessage('Падение скорости до нуля!');
+        Halt;
+      end;     
+end;
+
+procedure SetOmegaAndAccelerationNakl(var omega : TVector3D; var a : Real; tempstate: TStateVector);
+
+begin
+     a := 0;
+
+     omega.x:=0;
+     omega.y:=0;
+     if tempstate.V>=0 then
+      omega.z := 0 //rad
+     else
+      begin
+        omega.z :=0;
+        ShowMessage('Падение скорости до нуля!');
+        Halt;
+      end;
+end;
+
+ procedure Etape(var TempFlightData : TManevrData; ny : Real);
+   begin
+    ExtendArray(TempFlightData);
+
+    SetOmegaAndAccelerationNakl(tempomega, tempa, tempstate);
+
+    MyIntegrate(tempstate,dt,tempa,tempomega);
+
+    TempFlightData[High(TempFlightData)] := tempstate;
+   end;
+
+
+begin
+     //инициализируем
+
+     SetLength(Result,0);
+
+     failed := False;
+     ClearFailureMessages;
+
+// if not ((nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) or (nyvyvoda > ny(helicopter, icG, icT,initialstate.y-200,Vvyvoda))) then
+if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) then
+
+  begin
+   //  dnxa := nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*g_mps);  //переводим скорость в км/ч
+
+     tempstate := initialstate;
+
+   //ввод
+     SetLength(vvod,0);
+
+    while (not ((RadToDeg(tempstate.theta)>=thetaSlope) xor Pikirovanie)) and (not failed) do
+      if (tempstate.V > 0) then
+       begin
+        SetOmegaAndAccelerationVvodVyvod(tempomega, tempa, tempstate,nyvvoda,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
+        g_Etape(vvod,tempstate, helicopter, nyvvoda,tempa, tempomega);
+
+        tempstate.thetaVisual := initialstate.thetaVisual;
+
+        HmaxCheck(tempstate, failed);
+       end
+      else
+      failed := True;
+
+    vvod[High(vvod)].theta := DegToRad(thetaSlope);
+
+   //наклонный участок
+     SetLength(nakl,0);
+
+     nyslope := Cos(tempstate.theta);
+
+    while (not (Abs(initialstate.y-tempstate.y)>=hvyvoda)) and (not failed) do
+     if (tempstate.V > 0) then
+      begin
+       Etape(nakl,nyslope);
+       tempstate.thetaVisual := initialstate.thetaVisual;
+       HmaxCheck(tempstate, failed);
+      end
+     else
+    failed := True;
+
+   //вывод  
+     SetLength(vyvod,0);
+   if not (nyvyvoda > ny(helicopter, icG, icT,initialstate.y-200,g_mps*tempstate.V)) then
+   while (not ((RadToDeg(tempstate.theta)<=0) xor Pikirovanie)) and (not failed) do
+    if (tempstate.V > 0) then
+     begin
+        SetOmegaAndAccelerationVvodVyvod(tempomega, tempa, tempstate,nyvyvoda,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
+        g_Etape(vvod,tempstate, helicopter, nyvyvoda,tempa, tempomega);
+
+        tempstate.thetaVisual := initialstate.thetaVisual;
+
+        HmaxCheck(tempstate, failed);
+     end
+    else
+     failed := True
+
+    else
+   begin
+   failed := True;
+   AppendFailureMessage('превышена перегрузка на выводе');
+   end
+  end
+
+ else
+ begin
+  failed := True;
+  AppendFailureMessage('превышена перегрузка на вводе');
+ end;
+
+ //стыкуем
+  if not failed then
+    begin
+     vyvod[High(vyvod)].theta := 0.;
+     vyvod[High(vyvod)].thetaVisual :=DegToRad(g_thetaVisualdefault);
+
+     AppendManevrData(Result,vvod,helicopter);
+     AppendManevrData(Result,nakl,helicopter);
+     AppendManevrData(Result,vyvod,helicopter);
+    end
+  else
+   ShowMessage(failureMessage);
+
+
+ //очищаем
+  SetLength(vvod,0);
+  SetLength(nakl,0);
+  SetLength(vyvod,0);
+  
+end;
+
 end.
 
 
