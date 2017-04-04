@@ -1365,7 +1365,7 @@ if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
         SetOmegaAndAccelerationVvodVyvod(tempomega, tempa, tempstate,nyvvoda,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
         g_Etape(vvod,tempstate, helicopter, nyvvoda,tempa, tempomega);
 
-        tempstate.thetaVisual := initialstate.thetaVisual;
+        vvod[High(vvod)].thetaVisual := initialstate.thetaVisual;
 
         HmaxCheck(tempstate, failed);
        end
@@ -1383,7 +1383,7 @@ if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
      if (tempstate.V > 0) then
       begin
        Etape(nakl,nyslope);
-       tempstate.thetaVisual := initialstate.thetaVisual;
+       nakl[High(nakl)].thetaVisual := initialstate.thetaVisual;
        HmaxCheck(tempstate, failed);
       end
      else
@@ -1399,7 +1399,7 @@ if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
         SetOmegaAndAccelerationVvodVyvod(tempomega, tempa, tempstate,nyvyvoda,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
         g_Etape(vyvod,tempstate, helicopter, nyvyvoda,tempa, tempomega);
 
-        tempstate.thetaVisual := initialstate.thetaVisual;
+        vyvod[High(vyvod)].thetaVisual := initialstate.thetaVisual;
 
         HmaxCheck(tempstate, failed);
      end
