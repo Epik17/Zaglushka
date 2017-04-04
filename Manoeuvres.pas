@@ -16,6 +16,7 @@ function VertVzlet(helicopter : THelicopter; initialstate : TStateVector; icG, i
 function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
 function Visenie(initialstate : TStateVector; duration : Real) : TManevrData;
 function ForcedVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
+function Naklon (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,hvyvoda : Real) : TManevrData;
 
 function VertVzletPosadkaVmax (helicopter : THelicopter;icG, icT,icH0, deltay : Real) : Real;
 
@@ -1283,7 +1284,7 @@ end;
 
 
 
-function iNaklon (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,hvyvoda : Real; Pikirovanie : Boolean) : TManevrData;
+function Naklon (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,hvyvoda : Real) : TManevrData;
 var
  vvod,nakl,vyvod : TManevrData;
  nyslope,tempa : Real;
@@ -1359,7 +1360,7 @@ if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
    //ввод
      SetLength(vvod,0);
 
-    while (not ((RadToDeg(tempstate.theta)>=thetaSlope) xor Pikirovanie)) and (not failed) do
+    while (not (RadToDeg(tempstate.theta)>=thetaSlope)) and (not failed) do
       if (tempstate.V > 0) then
        begin
         SetOmegaAndAccelerationVvodVyvod(tempomega, tempa, tempstate,nyvvoda,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
@@ -1392,7 +1393,7 @@ if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
    //вывод  
      SetLength(vyvod,0);
    if not (nyvyvoda > ny(helicopter, icG, icT,initialstate.y-200,g_mps*tempstate.V)) then
-   while (not ((RadToDeg(tempstate.theta)<=0) xor Pikirovanie)) and (not failed) do
+   while (not (RadToDeg(tempstate.theta)<=0)) and (not failed) do
     if (tempstate.V > 0) then
      begin
         SetOmegaAndAccelerationVvodVyvod(tempomega, tempa, tempstate,nyvyvoda,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
