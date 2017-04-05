@@ -170,15 +170,7 @@ begin
   end;
 end;
 
-function iGorkaPikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real; Pikirovanie : Boolean) : TManevrData;
-var
- vvod,nakl,vyvod : TManevrData;
- nyslope,tempa,dnxa : Real;
- tempstate : TStateVector;
- tempomega : TVector3D;
- failed : Boolean;
-
-procedure SetOmegaAndAcceleration(var omega : TVector3D; var a : Real; tempstate: TStateVector; ny,nx,dnxa,nxOtXvr : Real);
+procedure SetOmegaAndAccelerationVvodVGorku(var omega : TVector3D; var a : Real; tempstate: TStateVector; ny,nx,dnxa,nxOtXvr : Real);
 
 begin
      omega.x:=0;
@@ -195,11 +187,19 @@ begin
       a := g_g*(nx - dnxa - Sin(tempstate.theta) - nxOtXvr);
 end;
 
+function iGorkaPikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real; Pikirovanie : Boolean) : TManevrData;
+var
+ vvod,nakl,vyvod : TManevrData;
+ nyslope,tempa,dnxa : Real;
+ tempstate : TStateVector;
+ tempomega : TVector3D;
+ failed : Boolean;
+
  procedure Etape(var TempFlightData : TManevrData; ny : Real);
    begin
     ExtendArray(TempFlightData);
 
-    SetOmegaAndAcceleration(tempomega, tempa, tempstate,ny,nx(helicopter, ny, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
+    SetOmegaAndAccelerationVvodVGorku(tempomega, tempa, tempstate,ny,nx(helicopter, ny, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
 
     MyIntegrate(tempstate,dt,tempa,tempomega);
 
@@ -229,7 +229,7 @@ if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
     while (not ((RadToDeg(tempstate.theta)>=thetaSlope) xor Pikirovanie)) and (not failed) do
       if (tempstate.V > 0) then
        begin
-        SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyvvoda,nx(helicopter, nyvvoda, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
+        SetOmegaAndAccelerationVvodVGorku(tempomega, tempa, tempstate,nyvvoda,nx(helicopter, nyvvoda, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
         g_Etape(vvod,tempstate, helicopter, nyvvoda,tempa, tempomega);
         HmaxCheck(tempstate, failed);
        end
@@ -237,6 +237,7 @@ if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
       failed := True;
 
     vvod[High(vvod)].theta := DegToRad(thetaSlope);
+
 
    //наклонный участок
      SetLength(nakl,0);
@@ -1474,6 +1475,49 @@ begin
 
 end;
 
+function PetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn, nyAmplitude,thetaSlope: Real) : TManevrData;
+var
+ tempa,dnxa,nytemp : Real;
+ tempstate : TStateVector;
+ tempomega : TVector3D;
+ failed : Boolean;
+
+begin
+     //инициализируем
+
+     SetLength(Result,0);
+
+     failed := False;
+     ClearFailureMessages;
+
+// if not ((nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) or (nyvyvoda > ny(helicopter, icG, icT,initialstate.y-200,Vvyvoda))) then
+if not (nySredn > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) then
+ begin
+     dnxa := nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*g_mps);  //переводим скорость в км/ч
+
+     tempstate := initialstate;
+
+    while (not (RadToDeg(tempstate.theta)>=360) and (not failed)) do
+      if (tempstate.V > 0) then
+       begin
+        nytemp := nySredn + nyAmplitude * Cos(tempstate.theta);
+        SetOmegaAndAccelerationVvodVGorku(tempomega, tempa, tempstate,nytemp,nx(helicopter, nytemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V)); //переводим скорость в км/ч
+        g_Etape(Result,tempstate, helicopter, nytemp,tempa, tempomega);
+        HmaxCheck(tempstate, failed);
+       end
+      else
+      failed := True;
+
+      if Length(Result) > 0 then
+         Result[High(Result)].theta := DegToRad(thetaSlope);
+ end
+ else
+  begin
+   failed := True;
+   AppendFailureMessage('превышена перегрузка на вводе');
+  end;
+
+end; 
 
 end.
 
