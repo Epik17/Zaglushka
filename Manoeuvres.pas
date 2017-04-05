@@ -17,7 +17,7 @@ function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG,
 function Visenie(initialstate : TStateVector; duration : Real) : TManevrData;
 function ForcedVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 function Naklon (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,hvyvoda : Real) : TManevrData;
-function PetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn,thetaSlope: Real) : TManevrData;
+function PetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn: Real) : TManevrData;
 
 function VertVzletPosadkaVmax (helicopter : THelicopter;icG, icT,icH0, deltay : Real) : Real;
 
@@ -1476,7 +1476,7 @@ begin
 
 end;
 
-function iPetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn, nyAmplitude,thetaSlope: Real) : TManevrData;
+function iPetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn, nyAmplitude: Real) : TManevrData;
 var
  tempa,dnxa,nytemp : Real;
  tempstate : TStateVector;
@@ -1506,10 +1506,14 @@ if not (nySredn > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
         HmaxCheck(tempstate, failed);
        end
       else
-      failed := True;
+      
+       begin
+        failed := True;
+        AppendFailureMessage('при выполнении петли Нестерова произошло падение скорости до нуля');
+       end;
 
       if Length(Result) > 0 then
-         Result[High(Result)].theta := DegToRad(thetaSlope);
+         Result[High(Result)].theta := 0;
  end
  else
   begin
@@ -1517,13 +1521,16 @@ if not (nySredn > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
    AppendFailureMessage('превышена перегрузка на вводе');
   end;
 
+  if failed then
+   ShowMessage(failureMessage);
+
 end;
 
-function PetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn,thetaSlope: Real) : TManevrData;
+function PetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn: Real) : TManevrData;
 const
-  amplitudeCoeff = 0.2;
+  amplitudeCoeff = 0.3;
 begin
- Result := iPetlyaNesterova (helicopter , initialstate, icG, icT,nySredn,amplitudeCoeff*nySredn, thetaSlope)
+ Result := iPetlyaNesterova (helicopter , initialstate, icG, icT,nySredn,amplitudeCoeff*nySredn)
 end;
 
 end.

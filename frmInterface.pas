@@ -298,6 +298,9 @@ end;
 
         mtNaklSnizhenie:
           TempManevrData:=Naklon(g_Helicopter, laststate,g_G, g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[10]);
+
+        mtNesterov:
+         TempManevrData := PetlyaNesterova(g_Helicopter, laststate, g_G, g_T,tempManevr.fParameters[2])
    end;
 
    if Length(TempManevrData) > 0 then
@@ -837,6 +840,7 @@ begin
 
      if (ManevrType = mtNaklNabor) then
       begin
+
        mins[0]:=101;
        mins[1]:=50;
 
@@ -852,6 +856,19 @@ begin
        maxes[0]:=90;
        maxes[1]:=370;    //max should be greater than every possible value of parameter; we get delphi bug if not
       end;
+
+
+    if (ManevrType = mtNesterov) then
+     begin
+      count :=1;
+      MySetLength(count);
+
+      names[0]:='ny ввода';
+      multipliers[0]:=0.01;
+
+      mins[0]:=101;
+      maxes[0]:=370;  //max should be greater than every possible value of parameter; we get delphi bug if not
+     end;
 
   CreateLabeledScrollbars(names, multipliers, mins, maxes);
 end;
@@ -921,6 +938,10 @@ if lst_Manevry.ItemIndex <>-1 then
         g_TrackBars[2].Position := Round(SelectedManevr.fParameters[4]/g_Multipliers[2]);
         g_TrackBars[3].Position := Round(SelectedManevr.fParameters[10]/g_Multipliers[3]);
        end;
+
+           if (SelectedManevr.pType = mtNesterov) then
+        g_TrackBars[0].Position := Round(SelectedManevr.fParameters[2]/g_Multipliers[0]);
+
  end;
 end;
 
@@ -1004,10 +1025,13 @@ begin
                    if aType = 'Снижение по наклонной' then
                     Result := 15
                    else
-                    begin
-                     Result := -1;
-                     ShowMessage('function ManevrTypeToNumber: некорректное название маневра');
-                    end;
+                    if aType = 'Петля Нестерова' then
+                     Result := 16
+                    else
+                     begin
+                      Result := -1;
+                      ShowMessage('function ManevrTypeToNumber: некорректное название маневра');
+                     end;
 
 end;
 
@@ -1590,17 +1614,7 @@ const
   cosCorrection = 0.02;
 
 begin
- {
-      names[0]:='ny ввода';
-      names[1]:='ny вывода';
-      names[2]:='Накл. тракт., град.';
-      names[3]:='Скор. вывода, км/ч';
 
-      multipliers[0]:=0.01;
-      multipliers[1]:=0.01;
-      multipliers[2]:=1;
-      multipliers[3]:=10;
- }
   trckbarNo :=0;
 
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Пикирование') or
@@ -1702,8 +1716,30 @@ begin
       end;
     end;
 
-end;
 
+  if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Петля Нестерова') then
+    begin
+     trckbarNo := 0;
+
+       //ny vvoda
+      nyvvodaMaxPos := Round(100*RoundTo(nyMax(g_helicopter,g_G, g_T,g_H0),-2));
+
+      if nyvvodaMaxPos > 100 then
+       begin
+        g_TrackBars[trckbarNo].Enabled := True;
+        btn_AddManevr.Enabled := True;
+
+        g_TrackBars[trckbarNo].Max := Round(100*RoundTo(nyMax(g_helicopter,g_G, g_T,g_H0),-2));
+       end
+      else
+       begin
+        g_TrackBars[trckbarNo].Enabled := False;
+        btn_AddManevr.Enabled := False;
+       end;
+
+    end;
+
+end;
 
 
 procedure Tfrm_Interface.CollectTrackBarsData(var ParamArray : TParametersArray);
@@ -1841,6 +1877,21 @@ begin
      ParamArray[10] :=g_Multipliers[3]*g_TrackBars[3].Position;;
      ParamArray[11] :=0;
    end;
+
+     if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Петля Нестерова') then
+   begin
+     ParamArray[1] := 0;
+     ParamArray[2] :=g_Multipliers[0]*g_TrackBars[0].Position;
+     ParamArray[3] :=0;
+     ParamArray[4] :=0;
+     ParamArray[5] :=0;
+     ParamArray[6] :=0;
+     ParamArray[7] :=0;
+     ParamArray[8] :=0;
+     ParamArray[9] :=0;
+     ParamArray[10] :=0;
+     ParamArray[11] :=0;
+   end;
 end;
 
 
@@ -1886,10 +1937,17 @@ begin
            end;
 
          if (manevrlist[SelectedIndex].pType = mtNaklNabor) or (manevrlist[SelectedIndex].pType = mtNaklSnizhenie) then
+         begin
           manevrlist[SelectedIndex].fParameters[2] := g_Multipliers[0]*g_TrackBars[0].Position;
           manevrlist[SelectedIndex].fParameters[3] := g_Multipliers[1]*g_TrackBars[1].Position;
           manevrlist[SelectedIndex].fParameters[4] := g_Multipliers[2]*g_TrackBars[2].Position;
           manevrlist[SelectedIndex].fParameters[10] := g_Multipliers[3]*g_TrackBars[3].Position;
+         end;
+
+         if (manevrlist[SelectedIndex].pType = mtNesterov) then
+         begin
+          manevrlist[SelectedIndex].fParameters[2] := g_Multipliers[0]*g_TrackBars[0].Position;
+         end;
 
        end;
 end;
