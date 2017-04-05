@@ -1491,7 +1491,7 @@ begin
      failed := False;
      ClearFailureMessages;
 
-if not (nySredn > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) then
+//if not (nySredn > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) then
  begin
      dnxa := nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*g_mps);  //переводим скорость в км/ч
 
@@ -1514,12 +1514,12 @@ if not (nySredn > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
 
       if Length(Result) > 0 then
          Result[High(Result)].theta := 0;
- end
- else
+ end;
+{ else
   begin
    failed := True;
    AppendFailureMessage('превышена перегрузка на вводе');
-  end;
+  end;  }
 
   if failed then
    ShowMessage(failureMessage);
