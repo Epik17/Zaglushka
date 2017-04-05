@@ -17,6 +17,7 @@ function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG,
 function Visenie(initialstate : TStateVector; duration : Real) : TManevrData;
 function ForcedVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 function Naklon (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,hvyvoda : Real) : TManevrData;
+function PetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn,thetaSlope: Real) : TManevrData;
 
 function VertVzletPosadkaVmax (helicopter : THelicopter;icG, icT,icH0, deltay : Real) : Real;
 
@@ -1475,7 +1476,7 @@ begin
 
 end;
 
-function PetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn, nyAmplitude,thetaSlope: Real) : TManevrData;
+function iPetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn, nyAmplitude,thetaSlope: Real) : TManevrData;
 var
  tempa,dnxa,nytemp : Real;
  tempstate : TStateVector;
@@ -1490,7 +1491,6 @@ begin
      failed := False;
      ClearFailureMessages;
 
-// if not ((nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) or (nyvyvoda > ny(helicopter, icG, icT,initialstate.y-200,Vvyvoda))) then
 if not (nySredn > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) then
  begin
      dnxa := nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*g_mps);  //переводим скорость в км/ч
@@ -1517,7 +1517,14 @@ if not (nySredn > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
    AppendFailureMessage('превышена перегрузка на вводе');
   end;
 
-end; 
+end;
+
+function PetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn,thetaSlope: Real) : TManevrData;
+const
+  amplitudeCoeff = 0.2;
+begin
+ Result := iPetlyaNesterova (helicopter , initialstate, icG, icT,nySredn,amplitudeCoeff*nySredn, thetaSlope)
+end;
 
 end.
 
