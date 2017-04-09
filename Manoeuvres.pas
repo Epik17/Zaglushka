@@ -1644,8 +1644,11 @@ begin
           else
           failed := True;
 
+       if Length(vvod)>0 then
+       begin
         vvod[High(vvod)].theta := DegToRad(tangage);
         tempstate.theta := DegToRad(tangage);
+       end; 
 
        //наклонный участок
          SetLength(stable,0);
@@ -1669,7 +1672,7 @@ begin
         failed := True;
 
         if Length(stable)>0 then
-        stable[High(stable)].theta := DegToRad(tangage);
+         stable[High(stable)].theta := DegToRad(tangage);
 
         
        //вывод  
