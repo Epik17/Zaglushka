@@ -18,6 +18,7 @@ function Visenie(initialstate : TStateVector; duration : Real) : TManevrData;
 function ForcedVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
 function Naklon (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,hvyvoda : Real) : TManevrData;
 function PetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn: Real) : TManevrData;
+function iBoevoiRazvorot(helicopter : THelicopter; initialstate : TStateVector; icG, icT, kren, tangage, dkurs, greaternyCoeff, smallernyCoeff : Real) : TManevrData;
 
 function VertVzletPosadkaVmax (helicopter : THelicopter;icG, icT,icH0, deltay : Real) : Real;
 
@@ -1534,7 +1535,7 @@ begin
 end;
 
 
-function iBoevoiRazvorot(helicopter : THelicopter; initialstate : TStateVector; icG, icT, kren, tangage, dkurs, greaternyCoeff, smallernyCoeff : Real; Nishod: Boolean) : TManevrData;
+function iBoevoiRazvorot(helicopter : THelicopter; initialstate : TStateVector; icG, icT, kren, tangage, dkurs, greaternyCoeff, smallernyCoeff : Real) : TManevrData;
 var
 vvod, stable, vyvod: TManevrData;
  nyTemp, tempa,dnxa, localTime : Real;
@@ -1545,7 +1546,13 @@ vvod, stable, vyvod: TManevrData;
 const
 // greater = 1.2;
 // smaller = 0.8;
- kursCoeff = 0.85;
+ kursCoeff = 0.97;
+ gammaDot = 0.087; //5 degrees per second
+
+ function Nishod : Boolean;
+ begin
+   Result := tangage < 0
+ end;
 
  function nyVvodCoeff (Nishod: Boolean) : Real;
  begin
@@ -1569,8 +1576,7 @@ const
  end;
 
 procedure SetOmegaAndAcceleration(var omega : TVector3D; var a : Real; tempstate: TStateVector; ny,nx,dnxa,nxOtXvr, initialkren, finalkren, localTime : Real);
- const
-   gammaDot = 0.087; //5 degrees per second
+
 begin
 
      if tempstate.V >= 0
@@ -1578,9 +1584,9 @@ begin
      then
 
       begin
-        if Abs(RadToDeg(tempstate.gamma)) < Abs(kren)
+        if (RadToDeg(tempstate.gamma) <> finalkren)
         then
-         if (initialkren < finalkren)
+         if (RadToDeg(tempstate.gamma) < finalkren)
          then
           omega.x := gammaDot
          else
@@ -1618,7 +1624,7 @@ begin
 
 //    if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) then
   //   if not (nyvyvoda > ny(helicopter, icG, icT,initialstate.y-200,Vvyvoda)) then
-      begin
+    begin
          dnxa := nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*g_mps);  //переводим скорость в км/ч
 
          tempstate := initialstate;
@@ -1631,7 +1637,7 @@ begin
            begin
             localTime := tempstate.t - initialstate.t;
             nyTemp := nyVvodCoeff(Nishod) * Cos(tempstate.theta) / Cos(tempstate.gamma);
-            SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V),RadToDeg(tempstate.gamma),kren, localTime); //переводим скорость в км/ч
+            SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V),RadToDeg(initialstate.gamma),kren, localTime); //переводим скорость в км/ч
             g_Etape(vvod,tempstate, helicopter, nyTemp,tempa, tempomega);
             HmaxCheck(tempstate, failed);
            end
@@ -1639,40 +1645,60 @@ begin
           failed := True;
 
         vvod[High(vvod)].theta := DegToRad(tangage);
-
+        tempstate.theta := DegToRad(tangage);
 
        //наклонный участок
          SetLength(stable,0);
 
-        nyTemp := Cos(tempstate.theta) / Cos(tempstate.gamma);
+
 
         while (not ((Abs(RadToDeg(tempstate.psi - initialstate.psi)) >= Abs(kursCoeff * dkurs)))) and (not failed) do
          if (tempstate.V > 0) then
           begin
-           SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V),RadToDeg(tempstate.gamma),kren, localTime); //переводим скорость в км/ч
+           nyTemp := Cos(tempstate.theta) / Cos(tempstate.gamma);
+           SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V),kren,kren, localTime); //переводим скорость в км/ч
            g_Etape(stable,tempstate, helicopter, nyTemp,tempa, tempomega);
+           
+            if Abs(stable[High(stable)].gamma) <> Abs(DegToRad(kren))
+            then
+            stable[High(stable)].gamma := DegToRad(kren);
+
            HmaxCheck(tempstate, failed);
           end
          else
         failed := True;
 
+        if Length(stable)>0 then
+        stable[High(stable)].theta := DegToRad(tangage);
 
         
        //вывод  
          SetLength(vyvod,0);
+         tempomega.z := 0;
+         tempomega.x := 0;
 
-       while  (tempstate.theta * tempomega.z <= 0) and (not failed) do
+      //   ShowMessage(FloatToStr(tempstate.theta * Round(tempomega.z)));
+
+   //    while  (tempstate.theta * tempomega.z <= 0) and (tempstate.gamma * tempomega.x <= 0) and (not failed) do
+       repeat
         if (tempstate.V > 0) then
          begin
           nyTemp := nyVyvodCoeff(Nishod) * Cos(tempstate.theta) / Cos(tempstate.gamma);
-          SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V),RadToDeg(tempstate.gamma),0, localTime); //переводим скорость в км/ч
+          SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V),RadToDeg(stable[High(stable)].gamma),0, localTime); //переводим скорость в км/ч
           g_Etape(vyvod,tempstate, helicopter, nyTemp,tempa, tempomega);
+
+          if Abs(vyvod[High(vyvod)].gamma) < gammaDot * dt
+          then
+           vyvod[High(vyvod)].gamma := 0;
+
           HmaxCheck(tempstate, failed);
          end
         else
          failed := True;
-      end;
 
+       until (((tempstate.theta * tempomega.z > 0) and (tempstate.gamma * tempomega.x > 0)) and (not failed));
+
+    end;
  {    else
       begin
        failed := True;
@@ -1686,15 +1712,15 @@ begin
 
             }
 
-     
-
 
       //стыкуем
   if not failed then
     begin
-     vyvod[High(vyvod)].theta := 0.;
-     vyvod[High(vyvod)].thetaVisual :=DegToRad(g_thetaVisualdefault);
-
+      if Length(vyvod) > 0 then
+      begin
+       vyvod[High(vyvod)].theta := 0.;
+       vyvod[High(vyvod)].thetaVisual :=DegToRad(g_thetaVisualdefault);
+      end;
      AppendManevrData(Result,vvod,helicopter);
      AppendManevrData(Result,stable,helicopter);
      AppendManevrData(Result,vyvod,helicopter);
