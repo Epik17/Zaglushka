@@ -1543,9 +1543,7 @@ vvod, stable, vyvod: TManevrData;
  tempomega : TVector3D;
  failed : Boolean;
 
-const
-// greater = 1.2;
-// smaller = 0.8;
+const 
  kursCoeff = 0.8;
  gammaDot = 0.067; //0.087 = 5 degrees per second
 
@@ -1565,7 +1563,7 @@ const
 
  end;
 
-  function nyVyvodCoeff (Nishod: Boolean) : Real;
+ function nyVyvodCoeff (Nishod: Boolean) : Real;
  begin
    if Nishod
    then
