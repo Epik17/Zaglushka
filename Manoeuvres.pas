@@ -1546,8 +1546,8 @@ vvod, stable, vyvod: TManevrData;
 const
 // greater = 1.2;
 // smaller = 0.8;
- kursCoeff = 0.97;
- gammaDot = 0.087; //5 degrees per second
+ kursCoeff = 0.8;
+ gammaDot = 0.067; //0.087 = 5 degrees per second
 
  function Nishod : Boolean;
  begin
@@ -1594,8 +1594,13 @@ begin
         else
          omega.x:=0;
 
-        omega.y:= - ny * Sin(tempstate.gamma) * g_g / (tempstate.V * Cos(tempstate.theta));      //rad
+       omega.y:= - ny * Sin(tempstate.gamma) * g_g / (tempstate.V * Cos(tempstate.theta));      //rad
+
+       if not (nyTemp = Cos(tempstate.theta) / Cos(tempstate.gamma)) then
         omega.z := (ny * Cos(tempstate.gamma) -Cos(tempstate.theta)) * g_g / tempstate.V    //rad
+       else
+        omega.z := 0;
+
       end
      else
       begin
@@ -1632,17 +1637,27 @@ begin
        //ввод
          SetLength(vvod,0);
 
-        while (not (Abs(RadToDeg(tempstate.theta))>=Abs(tangage)) and (not failed)) do
+       // while (not (Abs(RadToDeg(tempstate.theta))>=Abs(tangage)) and (Abs(RadToDeg(tempstate.gamma))>=Abs(kren)) and (not failed)) do
+         repeat
           if (tempstate.V > 0) then
            begin
             localTime := tempstate.t - initialstate.t;
-            nyTemp := nyVvodCoeff(Nishod) * Cos(tempstate.theta) / Cos(tempstate.gamma);
+           // nyTemp := nyVvodCoeff(Nishod) * Cos(tempstate.theta) / Cos(tempstate.gamma);
+
+            if (Abs(RadToDeg(tempstate.theta)) < Abs(tangage)) then
+             nyTemp := nyVvodCoeff(Nishod) * Cos(tempstate.theta) / Cos(tempstate.gamma)
+            else
+             nyTemp := Cos(tempstate.theta) / Cos(tempstate.gamma);  
+
+
             SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V),RadToDeg(initialstate.gamma),kren, localTime); //переводим скорость в км/ч
             g_Etape(vvod,tempstate, helicopter, nyTemp,tempa, tempomega);
             HmaxCheck(tempstate, failed);
            end
           else
           failed := True;
+         until
+            (Abs(RadToDeg(tempstate.theta))>=Abs(tangage)) and (Abs(RadToDeg(tempstate.gamma))>=Abs(kren)) and (not failed);
 
        if Length(vvod)>0 then
        begin
@@ -1686,7 +1701,11 @@ begin
        repeat
         if (tempstate.V > 0) then
          begin
-          nyTemp := nyVyvodCoeff(Nishod) * Cos(tempstate.theta) / Cos(tempstate.gamma);
+          if (tempstate.theta * stable[High(stable)].theta > 0) then
+           nyTemp := nyVyvodCoeff(Nishod) * Cos(tempstate.theta) / Cos(tempstate.gamma)
+          else
+           nyTemp := Cos(tempstate.theta) / Cos(tempstate.gamma);
+
           SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V),RadToDeg(stable[High(stable)].gamma),0, localTime); //переводим скорость в км/ч
           g_Etape(vyvod,tempstate, helicopter, nyTemp,tempa, tempomega);
 
