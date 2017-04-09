@@ -1,5 +1,5 @@
 object frm_Interface: Tfrm_Interface
-  Left = 453
+  Left = 464
   Top = 237
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle

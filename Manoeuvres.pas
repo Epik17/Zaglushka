@@ -295,7 +295,7 @@ if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
   SetLength(vvod,0);
   SetLength(nakl,0);
   SetLength(vyvod,0);
-  
+
 end;
 
 procedure VErrorMessage(temp,min,max: Real; manevr: string);
@@ -1531,6 +1531,183 @@ const
   amplitudeCoeff = 0.3;
 begin
  Result := iPetlyaNesterova (helicopter , initialstate, icG, icT,nySredn,amplitudeCoeff*nySredn)
+end;
+
+
+function iBoevoiRazvorot(helicopter : THelicopter; initialstate : TStateVector; icG, icT, kren, tangage, dkurs, greaternyCoeff, smallernyCoeff : Real; Nishod: Boolean) : TManevrData;
+var
+vvod, stable, vyvod: TManevrData;
+ nyTemp, tempa,dnxa, localTime : Real;
+ tempstate : TStateVector;
+ tempomega : TVector3D;
+ failed : Boolean;
+
+const
+// greater = 1.2;
+// smaller = 0.8;
+ kursCoeff = 0.85;
+
+ function nyVvodCoeff (Nishod: Boolean) : Real;
+ begin
+   if Nishod
+
+   then
+     Result := smallernyCoeff
+   else
+     Result := greaternyCoeff
+
+ end;
+
+  function nyVyvodCoeff (Nishod: Boolean) : Real;
+ begin
+   if Nishod
+   then
+     Result := greaternyCoeff
+   else
+     Result := smallernyCoeff
+
+ end;
+
+procedure SetOmegaAndAcceleration(var omega : TVector3D; var a : Real; tempstate: TStateVector; ny,nx,dnxa,nxOtXvr, initialkren, finalkren, localTime : Real);
+ const
+   gammaDot = 0.087; //5 degrees per second
+begin
+
+     if tempstate.V >= 0
+
+     then
+
+      begin
+        if Abs(RadToDeg(tempstate.gamma)) < Abs(kren)
+        then
+         if (initialkren < finalkren)
+         then
+          omega.x := gammaDot
+         else
+          omega.x := -gammaDot
+        else
+         omega.x:=0;
+
+        omega.y:= - ny * Sin(tempstate.gamma) * g_g / (tempstate.V * Cos(tempstate.theta));      //rad
+        omega.z := (ny * Cos(tempstate.gamma) -Cos(tempstate.theta)) * g_g / tempstate.V    //rad
+      end
+     else
+      begin
+        omega.x:=0;
+        omega.y :=0;
+        omega.z :=0;
+        ShowMessage('Падение скорости до нуля!');
+        Halt;
+      end;
+
+      a := g_g*(nx - dnxa - Sin(tempstate.theta) - nxOtXvr);
+end;
+
+
+begin
+
+     //инициализируем
+
+     SetLength(Result,0);
+     localTime := 0;
+
+     failed := False;
+     ClearFailureMessages;
+
+
+
+//    if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) then
+  //   if not (nyvyvoda > ny(helicopter, icG, icT,initialstate.y-200,Vvyvoda)) then
+      begin
+         dnxa := nx(helicopter, {ny}1, icG, icT,initialstate.y,initialstate.V*g_mps);  //переводим скорость в км/ч
+
+         tempstate := initialstate;
+
+       //ввод
+         SetLength(vvod,0);
+
+        while (not (Abs(RadToDeg(tempstate.theta))>=Abs(tangage)) and (not failed)) do
+          if (tempstate.V > 0) then
+           begin
+            localTime := tempstate.t - initialstate.t;
+            nyTemp := nyVvodCoeff(Nishod) * Cos(tempstate.theta) / Cos(tempstate.gamma);
+            SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V),RadToDeg(tempstate.gamma),kren, localTime); //переводим скорость в км/ч
+            g_Etape(vvod,tempstate, helicopter, nyTemp,tempa, tempomega);
+            HmaxCheck(tempstate, failed);
+           end
+          else
+          failed := True;
+
+        vvod[High(vvod)].theta := DegToRad(tangage);
+
+
+       //наклонный участок
+         SetLength(stable,0);
+
+        nyTemp := Cos(tempstate.theta) / Cos(tempstate.gamma);
+
+        while (not ((Abs(RadToDeg(tempstate.psi - initialstate.psi)) >= Abs(kursCoeff * dkurs)))) and (not failed) do
+         if (tempstate.V > 0) then
+          begin
+           SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V),RadToDeg(tempstate.gamma),kren, localTime); //переводим скорость в км/ч
+           g_Etape(stable,tempstate, helicopter, nyTemp,tempa, tempomega);
+           HmaxCheck(tempstate, failed);
+          end
+         else
+        failed := True;
+
+
+        
+       //вывод  
+         SetLength(vyvod,0);
+
+       while  (tempstate.theta * tempomega.z <= 0) and (not failed) do
+        if (tempstate.V > 0) then
+         begin
+          nyTemp := nyVyvodCoeff(Nishod) * Cos(tempstate.theta) / Cos(tempstate.gamma);
+          SetOmegaAndAcceleration(tempomega, tempa, tempstate,nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V),RadToDeg(tempstate.gamma),0, localTime); //переводим скорость в км/ч
+          g_Etape(vyvod,tempstate, helicopter, nyTemp,tempa, tempomega);
+          HmaxCheck(tempstate, failed);
+         end
+        else
+         failed := True;
+      end;
+
+ {    else
+      begin
+       failed := True;
+       AppendFailureMessage('превышена перегрузка на выводе');
+      end
+     else
+     begin
+      failed := True;
+      AppendFailureMessage('превышена перегрузка на вводе');
+     end;
+
+            }
+
+     
+
+
+      //стыкуем
+  if not failed then
+    begin
+     vyvod[High(vyvod)].theta := 0.;
+     vyvod[High(vyvod)].thetaVisual :=DegToRad(g_thetaVisualdefault);
+
+     AppendManevrData(Result,vvod,helicopter);
+     AppendManevrData(Result,stable,helicopter);
+     AppendManevrData(Result,vyvod,helicopter);
+    end
+  else
+   ShowMessage(failureMessage);
+
+
+ //очищаем
+  SetLength(vvod,0);
+  SetLength(stable,0);
+  SetLength(vyvod,0);
+
 end;
 
 end.
