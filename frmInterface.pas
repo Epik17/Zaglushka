@@ -260,7 +260,9 @@ end;
         TempManevrData:= iBoevoiRazvorot(g_Helicopter, laststate, g_G,g_T, -45(*kren*), -20(*tangage*), 180(*kurs*), 1.3, 0.5);
 
         mtPikirovanie :
-         TempManevrData:=Pikirovanie(g_Helicopter, laststate,g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[5]);
+      //   TempManevrData:=Pikirovanie(g_Helicopter, laststate,g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[5]);
+        TempManevrData :=  iRazvorotNaGorke(g_Helicopter, laststate,g_G,g_T, 1.5 {ny vvoda}, 0.8{ny vyvoda}, 30{tangage}, 100{Vvyvoda}, -20{kren},140{kurs});
+
 
         mtLeftVirage :
          TempManevrData:=Virage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[7]);
