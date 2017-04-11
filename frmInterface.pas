@@ -261,7 +261,7 @@ end;
 
         mtPikirovanie :
       //   TempManevrData:=Pikirovanie(g_Helicopter, laststate,g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[5]);
-        TempManevrData :=  iRazvorotNaGorke(g_Helicopter, laststate,g_G,g_T, 1.5 {ny vvoda}, 0.8{ny vyvoda}, 30{tangage}, 100{Vvyvoda}, -20{kren},140{kurs});
+        TempManevrData :=  RazvorotNaGorke(g_Helicopter, laststate,g_G,g_T, 1.5 {ny vvoda}, 0.8{ny vyvoda}, 30{tangage}, 100{Vvyvoda}, -20{kren},140{kurs});
 
 
         mtLeftVirage :
@@ -304,7 +304,13 @@ end;
           TempManevrData:=Naklon(g_Helicopter, laststate,g_G, g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[10]);
 
         mtNesterov:
-         TempManevrData := PetlyaNesterova(g_Helicopter, laststate, g_G, g_T,tempManevr.fParameters[2])
+         TempManevrData := PetlyaNesterova(g_Helicopter, laststate, g_G, g_T,tempManevr.fParameters[2]);
+
+        mtLeftRazvNaGorke:
+        TempManevrData :=  RazvorotNaGorke(g_Helicopter, laststate,g_G,g_T, tempManevr.fParameters[2],tempManevr.fParameters[3],tempManevr.fParameters[4],tempManevr.fParameters[5],-tempManevr.fParameters[6],tempManevr.fParameters[7]);
+
+        mtRightRazvNaGorke:
+        TempManevrData :=  RazvorotNaGorke(g_Helicopter, laststate,g_G,g_T, tempManevr.fParameters[2],tempManevr.fParameters[3],tempManevr.fParameters[4],tempManevr.fParameters[5],tempManevr.fParameters[6],tempManevr.fParameters[7]);
    end;
 
    if Length(TempManevrData) > 0 then
@@ -874,6 +880,44 @@ begin
       maxes[0]:=370;  //max should be greater than every possible value of parameter; we get delphi bug if not
      end;
 
+
+   if (ManevrType = mtLeftRazvNaGorke) or (ManevrType = mtRightRazvNaGorke) then
+     begin
+      count :=6;
+      MySetLength(count);
+
+      names[0]:='ny ввода';
+      names[1]:='ny вывода';
+      names[2]:='Накл. тракт., град.';
+      names[3]:='Скор. вывода, км/ч';
+
+      multipliers[0]:=0.01;
+      multipliers[1]:=0.01;
+      multipliers[2]:=1;
+      multipliers[3]:=1;
+
+       mins[0]:=101;
+       mins[1]:=50;
+       mins[2]:=20;
+       mins[3]:=110;
+
+       maxes[0]:=370; //max should be greater than every possible value of parameter; we get delphi bug if not
+       maxes[1]:=90;
+       maxes[2]:=30;
+       maxes[3]:=130;
+
+        multipliers[5]:=1;
+        mins[5]:=45;
+        names[5]:='Изм-е курса, град';
+        maxes[5]:=180;
+
+        multipliers[4]:=1;
+        mins[4]:=5;
+        names[4]:='Крен, град';
+        maxes[4]:=100;
+       end;
+
+
   CreateLabeledScrollbars(names, multipliers, mins, maxes);
 end;
 
@@ -945,6 +989,10 @@ if lst_Manevry.ItemIndex <>-1 then
 
            if (SelectedManevr.pType = mtNesterov) then
         g_TrackBars[0].Position := Round(SelectedManevr.fParameters[2]/g_Multipliers[0]);
+
+       if (SelectedManevr.pType = mtLeftRazvNaGorke) or (SelectedManevr.pType = mtRightRazvNaGorke) then
+         for i:=0 to Length(g_TrackBars)-1 do
+           g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+2]/g_Multipliers[i]);
 
  end;
 end;
@@ -1032,10 +1080,16 @@ begin
                     if aType = 'Петля Нестерова' then
                      Result := 16
                     else
-                     begin
-                      Result := -1;
-                      ShowMessage('function ManevrTypeToNumber: некорректное название маневра');
-                     end;
+                      if aType = 'Левый разворот на горке' then
+                       Result := 17
+                      else
+                       if aType = 'Правый разворот на горке' then
+                        Result := 18
+                       else
+                         begin
+                          Result := -1;
+                          ShowMessage('function ManevrTypeToNumber: некорректное название маневра');
+                         end;
 
 end;
 
@@ -1060,9 +1114,6 @@ begin
         if aType = 'Ми-8МТВ-5 (ВК-2500)' then
          Result := 2
         else
-       {  if aType = 'Ми-8' then
-          Result := 0
-         else   }
           if aType = 'Ми-8МТВ' then
            Result := 0
           else
@@ -1088,7 +1139,6 @@ end;
 
 procedure HelicoptersInitialization;
 begin
- //g_HelicopterDatabase[1] := CreateHelicopter('Ми-8',mi8);
  g_HelicopterDatabase[1] := CreateHelicopter('Ми-8МТВ',mi8mtv);
  g_HelicopterDatabase[2] := CreateHelicopter('Ми-8МТВ-5 (ТВ3-117ВМ)',mi8mtv5tv3117vm);
  g_HelicopterDatabase[3] := CreateHelicopter('Ми-8МТВ-5 (ВК-2500)',mi8mtv5vk2500);
@@ -1109,11 +1159,7 @@ begin
    4: g_Helicopter :=g_HelicopterDatabase[5];
    5: g_Helicopter :=g_HelicopterDatabase[6];
    6: g_Helicopter :=g_HelicopterDatabase[7];
-   //7: g_Helicopter :=g_HelicopterDatabase[8];
   end;
- // if cbb_HelicopterType.ItemIndex = 5 then g_Helicopter := g_HelicopterDatabase[2];
-
-
 
   SetInitialConditionsTrackbars;
   DynamicallyUpdateICLabelValuesAndPlots(Self);
@@ -1622,7 +1668,9 @@ begin
   trckbarNo :=0;
 
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Пикирование') or
-   (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Набор высоты по наклонной') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Снижение по наклонной') then
+   (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Набор высоты по наклонной') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Снижение по наклонной')
+   or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый разворот на горке') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый разворот на горке')
+   then
     begin
        //ny vvoda
       nyvvodaMaxPos := Round(100*RoundTo(nyMax(g_helicopter,g_G, g_T,g_H0),-2));
@@ -1632,7 +1680,8 @@ begin
         g_TrackBars[trckbarNo].Enabled := True;
         btn_AddManevr.Enabled := True;
 
-        if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Набор высоты по наклонной') then
+        if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Набор высоты по наклонной')
+        or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый разворот на горке') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый разворот на горке') then
          trckbarNo := 0
         else
         trckbarNo := 1;
@@ -1648,7 +1697,9 @@ begin
 
 
        //ny vyvoda and theta
-       if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Набор высоты по наклонной') then
+       if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Горка') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Набор высоты по наклонной')
+       or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый разворот на горке') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый разворот на горке')
+       then
         trckbarNo := 1
        else
         trckbarNo := 0;
@@ -1695,6 +1746,25 @@ begin
       else
        begin
         g_TrackBars[0].Enabled := False;
+        btn_AddManevr.Enabled := False;
+       end;
+
+    end;
+
+    if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый разворот на горке') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый разворот на горке')
+   then
+    begin
+      gammaMaxPos := Floor(gammaMax(g_helicopter,g_G, g_T,g_H0));
+
+      if gammaMaxPos > 1 then
+       begin
+        g_TrackBars[4].Enabled := True;
+        btn_AddManevr.Enabled := True;
+        g_TrackBars[4].Max := gammaMaxPos;
+       end
+      else
+       begin
+        g_TrackBars[4].Enabled := False;
         btn_AddManevr.Enabled := False;
        end;
 
@@ -1896,6 +1966,22 @@ begin
      ParamArray[10] :=0;
      ParamArray[11] :=0;
    end;
+
+ if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Левый разворот на горке') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Правый разворот на горке')
+ then
+   begin
+     ParamArray[1] := 0;
+     ParamArray[2] :=g_Multipliers[0]*g_TrackBars[0].Position;
+     ParamArray[3] :=g_Multipliers[1]*g_TrackBars[1].Position;
+     ParamArray[4] :=g_Multipliers[2]*g_TrackBars[2].Position;
+     ParamArray[5] :=g_Multipliers[3]*g_TrackBars[3].Position;
+     ParamArray[6] :=g_Multipliers[4]*g_TrackBars[4].Position;
+     ParamArray[7] :=g_Multipliers[5]*g_TrackBars[5].Position;
+     ParamArray[8] :=0;
+     ParamArray[9] :=0;
+     ParamArray[10] :=0;
+     ParamArray[11] :=0;
+   end;
 end;
 
 
@@ -1952,6 +2038,10 @@ begin
          begin
           manevrlist[SelectedIndex].fParameters[2] := g_Multipliers[0]*g_TrackBars[0].Position;
          end;
+
+          if (manevrlist[SelectedIndex].pType = mtLeftRazvNaGorke) or (manevrlist[SelectedIndex].pType = mtRightRazvNaGorke) then
+          for i:=0 to Length(g_TrackBars)-1 do
+           manevrlist[SelectedIndex].fParameters[i+2] := g_Multipliers[i]*g_TrackBars[i].Position;
 
        end;
 end;

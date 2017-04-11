@@ -1,10 +1,10 @@
 object frm_Interface: Tfrm_Interface
   Left = 464
-  Top = 237
+  Top = 198
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = #1055#1088#1086#1075#1088#1072#1084#1084#1072' '#1076#1083#1103' '#1084#1086#1076#1077#1083#1080#1088#1086#1074#1072#1085#1080#1103' '#1087#1086#1083#1077#1090#1085#1086#1075#1086' '#1079#1072#1076#1072#1085#1080#1103' '#1074#1077#1088#1090#1086#1083#1077#1090#1072
-  ClientHeight = 661
+  ClientHeight = 700
   ClientWidth = 836
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -74,14 +74,14 @@ object frm_Interface: Tfrm_Interface
   end
   object lbl_RecalcNeeded: TLabel
     Left = 147
-    Top = 212
+    Top = 252
     Width = 280
     Height = 13
     Caption = #1058#1088#1077#1073#1091#1077#1090#1089#1103' '#1087#1086#1083#1085#1099#1081' '#1087#1077#1088#1077#1089#1095#1077#1090' '#1074#1089#1077#1075#1086' '#1087#1086#1083#1077#1090#1085#1086#1075#1086' '#1079#1072#1076#1072#1085#1080#1103'.'
   end
   object lbl_developer: TLabel
     Left = 752
-    Top = 600
+    Top = 640
     Width = 78
     Height = 13
     Caption = 'Developer mode'
@@ -90,7 +90,7 @@ object frm_Interface: Tfrm_Interface
     Left = 656
     Top = 8
     Width = 177
-    Height = 153
+    Height = 201
     ItemHeight = 13
     PopupMenu = pm_Manevry
     TabOrder = 0
@@ -111,7 +111,7 @@ object frm_Interface: Tfrm_Interface
   end
   object btn_AddManevr: TButton
     Left = 432
-    Top = 168
+    Top = 216
     Width = 177
     Height = 25
     Caption = #1044#1086#1073#1072#1074#1080#1090#1100'/'#1086#1073#1085#1086#1074#1080#1090#1100' '#1084#1072#1085#1077#1074#1088
@@ -134,7 +134,7 @@ object frm_Interface: Tfrm_Interface
   end
   object btn_ExportFlightTask: TButton
     Left = 656
-    Top = 168
+    Top = 216
     Width = 177
     Height = 25
     Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1087#1086#1083#1077#1090#1085#1086#1077' '#1079#1072#1076#1072#1085#1080#1077
@@ -152,7 +152,7 @@ object frm_Interface: Tfrm_Interface
   end
   object Memo1: TMemo
     Left = 80
-    Top = 552
+    Top = 592
     Width = 617
     Height = 57
     Lines.Strings = (
@@ -198,7 +198,7 @@ object frm_Interface: Tfrm_Interface
   end
   object btn_Calcutate: TButton
     Left = 432
-    Top = 210
+    Top = 250
     Width = 177
     Height = 17
     Caption = #1042#1099#1087#1086#1083#1085#1080#1090#1100' '#1087#1077#1088#1077#1089#1095#1077#1090
@@ -252,7 +252,7 @@ object frm_Interface: Tfrm_Interface
   end
   object cht_traj: TChart
     Left = 8
-    Top = 240
+    Top = 280
     Width = 377
     Height = 377
     BackWall.Brush.Color = clWhite
@@ -295,7 +295,7 @@ object frm_Interface: Tfrm_Interface
   end
   object rg_view: TRadioGroup
     Left = 96
-    Top = 619
+    Top = 659
     Width = 225
     Height = 33
     Caption = #1042#1080#1076
@@ -324,7 +324,7 @@ object frm_Interface: Tfrm_Interface
   end
   object btn_ExportCalculatedTask: TButton
     Left = 440
-    Top = 624
+    Top = 664
     Width = 393
     Height = 33
     Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1084#1072#1089#1089#1080#1074' '#1087#1086#1083#1086#1078#1077#1085#1080#1081' '#1074#1077#1088#1090#1086#1083#1077#1090#1072
@@ -344,7 +344,7 @@ object frm_Interface: Tfrm_Interface
   end
   object strngrd_ManevrInfo: TStringGrid
     Left = 408
-    Top = 240
+    Top = 280
     Width = 313
     Height = 253
     ColCount = 3
@@ -354,7 +354,7 @@ object frm_Interface: Tfrm_Interface
   end
   object chk_developer: TCheckBox
     Left = 732
-    Top = 598
+    Top = 638
     Width = 17
     Height = 17
     Caption = 'chk_developer'

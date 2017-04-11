@@ -19,7 +19,7 @@ function ForcedVirage(helicopter : THelicopter; initialstate : TStateVector; icG
 function Naklon (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,hvyvoda : Real) : TManevrData;
 function PetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn: Real) : TManevrData;
 function iBoevoiRazvorot(helicopter : THelicopter; initialstate : TStateVector; icG, icT, kren, tangage, dkurs, greaternyCoeff, smallernyCoeff : Real) : TManevrData;
-function iRazvorotNaGorke (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,kren,dkurs : Real) : TManevrData;
+function RazvorotNaGorke (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,kren,dkurs : Real) : TManevrData;
 
 function VertVzletPosadkaVmax (helicopter : THelicopter;icG, icT,icH0, deltay : Real) : Real;
 
@@ -1942,6 +1942,11 @@ begin
   SetLength(stable,0);
   SetLength(vyvod,0);
 
+end;
+
+function RazvorotNaGorke (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,kren,dkurs : Real) : TManevrData;
+begin
+  Result := iRazvorotNaGorke(helicopter, initialstate, icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,kren,dkurs)
 end;
 
 end.

@@ -22,13 +22,14 @@ g_ParametersCount = 11;
 //10: Вертикальное смещение при взлете/посадке/накл.наборе/накл.снижении, м
 //11: Продолжительность висения, с
 
-g_ManevrTypesCount = 17;
+g_ManevrTypesCount = 19;
 g_ManevrNames :array[1..g_ManevrTypesCount] of string = ('Горизонтальный полет','Горка','Пикирование','Левый вираж', 'Правый вираж', 'Разгон/торможение в горизонте',
-'Разгон/торможение с изм. высоты','Вертикальный взлет','Вертикальная посадка','Висение',
-'Левая спираль', 'Правая спираль','Левый форсированный вираж', 'Правый форсированный вираж', 'Набор высоты по наклонной','Снижение по наклонной','Петля Нестерова');
+'Разгон/торможение с изм. высоты','Вертикальный взлет','Вертикальная посадка','Висение', 'Левая спираль', 'Правая спираль','Левый форсированный вираж',
+'Правый форсированный вираж', 'Набор высоты по наклонной','Снижение по наклонной','Петля Нестерова', 'Левый разворот на горке','Правый разворот на горке');
 
 type TManevrTypes = (mtUndefined, mtHorizFlight, mtGorka, mtPikirovanie,mtLeftVirage,mtRightVirage,
-mtHorizRazgonTormozh,mtRazgonSnaborom, mtLiftOff, mtLanding, mtHovering,mtLeftSpiral,mtRightSpiral,mtLeftForcedVirage,mtRightForcedVirage,mtNaklNabor, mtNaklSnizhenie, mtNesterov);
+mtHorizRazgonTormozh,mtRazgonSnaborom, mtLiftOff, mtLanding, mtHovering,mtLeftSpiral,mtRightSpiral,
+mtLeftForcedVirage,mtRightForcedVirage,mtNaklNabor, mtNaklSnizhenie, mtNesterov, mtLeftRazvNaGorke, mtRightRazvNaGorke);
 type TParametersArray = array [1..g_ParametersCount] of Real;
 type TArrayOfString = array of string;
 
@@ -116,6 +117,8 @@ begin
     if aType = 'Набор высоты по наклонной' then Result := mtNaklNabor;
     if aType = 'Снижение по наклонной' then Result := mtNaklSnizhenie;
     if aType = 'Петля Нестерова' then Result := mtNesterov;
+    if aType = 'Левый разворот на горке' then Result := mtLeftRazvNaGorke;
+    if aType = 'Правый разворот на горке' then Result := mtRightRazvNaGorke;
 end;
 
 function ConvertManevrType (aType : TManevrTypes) : string; overload;
@@ -140,6 +143,8 @@ begin
     mtNaklNabor : Result := 'Набор высоты по наклонной';
     mtNaklSnizhenie : Result := 'Снижение по наклонной';
     mtNesterov : Result := 'Петля Нестерова';
+    mtLeftRazvNaGorke : Result := 'Левый разворот на горке';
+    mtRightRazvNaGorke : Result := 'Правый разворот на горке';
   end;
 end;
 
