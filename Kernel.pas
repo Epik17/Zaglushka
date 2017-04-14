@@ -14,7 +14,8 @@ function Diapason(helicopter : THelicopter; icG, icT : Real) : TDiapason;overloa
 function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V : Real) : Real;overload; //с учетом полетного веса и температуры
 function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V{km/h}, Vy{m/s} : Real) : Real;overload;
 
-function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real;
+function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real;  overload;
+function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V, Cx : Real) : Real;  overload;
 
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real):Real;
 function nyMax(helicopter : THelicopter;icG, icT,icH0 : Real): Real;
@@ -104,9 +105,14 @@ function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V{km/h}, Vy{
    Result := inx (helicopter, ny, icG, icT,hManevraCurrent,V{km/h}, Vy);
  end;
 
-function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real;
+function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real; overload;
 const
   Cx = 0.0115;
+begin
+  Result := Cx*helicopter.Fomet*AirDensity(hManevraCurrent)*Sqr(V/g_mps/2)/icG
+end;
+
+function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V, Cx : Real) : Real;  overload;
 begin
   Result := Cx*helicopter.Fomet*AirDensity(hManevraCurrent)*Sqr(V/g_mps/2)/icG
 end;
