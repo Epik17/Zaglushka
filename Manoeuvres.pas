@@ -257,7 +257,7 @@ if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
      else
     failed := True;
 
-   //вывод  
+   //вывод
      SetLength(vyvod,0);
 
    while (not ((RadToDeg(tempstate.theta)<=0) xor Pikirovanie)) and (not failed) do
@@ -2103,7 +2103,7 @@ begin
      if (tempstate.V > 0) then
       begin
        localTime := tempstate.t - localTimeMemo;
-       nyTemp := nyslope*0.87/Cos(tempstate.gamma);
+       nyTemp := nyslope*0.9/Cos(tempstate.gamma);
        SetOmegaAndAccelerationPovNaGorke(tempomega,tempa, tempstate, nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V, 0.0115*4),localTime, psiLocal, DegToRad(thetaSlope),right);
        psiLocal := psiLocal + {VertVzletPosadkaV(Pi, psiDotLocalMax, localTime)} psiDotLocal (right) * dt;
        g_Etape(razvorot,tempstate, helicopter, nyTemp,tempa, tempomega);
@@ -2117,16 +2117,49 @@ begin
    until
     Abs(tempstate.psi-initialstate.psi)>=Pi;
 
+
+     SetLength(nakl1,0);
+    //второй накл. участок
+    if tempstate.V*g_mps < Vvyvoda
+    then
+       begin
+                  //наклонный участок
+           nyslope := Cos(tempstate.theta);
+
+          while (g_mps*tempstate.V <= Vvyvoda) and (not failed) do
+           if (tempstate.V > 0) then
+            begin
+             Etape(nakl1,nyslope);
+             HmaxCheck(tempstate, failed);
+            end
+           else
+          failed := True;
+       end;
+
+        //вывод
+     SetLength(vyvod,0);
+
+   while (RadToDeg(tempstate.theta)<=0) and (not failed) do
+    if (tempstate.V > 0) then
+     begin
+      Etape(vyvod,nyvyvoda);
+      HmaxCheck(tempstate, failed);
+     end
+    else
+     failed := True;
+
+
+
   if not failed then
     begin
-   //  vyvod[High(vyvod)].theta := 0.;
-   //  vyvod[High(vyvod)].thetaVisual :=DegToRad(g_thetaVisualdefault);
+     vyvod[High(vyvod)].theta := 0.;
+     vyvod[High(vyvod)].thetaVisual :=DegToRad(g_thetaVisualdefault);
 
      AppendManevrData(Result,vvod,helicopter);
      AppendManevrData(Result,nakl,helicopter);
      AppendManevrData(Result,razvorot,helicopter);
-   //  AppendManevrData(Result,stable,helicopter);
-   //  AppendManevrData(Result,vyvod,helicopter);
+     AppendManevrData(Result,nakl1,helicopter);
+     AppendManevrData(Result,vyvod,helicopter);
     end
   else
    ShowMessage(failureMessage);
