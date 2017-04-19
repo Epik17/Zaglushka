@@ -20,7 +20,7 @@ function Naklon (helicopter : THelicopter; initialstate : TStateVector; icG, icT
 function PetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn: Real) : TManevrData;
 function iBoevoiRazvorot(helicopter : THelicopter; initialstate : TStateVector; icG, icT, kren, tangage, dkurs, greaternyCoeff, smallernyCoeff : Real) : TManevrData;
 function RazvorotNaGorke (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda,kren,dkurs : Real) : TManevrData;
-function iPovorotNaGorke (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda, kren : Real) : TManevrData;
+function iPovorotNaGorke (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real; right : Boolean) : TManevrData;
 
 function VertVzletPosadkaVmax (helicopter : THelicopter;icG, icT,icH0, deltay : Real) : Real;
 
@@ -1957,7 +1957,19 @@ begin
 end;
 
 
-procedure SetOmegaAndAccelerationPovNaGorke(var omega : TVector3D; var a : Real; tempstate: TStateVector; ny,nx,dnxa,nxOtXvr, finalkren, localTime, psiLocal,psiDotLocalMax : Real);
+
+  function psiDotLocal (right : Boolean) : Real;
+  const
+  psiDotLocalMax = 0.174; //10 degrees per second
+  begin
+    if right
+    then
+     psiDotLocal := -psiDotLocalMax
+    else
+     psiDotLocal := psiDotLocalMax
+  end;
+
+procedure SetOmegaAndAccelerationPovNaGorke(var omega : TVector3D; var a : Real; tempstate: TStateVector; ny,nx,dnxa,nxOtXvr, localTime, psiLocal, thetaSlope : Real; right : Boolean);
 const
 gammaDot = 0.067;
 
@@ -1981,7 +1993,7 @@ begin
 
        omega.z := (ny * Cos(tempstate.gamma) -Cos(tempstate.theta)) * g_g / tempstate.V ;
 
-       omega.y:= psiDotPovNaGorke(tempstate, {psiDotLocal} {VertVzletPosadkaV (Pi, psiDotLocalMax, localTime)}-psiDotLocalMax, psiLocal,omega.x,omega.z);      //rad
+       omega.y:= psiDotPovNaGorke(tempstate, {psiDotLocal} {VertVzletPosadkaV (Pi, psiDotLocalMax, localTime)} psiDotLocal (right), psiLocal,omega.x,omega.z);      //rad
 
       end
      else
@@ -1993,11 +2005,11 @@ begin
         Halt;
       end;
 
-      a := {g_g*(nx - dnxa - Sin(tempstate.theta) - nxOtXvr)}0;
+      a := g_g*(nx - dnxa - Sin(thetaSlope) - nxOtXvr);
 end;
 
 
-function iPovorotNaGorke (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda, kren : Real) : TManevrData;
+function iPovorotNaGorke (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real; right : Boolean) : TManevrData;
 var
  vvod,nakl,razvorot,nakl1, vyvod : TManevrData;
  nyslope,tempa,dnxa, nyTemp, localTime, psiLocal, localTimeMemo : Real;
@@ -2005,8 +2017,22 @@ var
  tempomega : TVector3D;
  failed : Boolean;
 
-const
-  psiDotLocalMax = 0.174; //10 degrees per second
+
+
+
+  function gammafun (temptheta, theta0 : Real; right : Boolean) : Real;
+  begin
+    if right
+    then
+     Result := theta0 - Abs(temptheta)
+    else
+      Result := -(theta0 - Abs(temptheta));
+
+    if right and (Result < 0) then
+      Result := 0;
+    if (not(right)) and (Result > 0) then
+     Result := 0;
+  end;
 
  procedure Etape(var TempFlightData : TManevrData; ny : Real);
    begin
@@ -2071,22 +2097,25 @@ begin
    psiLocal := 0;
    SetLength(razvorot,0);
 
-   nyTemp := nyslope*0.87;
+
 
    repeat
      if (tempstate.V > 0) then
       begin
        localTime := tempstate.t - localTimeMemo;
-       SetOmegaAndAccelerationPovNaGorke(tempomega,tempa, tempstate, nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V, 0.0115*4), kren, localTime, psiLocal, psiDotLocalMax);
-       psiLocal := psiLocal - {VertVzletPosadkaV(Pi, psiDotLocalMax, localTime)}psiDotLocalMax * dt;
+       nyTemp := nyslope*0.87/Cos(tempstate.gamma);
+       SetOmegaAndAccelerationPovNaGorke(tempomega,tempa, tempstate, nyTemp,nx(helicopter, nyTemp, icG, icT,tempstate.y,g_mps*tempstate.V),dnxa,nxOtXvr(helicopter,tempstate.y,icG,g_mps*tempstate.V, 0.0115*4),localTime, psiLocal, DegToRad(thetaSlope),right);
+       psiLocal := psiLocal + {VertVzletPosadkaV(Pi, psiDotLocalMax, localTime)} psiDotLocal (right) * dt;
        g_Etape(razvorot,tempstate, helicopter, nyTemp,tempa, tempomega);
+
+       tempstate.gamma := gammafun (tempstate.theta, DegToRad(thetaSlope), right);
 
        HmaxCheck(tempstate, failed);
       end
      else
     failed := True
    until
-    Abs(psiLocal)>=Pi;
+    Abs(tempstate.psi-initialstate.psi)>=Pi;
 
   if not failed then
     begin
