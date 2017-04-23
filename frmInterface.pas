@@ -261,8 +261,8 @@ end;
 
         mtPikirovanie :
      //    TempManevrData:=Pikirovanie(g_Helicopter, laststate,g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[5]);
-        TempManevrData:= iPovorotNaGorke (g_Helicopter, laststate, g_G,g_T, 1.4{nyvvoda}, 1.4{nyvyvoda}, 30(*tangage*), 140{Vvyvoda}, True(*right*));
-
+     //   TempManevrData:= iPovorotNaGorke (g_Helicopter, laststate, g_G,g_T, 1.4{nyvvoda}, 1.4{nyvyvoda}, 30(*tangage*), 140{Vvyvoda}, True(*right*));
+          iBochka (g_Helicopter, laststate, g_G,g_T, 1.4{nyvvoda}, 1.4{nyvyvoda}, 20(*tangage*), 180{Vvyvoda}, 360);
 
         mtLeftVirage :
          TempManevrData:=Virage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[7]);
