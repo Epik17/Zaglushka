@@ -30,7 +30,6 @@ function VyRasp(helicopter : THelicopter; icG, icT, h0, Vnach, Vkon{km/h} : Real
 function VyRasp(helicopter : THelicopter; icG, icT, h0, V{km/h}  : Real) : Real;overload;
 
 
-function TraspUZemli(helicopter : THelicopter; icT : Real) : Real;
 function Trasp(helicopter : THelicopter; icT, icH0 : Real) : Real;
 function HotTyagi(helicopter : THelicopter; icT, Tyaga : Real) : Real;
 
@@ -53,23 +52,38 @@ begin
      Result[i] :=  HotV(helicopter, i)
 end;
 
-function TraspUZemli(helicopter : THelicopter; icT : Real) : Real;
+function iUZemli(uzemli{при 15 градусах}, tempcoeff, icT : Real) : Real;
 begin
-  Result := helicopter.TraspUZemli; //при 15 градусах
+  Result := uzemli;
 
   if icT > normT then
-    Result := Result - helicopter.TemperCoeff*(icT-normT)
+    Result := Result - tempcoeff*(icT-normT)
+end;
+
+{
+function TraspUZemli(helicopter : THelicopter; icT : Real) : Real;
+begin
+  Result := iUZemli(helicopter.TraspUZemli, helicopter.TemperCoeff, icT)
+end;
+ }
+
+function fOtH(uzemli{при 15 градусах}, tempcoeff, icT, icH0, ctg : Real) : Real;
+begin
+  Result := iUZemli(uzemli{при 15 градусах}, tempcoeff, icT) - icH0 * ctg
 end;
 
 function Trasp(helicopter : THelicopter; icT, icH0 : Real) : Real;
 begin
-  Result := TraspUZemli(helicopter, icT) - icH0 * helicopter.ctgTotH
+  //Result := TraspUZemli(helicopter, icT) - icH0 * helicopter.ctgTotH
+  Result := fOtH(helicopter.TraspUZemli{при 15 градусах}, helicopter.TemperCoeff, icT, icH0, helicopter.ctgTotH)
 end;
+
+
 
 //функци€, обратна€ Trasp
 function HotTyagi(helicopter : THelicopter; icT, Tyaga : Real) : Real;
 begin
-  Result := (TraspUZemli(helicopter, icT)-Tyaga)/helicopter.ctgTotH
+  Result := (iUZemli(helicopter.TraspUZemli, helicopter.TemperCoeff, icT) - Tyaga) / helicopter.ctgTotH
 end;
 
    {
@@ -99,6 +113,41 @@ begin
   Result := HotV(helicopter,V) + HotTyagi(helicopter, icT, Trasp(helicopter,normT, H1)*(icG/helicopter.Gnorm)) - H1
 end;
 
+function Ne(helicopter : THelicopter; icT, icH0 : Real) : Real;
+const
+  Neuzemli = 2000;
+  tepmCoeffHotT = 50;
+begin
+  //Result := TraspUZemli(helicopter, icT) - icH0 * helicopter.ctgTotH
+  Result := fOtH(Neuzemli{при 15 градусах}, helicopter.TemperCoeff * helicopter.ctgNotH, icT, icH0, helicopter.ctgNotH)
+end;
+    {
+function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V : Real) : Real;
+
+const
+  smallnumber = 0.001;
+
+var
+  tempV, H1 : Real;
+begin
+   Result :=0;
+
+ if (Abs(V) <= smallnumber) and (V >= 0) then
+  tempV := smallnumber
+ else
+  tempV := V;
+
+ if tempV>0 then
+  begin
+   H1 := HotV(helicopter,ny*icG, icT, V);
+
+   Result :=  g_mps*(2*(Ne(helicopter, icT, H1) - Ne(helicopter, icT, hManevraCurrent)))/(tempV*helicopter.Gnorm)
+  end
+ else
+  ShowMessage('ѕри вычислении тангенциальной перегрузки обнаружено некорректное значение скорости '+FloatToStr(V));
+
+end;
+   }
 
 function Diapason (helicopter : THelicopter; icG, icT : Real) : TDiapason;overload;
 var
