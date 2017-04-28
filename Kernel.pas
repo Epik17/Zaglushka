@@ -29,7 +29,14 @@ function RealHst(helicopter : THelicopter; icG, icT : Real): Real;
 function VyRasp(helicopter : THelicopter; icG, icT, h0, Vnach, Vkon{km/h} : Real) : Real;overload; //m/s
 function VyRasp(helicopter : THelicopter; icG, icT, h0, V{km/h}  : Real) : Real;overload;
 
+
+function TraspUZemli(helicopter : THelicopter; icT : Real) : Real;
+function Trasp(helicopter : THelicopter; icT, icH0 : Real) : Real;
+
 implementation
+
+const
+ normT = 15;
 
 function HotV(helicopter : THelicopter; V: Real) : Real;overload;
 //характеризует диапазон высот и скоростей для нормальных условий
@@ -45,11 +52,24 @@ begin
      Result[i] :=  HotV(helicopter, i)
 end;
 
+function TraspUZemli(helicopter : THelicopter; icT : Real) : Real;
+begin
+  Result := helicopter.TraspUZemli; //при 15 градусах
+
+  if icT > normT then
+    Result := Result - helicopter.TemperCoeff*(icT-normT)
+end;
+
+function Trasp(helicopter : THelicopter; icT, icH0 : Real) : Real;
+begin
+  Result := TraspUZemli(helicopter, icT) - icH0 * helicopter.ctgTotH
+end;
+
+
 function HotV(helicopter : THelicopter;icG, icT, V: Real) : Real; overload;
 var
    groundT, T,dH, H1 : Real;
-const
- normT = 15;
+
 begin
  H1 := HotV(helicopter,0);
  groundT := helicopter.TraspUZemli;
@@ -116,7 +136,7 @@ function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V, Cx : Real) : Re
 begin
   Result := Cx*helicopter.Fomet*AirDensity(hManevraCurrent)*Sqr(V/g_mps/2)/icG
 end;
-
+  {
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real): Real;
 var
   denominator : Real;
@@ -132,6 +152,14 @@ begin
     ShowMessage('При заданных условиях невозможно определить нормальную перегрузку');
 
 end;
+    }
+function ny(helicopter : THelicopter;icG, icT,icH0,V : Real): Real;
+
+begin
+ Result := {располагаемая} Trasp(helicopter, icT, icH0) / {потребная} Trasp(helicopter, icT, HotV(helicopter, icG, icT, V))
+end;
+
+
 
 function nyMax(helicopter : THelicopter;icG, icT,icH0 : Real): Real;
 var

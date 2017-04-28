@@ -178,7 +178,7 @@ procedure Tfrm_Interface.FormCreate(Sender: TObject);
 var
   i : Byte;
  // test : TManevrData;
-begin
+begin    
 
  for i:=1 to Length(g_ManevrNames) do
    cbb_Manevry.Items.Add(g_ManevrNames[i]);
@@ -481,6 +481,9 @@ var
 const
   manevrInfoStartLineIndex = 5;
 begin
+
+ // ShowMessage(FloatToStr(ny(g_helicopter,13000, 20,800,80)));
+
 
   // создаем резервную копию параметров; она нужна при срабатывании исключения
   HelicopterTypeItemIndex :=  cbb_HelicopterType.ItemIndex;
@@ -2190,5 +2193,10 @@ begin
 end;
 
 end.
+
+
+
+
+
 
 
