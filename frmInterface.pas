@@ -482,7 +482,7 @@ const
   manevrInfoStartLineIndex = 5;
 begin
 
- // ShowMessage(FloatToStr(ny(g_helicopter,13000, 20,800,80)));
+  ShowMessage(FloatToStr(HotTyagi(g_helicopter, 15, 13000)));
 
 
   // создаем резервную копию параметров; она нужна при срабатывании исключения

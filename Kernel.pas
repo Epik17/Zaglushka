@@ -32,6 +32,7 @@ function VyRasp(helicopter : THelicopter; icG, icT, h0, V{km/h}  : Real) : Real;
 
 function TraspUZemli(helicopter : THelicopter; icT : Real) : Real;
 function Trasp(helicopter : THelicopter; icT, icH0 : Real) : Real;
+function HotTyagi(helicopter : THelicopter; icT, Tyaga : Real) : Real;
 
 implementation
 
@@ -65,7 +66,13 @@ begin
   Result := TraspUZemli(helicopter, icT) - icH0 * helicopter.ctgTotH
 end;
 
+//функция, обратная Trasp
+function HotTyagi(helicopter : THelicopter; icT, Tyaga : Real) : Real;
+begin
+  Result := (TraspUZemli(helicopter, icT)-Tyaga)/helicopter.ctgTotH
+end;
 
+   {
 function HotV(helicopter : THelicopter;icG, icT, V: Real) : Real; overload;
 var
    groundT, T,dH, H1 : Real;
@@ -81,6 +88,17 @@ begin
 
   Result := HotV(helicopter,V) + dH;
 end;
+
+  }
+function HotV(helicopter : THelicopter;icG, icT, V: Real) : Real; overload;
+var
+  H1 : Real;
+begin
+  H1 := HotV(helicopter,0);
+
+  Result := HotV(helicopter,V) + HotTyagi(helicopter, icT, Trasp(helicopter,normT, H1)*(icG/helicopter.Gnorm)) - H1
+end;
+
 
 function Diapason (helicopter : THelicopter; icG, icT : Real) : TDiapason;overload;
 var
