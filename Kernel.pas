@@ -116,12 +116,12 @@ end;
 function Ne(helicopter : THelicopter; icT, icH0 : Real) : Real;
 const
   Neuzemli = 2000;
-  tepmCoeffHotT = 50;
+  termCoeffHotT = 50;
 begin
   //Result := TraspUZemli(helicopter, icT) - icH0 * helicopter.ctgTotH
-  Result := fOtH(Neuzemli{при 15 градусах}, helicopter.TemperCoeff * helicopter.ctgNotH, icT, icH0, helicopter.ctgNotH)
+  Result := fOtH(Neuzemli{при 15 градусах}, termCoeffHotT * helicopter.ctgNotH, icT, icH0, helicopter.ctgNotH)
 end;
-    {
+
 function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V : Real) : Real;
 
 const
@@ -139,15 +139,15 @@ begin
 
  if tempV>0 then
   begin
-   H1 := HotV(helicopter,ny*icG, icT, V);
+   H1 := HotV(helicopter,ny*icG, icT, tempV);
 
-   Result :=  g_mps*(2*(Ne(helicopter, icT, H1) - Ne(helicopter, icT, hManevraCurrent)))/(tempV*helicopter.Gnorm)
+   Result :=  g_mps*(75 * (2 * (Ne(helicopter, icT, H1) - Ne(helicopter, icT, hManevraCurrent))))/(tempV*helicopter.Gnorm)
   end
  else
   ShowMessage('При вычислении тангенциальной перегрузки обнаружено некорректное значение скорости '+FloatToStr(V));
 
 end;
-   }
+
 
 function Diapason (helicopter : THelicopter; icG, icT : Real) : TDiapason;overload;
 var
@@ -179,11 +179,11 @@ begin
   ShowMessage('При вычислении тангенциальной перегрузки обнаружено некорректное значение скорости '+FloatToStr(V));
 end;
 
-function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V : Real) : Real; overload;
-//с учетом полетного веса и температуры
- begin
-   Result := inx (helicopter, ny, icG, icT,hManevraCurrent,V{km/h}, 0);
- end;
+//function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V : Real) : Real; overload;
+////с учетом полетного веса и температуры
+// begin
+//   Result := inx (helicopter, ny, icG, icT,hManevraCurrent,V{km/h}, 0);
+// end;
 
 
 function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V{km/h}, Vy{m/s} : Real) : Real;overload;
@@ -322,3 +322,4 @@ begin
 end;
 
 end.
+
