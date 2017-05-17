@@ -141,7 +141,7 @@ begin
   begin
    H1 := HotV(helicopter,ny*icG, icT, tempV);
 
-   Result :=  g_mps*(75 * (2 * (Ne(helicopter, icT, H1) - Ne(helicopter, icT, hManevraCurrent))))/(tempV*helicopter.Gnorm)
+   Result :=  g_mps*(75 * (2 * (Ne(helicopter, icT, hManevraCurrent){располагаемая} - Ne(helicopter, icT, H1){потребная})))/(tempV*helicopter.Gnorm)
   end
  else
   ShowMessage('При вычислении тангенциальной перегрузки обнаружено некорректное значение скорости '+FloatToStr(V));
