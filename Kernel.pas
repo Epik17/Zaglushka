@@ -88,12 +88,12 @@ begin
    Result := fOtH(uzemli15, tempcoeff, icT, H, ctg)
 end;
 
-function Trasp(helicopter : THelicopter; icT, H : Real) : Real;
+function Trasp(helicopter : THelicopter; icT, H : Real) : Real;overload;
 begin
   Result := fOtH(helicopter.TraspUZemli{при 15 градусах}, helicopter.TemperCoeff, icT, H, helicopter.ctgTotH)
 end;
 
-function Tpotreb(helicopter : THelicopter; icT, H, Hrasch : Real) : Real;
+function Trasp(helicopter : THelicopter; icT, H, Hrasch : Real) : Real;overload;
 begin
   Result := fOtH(helicopter.TraspUZemli{при 15 градусах}, helicopter.TemperCoeff, icT, H, helicopter.ctgTotH, Hrasch)
 end;
@@ -297,7 +297,7 @@ end;
 
 function ny(helicopter : THelicopter;icG, icT,icH0,V, Hrasch : Real): Real; overload;
 begin
- Result := {располагаемая} Trasp(helicopter, icT, icH0) / {потребная} Tpotreb(helicopter, icT, HotV(helicopter, icG, icT, V), Hrasch)
+ Result := {располагаемая} Trasp(helicopter, icT, icH0, Hrasch) / {потребная} Trasp(helicopter, icT, HotV(helicopter, icG, icT, V))
 end;
 
 
