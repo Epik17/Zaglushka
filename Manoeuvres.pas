@@ -2181,7 +2181,7 @@ end;
 function iBochka (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda, kren : Real) : TManevrData;
 var
  vvod,nakl,razvorot,nakl1, vyvod : TManevrData;
- nyslope,tempa,dnxa, nyTemp, localTime, localTimeMemo : Real;
+ nyslope,tempa,dnxa, localTime, localTimeMemo : Real;
  tempstate : TStateVector;
  tempomega : TVector3D;
  failed : Boolean;
