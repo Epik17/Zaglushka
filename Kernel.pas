@@ -41,7 +41,7 @@ const
  //global constants
  //used in nx and ny plots !
   g_Trasch = 13000; // должно стать параметром вертолета
-  g_Nerasch = 2000; // должно стать параметром вертолета
+  g_Nerasch = 1800; // должно стать параметром вертолета
 
 implementation
 
