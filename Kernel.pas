@@ -40,14 +40,14 @@ function HotTyagi(helicopter : THelicopter; icT, Tyaga : Real) : Real;
 const
  //global constants
  //used in nx and ny plots !
-  g_Trasch = 13000; // должно стать параметром вертолета
-  g_Nerasch = 1800; // должно стать параметром вертолета
+  g_Trasch = 13000; // должно быть заменено параметром вертолета
+  g_Nerasch = 1800; // должно быть заменено параметром вертолета
 
 implementation
 
 const
  normT = 15;
- Neuzemli15 = 2000; // должно стать параметром вертолета
+ Neuzemli15 = 2000; // должно быть заменено параметром вертолета
  termCoeffHotT = 50; //одинаково для всех вертолетов
 
 function HotV(helicopter : THelicopter; V: Real) : Real; overload;
