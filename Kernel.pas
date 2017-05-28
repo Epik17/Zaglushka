@@ -13,13 +13,13 @@ function Diapason(helicopter : THelicopter; icG, icT : Real) : TDiapason;overloa
 
 function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V : Real) : Real;overload; //с учетом полетного веса и температуры
 function nx (helicopter : THelicopter; ny, icG, icT,hManevraCurrent,V{km/h}, Vy{m/s} : Real) : Real;overload;
-function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent, V, Vy, Hrasch : Real) : Real; overload;
+function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent, V, Vy, Nerasch : Real) : Real; overload;
 
 function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real;  overload;
 function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V, Cx : Real) : Real;  overload;
 
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real):Real; overload;
-function ny(helicopter : THelicopter;icG, icT,icH0,V, Hrasch : Real): Real; overload;
+function ny(helicopter : THelicopter;icG, icT,icH0,V, Trasch : Real): Real; overload;
 
 function nyMax(helicopter : THelicopter;icG, icT,icH0 : Real): Real;
 function gammaMax(helicopter : THelicopter;icG, icT,icH0 : Real): Real;
@@ -38,15 +38,17 @@ function HotTyagi(helicopter : THelicopter; icT, Tyaga : Real) : Real;
 
 
 const
-  g_Hrasch = 1500;  //used in nx and ny plots !
-
+ //global constants
+ //used in nx and ny plots !
+  g_Trasch = 13000; // должно стать параметром вертолета
+  g_Nerasch = 2000; // должно стать параметром вертолета
 
 implementation
 
 const
  normT = 15;
- Neuzemli15 = 2000;
- termCoeffHotT = 50;
+ Neuzemli15 = 2000; // должно стать параметром вертолета
+ termCoeffHotT = 50; //одинаково для всех вертолетов
 
 function HotV(helicopter : THelicopter; V: Real) : Real; overload;
 //характеризует диапазон высот и скоростей для нормальных условий
@@ -71,13 +73,27 @@ begin
 end;
 
 
+
 function fOtH(uzemli15{при 15 градусах}, tempcoeff, icT, H, ctg : Real) : Real; overload;
 begin
   Result := iUZemli(uzemli15, tempcoeff, icT) - H * ctg
 end;
 
-function fOtH(uzemli15, tempcoeff, icT, H, ctg, Hrasch : Real) : Real; overload;
+function HotF(icT, uzemli, ctg, value, tempcoeff : Real) : Real;
+//обратная функция
 begin
+ Result := (iUZemli(uzemli, tempcoeff, icT) - value) / ctg
+end;
+
+function Hrasch(icT, uzemli, ctg, value, tempcoeff : Real) : Real;
+begin
+  Result :=  HotF(icT, uzemli, ctg, value, tempcoeff)
+end;
+
+
+function fOtH(uzemli15, tempcoeff, icT, H, ctg, Hrasch : Real) : Real; overload;
+
+begin 
   if
    H <= Hrasch
 
@@ -92,16 +108,25 @@ function Trasp(helicopter : THelicopter; icT, H : Real) : Real;overload;
 begin
   Result := fOtH(helicopter.TraspUZemli{при 15 градусах}, helicopter.TemperCoeff, icT, H, helicopter.ctgTotH)
 end;
-
+  {
 function Trasp(helicopter : THelicopter; icT, H, Hrasch : Real) : Real;overload;
 begin
-  Result := fOtH(helicopter.TraspUZemli{при 15 градусах}, helicopter.TemperCoeff, icT, H, helicopter.ctgTotH, Hrasch)
+  Result := fOtH(helicopter.TraspUZemli, helicopter.TemperCoeff, icT, H, helicopter.ctgTotH, Hrasch)
+end;
+ }
+
+ function Trasp(helicopter : THelicopter; icT, H, Trasch : Real) : Real;overload;
+begin
+  Result := fOtH(helicopter.TraspUZemli, helicopter.TemperCoeff, icT, H, helicopter.ctgTotH,
+                 Hrasch(icT, helicopter.TraspUZemli, helicopter.ctgTotH, Trasch, helicopter.TemperCoeff)
+                 )
 end;
 
 //функция, обратная Trasp
 function HotTyagi(helicopter : THelicopter; icT, Tyaga : Real) : Real;
 begin
-  Result := (iUZemli(helicopter.TraspUZemli, helicopter.TemperCoeff, icT) - Tyaga) / helicopter.ctgTotH
+ // Result := (iUZemli(helicopter.TraspUZemli, helicopter.TemperCoeff, icT) - Tyaga) / helicopter.ctgTotH
+  Result := HotF(icT, helicopter.TraspUZemli, helicopter.ctgTotH, Tyaga, helicopter.TemperCoeff)
 end;
 
    {
@@ -135,10 +160,16 @@ function Ne(helicopter : THelicopter; icT, H : Real) : Real; overload;
 begin
   Result := fOtH(Neuzemli15, termCoeffHotT * helicopter.ctgNotH, icT, H, helicopter.ctgNotH)
 end;
-
+ {
 function Ne(helicopter : THelicopter; icT, H, Hrasch : Real) : Real; overload;
 begin
   Result := fOtH(Neuzemli15, termCoeffHotT * helicopter.ctgNotH, icT, H, helicopter.ctgNotH, Hrasch)
+end;
+ }
+
+function Ne(helicopter : THelicopter; icT, H, Nerasch : Real) : Real; overload;
+begin
+  Result := fOtH(Neuzemli15, termCoeffHotT * helicopter.ctgNotH, icT, H, helicopter.ctgNotH, Hrasch(icT, Neuzemli15, helicopter.ctgNotH, Nerasch, termCoeffHotT * helicopter.ctgNotH))
 end;
 
 
@@ -178,9 +209,9 @@ begin
   Result := iinx (helicopter, ny, icG, icT, V, hManevraCurrent, Vy, Ne(helicopter, icT, hManevraCurrent))
 end;
 
-function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent, V, Vy, Hrasch : Real) : Real; overload;
+function nx(helicopter : THelicopter; ny, icG, icT,hManevraCurrent, V, Vy, Nerasch : Real) : Real; overload;
 begin
-  Result := iinx (helicopter, ny, icG, icT, V, hManevraCurrent, Vy, Ne(helicopter, icT, hManevraCurrent,Hrasch))
+  Result := iinx (helicopter, ny, icG, icT, V, hManevraCurrent, Vy, Ne(helicopter, icT, hManevraCurrent,Nerasch))
 end;
 
 
@@ -295,9 +326,9 @@ begin
  Result := {располагаемая} Trasp(helicopter, icT, icH0) / {потребная} Trasp(helicopter, icT, HotV(helicopter, icG, icT, V))
 end;
 
-function ny(helicopter : THelicopter;icG, icT,icH0,V, Hrasch : Real): Real; overload;
+function ny(helicopter : THelicopter;icG, icT,icH0,V, Trasch : Real): Real; overload;
 begin
- Result := {располагаемая} Trasp(helicopter, icT, icH0, Hrasch) / {потребная} Trasp(helicopter, icT, HotV(helicopter, icG, icT, V))
+ Result := {располагаемая} Trasp(helicopter, icT, icH0, Trasch) / {потребная} Trasp(helicopter, icT, HotV(helicopter, icG, icT, V))
 end;
 
 

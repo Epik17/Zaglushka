@@ -1450,7 +1450,7 @@ begin
 
  for V := 0 to g_Vmax do
   begin
-    tempny := ny(helicopter,g_G, g_T,g_H0,V, g_Hrasch);
+    tempny := ny(helicopter,g_G, g_T,g_H0,V, g_Trasch);
 
    if tempny > 0 then
     cht.Series[0].AddXY(V,tempny)
@@ -1514,7 +1514,7 @@ begin
     for V :=Vmin to g_Vmax do
       begin
        cht.AddSeries(NewSeries);
-       cht.Series[cht.SeriesCount-1].AddXY(V,nx(helicopter,tempny, icG, icT,icH0,V,0, g_Hrasch));
+       cht.Series[cht.SeriesCount-1].AddXY(V,nx(helicopter,tempny, icG, icT,icH0,V,0, g_Nerasch));
       end;
 
     tempny := tempny + dny;
