@@ -149,7 +149,7 @@ const
 Tmin = -40; //minimal outboard temperature
 Tmax = 40;  //maximal outboard temperature
 Tdefault = 15; //default outboard temperature
-deltaH0 = 25; //H0 increment
+deltaH0 = 5; //H0 increment
 Hmin = 50;
 Hdefault = 400;
 Hmax = 2000;
@@ -844,7 +844,7 @@ begin
       multipliers[3]:=1;
 
 
-      mins[2]:=5;
+      mins[2]:=1;
       maxes[2]:=30;
 
       mins[3]:=100;
@@ -1098,7 +1098,9 @@ end;
 
 function HelicopterTypeToNumber (aType : string) : Integer;
 begin
-
+ if aType = 'Ми-8МТ' then
+   Result := 7
+  else
   if aType = 'Ансат-У' then
    Result := 5
   else
@@ -1149,6 +1151,7 @@ begin
  g_HelicopterDatabase[5] := CreateHelicopter('Ми-26',mi26);
  g_HelicopterDatabase[6] := CreateHelicopter('Ансат-У',ansatU);
  g_HelicopterDatabase[7] := CreateHelicopter('Ка-226',ka226);
+ g_HelicopterDatabase[8] := CreateHelicopter('Ми-8МТ',mi8mt);
 end;
 
 
@@ -1162,6 +1165,7 @@ begin
    4: g_Helicopter :=g_HelicopterDatabase[5];
    5: g_Helicopter :=g_HelicopterDatabase[6];
    6: g_Helicopter :=g_HelicopterDatabase[7];
+   7: g_Helicopter :=g_HelicopterDatabase[8];
   end;
 
   SetInitialConditionsTrackbars;

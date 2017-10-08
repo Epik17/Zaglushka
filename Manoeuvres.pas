@@ -381,7 +381,7 @@ begin
 
    if not constKren then
     begin
-     omega.x:=DegToRad(10);  //скорость ввода в крен (вывода из крена), градусов в секунду
+     omega.x:=DegToRad(0.6);  //скорость ввода в крен (вывода из крена), градусов в секунду
      if Left then omega.x := -omega.x
     end
    else
