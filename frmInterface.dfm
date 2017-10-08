@@ -1,10 +1,10 @@
 object frm_Interface: Tfrm_Interface
-  Left = 305
-  Top = 121
+  Left = 310
+  Top = 194
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = #1055#1088#1086#1075#1088#1072#1084#1084#1072' '#1076#1083#1103' '#1084#1086#1076#1077#1083#1080#1088#1086#1074#1072#1085#1080#1103' '#1087#1086#1083#1077#1090#1085#1086#1075#1086' '#1079#1072#1076#1072#1085#1080#1103' '#1074#1077#1088#1090#1086#1083#1077#1090#1072
-  ClientHeight = 701
+  ClientHeight = 623
   ClientWidth = 836
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -80,8 +80,8 @@ object frm_Interface: Tfrm_Interface
     Caption = #1058#1088#1077#1073#1091#1077#1090#1089#1103' '#1087#1086#1083#1085#1099#1081' '#1087#1077#1088#1077#1089#1095#1077#1090' '#1074#1089#1077#1075#1086' '#1087#1086#1083#1077#1090#1085#1086#1075#1086' '#1079#1072#1076#1072#1085#1080#1103'.'
   end
   object lbl_developer: TLabel
-    Left = 752
-    Top = 640
+    Left = 736
+    Top = 560
     Width = 78
     Height = 13
     Caption = 'Developer mode'
@@ -151,10 +151,10 @@ object frm_Interface: Tfrm_Interface
     OnClick = btn_ImportFlightTaskClick
   end
   object Memo1: TMemo
-    Left = 80
-    Top = 592
+    Left = 56
+    Top = 520
     Width = 617
-    Height = 57
+    Height = 25
     Lines.Strings = (
       'M'
       'e'
@@ -254,7 +254,7 @@ object frm_Interface: Tfrm_Interface
     Left = 8
     Top = 280
     Width = 377
-    Height = 377
+    Height = 281
     BackWall.Brush.Color = clWhite
     BackWall.Brush.Style = bsClear
     Title.AdjustFrame = False
@@ -294,8 +294,8 @@ object frm_Interface: Tfrm_Interface
     end
   end
   object rg_view: TRadioGroup
-    Left = 96
-    Top = 659
+    Left = 88
+    Top = 571
     Width = 225
     Height = 33
     Caption = #1042#1080#1076
@@ -323,8 +323,8 @@ object frm_Interface: Tfrm_Interface
     OnClick = rg_xarakClick
   end
   object btn_ExportCalculatedTask: TButton
-    Left = 440
-    Top = 664
+    Left = 424
+    Top = 576
     Width = 393
     Height = 33
     Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1084#1072#1089#1089#1080#1074' '#1087#1086#1083#1086#1078#1077#1085#1080#1081' '#1074#1077#1088#1090#1086#1083#1077#1090#1072
@@ -343,7 +343,7 @@ object frm_Interface: Tfrm_Interface
     TickStyle = tsNone
   end
   object strngrd_ManevrInfo: TStringGrid
-    Left = 408
+    Left = 400
     Top = 280
     Width = 313
     Height = 281
@@ -353,8 +353,8 @@ object frm_Interface: Tfrm_Interface
     Visible = False
   end
   object chk_developer: TCheckBox
-    Left = 732
-    Top = 638
+    Left = 716
+    Top = 558
     Width = 17
     Height = 17
     Caption = 'chk_developer'

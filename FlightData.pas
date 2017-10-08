@@ -15,8 +15,10 @@ type TManevrData = array of TStateVector;
 type TFlightData = array of TManevrData;
 
 type TManevrPropsPerebornye = record
-Vmax, Vmin, S, xmin, xmax, ymin, ymax, zmin, zmax : Real
+Vmax, Vmin, S, xmin, xmax, ymin, ymax, zmin, zmax : Real;
 end;
+
+type TParametersNames = (x, y, z, theta, gamma, psi, V, ny, nx);
 
 
 function StateVectorString (state:TStateVector):string;
@@ -177,6 +179,7 @@ begin
   Result := Manevr[High(Manevr)].V * g_mps
 end;
 
+
 function deltaX(Manevr : TManevrData) : Extended;
 begin
   Result := Manevr[High(Manevr)].x - Manevr[Low(Manevr)].x
@@ -252,5 +255,6 @@ begin
   Result.Vmin := Result.Vmin * g_mps;
   Result.Vmax := Result.Vmax * g_mps;
 end;
+
 
 end.

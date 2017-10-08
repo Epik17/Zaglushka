@@ -15,12 +15,14 @@ uses
   JmTypes in 'JmTypes.pas',
   JmGeometry in 'JmGeometry.pas',
   GlobalConstants in 'GlobalConstants.pas',
-  DeveloperTools in 'DeveloperTools.pas';
+  DeveloperTools in 'DeveloperTools.pas',
+  frmPlot in 'frmPlot.pas' {frm_Plot};
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.CreateForm(Tfrm_Interface, frm_Interface);
+  Application.CreateForm(Tfrm_Plot, frm_Plot);
   Application.Run;
 end.

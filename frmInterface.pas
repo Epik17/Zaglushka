@@ -29,7 +29,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls,InterfaceClasses, HelicoptersDatabase,FlightData,Manoeuvres,Menus, Grids, ComCtrls,
-  ExtCtrls,Kernel, TeeProcs, TeEngine, Chart, Series,Matrix_preobraz,Matrixes,MyTypes,Math,shellapi, GlobalConstants, DeveloperTools;
+  ExtCtrls,Kernel, TeeProcs, TeEngine, Chart, Series,Matrix_preobraz,Matrixes,MyTypes,Math,shellapi, GlobalConstants, DeveloperTools, frmPlot;
 
 
 type TButtonMode = (bmAdd,bmUpdate);
@@ -2165,6 +2165,8 @@ begin
     Cells[colNo,10] := Format(RadToDeg(deltaPsi(manevr)));
   end;
 
+  plotParameterVsTime(manevr,cbbParameterItemIndexToParameter(frm_Plot.cbb_parameter.ItemIndex));
+
 end;
 
 procedure Tfrm_Interface.ShowManevrInfo;
@@ -2191,7 +2193,7 @@ begin
         ShowManevrInfo(prependedManevr,1)
        end;
 
-      ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2); 
+      ShowManevrInfo(FlightDataToManevrData(g_FlightData,g_Helicopter),2);
      end
     else
      strngrd_ManevrInfo.Visible := False;
