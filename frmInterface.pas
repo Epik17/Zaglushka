@@ -255,9 +255,9 @@ end;
          TempManevrData:=HorizFlight(laststate,tempManevr.fParameters[1]);
 
         mtGorka :
-        // TempManevrData:=Gorka(g_Helicopter, laststate,g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],tempManevr.fParameters[4],tempManevr.fParameters[5]);
+         TempManevrData:=Gorka(g_Helicopter, laststate,g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],tempManevr.fParameters[4],tempManevr.fParameters[5]);
 
-        TempManevrData:= iBoevoiRazvorot(g_Helicopter, laststate, g_G,g_T, -45(*kren*), -20(*tangage*), 180(*kurs*), 1.3, 0.5);
+     //   TempManevrData:= iBoevoiRazvorot(g_Helicopter, laststate, g_G,g_T, -45(*kren*), -20(*tangage*), 180(*kurs*), 1.3, 0.5);
 
         mtPikirovanie :
      //    TempManevrData:=Pikirovanie(g_Helicopter, laststate,g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[5]);

@@ -164,6 +164,8 @@ begin
   MyIntegrate(tempstate,dt,a,omega);
 
   TempFlightData[High(TempFlightData)] := tempstate;
+
+  TempFlightData[High(TempFlightData)].ny := ny;
 end;
 
 procedure HmaxCheck (tempstate: TStateVector; var failed : Boolean);
@@ -209,6 +211,8 @@ var
     MyIntegrate(tempstate,dt,tempa,tempomega);
 
     TempFlightData[High(TempFlightData)] := tempstate;
+
+    TempFlightData[High(TempFlightData)].ny := ny;
    end;
 
 
