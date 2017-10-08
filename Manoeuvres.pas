@@ -32,7 +32,6 @@ x,y,z : Real
 end;  
 
 const
- dt = 0.1; //шаг по времени, с
  deltatSlope = 1.; //продолжительность ненулевого ускорени€ при взлете/посадке
  defaultfailureMessage = 'ќбнаружены ошибки';
 
@@ -166,6 +165,11 @@ begin
   TempFlightData[High(TempFlightData)] := tempstate;
 
   TempFlightData[High(TempFlightData)].ny := ny;
+
+  if High(TempFlightData) = 0 then
+     TempFlightData[High(TempFlightData)].nxfact := 0
+  else
+     TempFlightData[High(TempFlightData)].nxfact := (TempFlightData[High(TempFlightData)].V - TempFlightData[High(TempFlightData)-1].V) / dt /g_g
 end;
 
 procedure HmaxCheck (tempstate: TStateVector; var failed : Boolean);
@@ -213,6 +217,11 @@ var
     TempFlightData[High(TempFlightData)] := tempstate;
 
     TempFlightData[High(TempFlightData)].ny := ny;
+
+      if High(TempFlightData) = 0 then
+       TempFlightData[High(TempFlightData)].nxfact := 0
+      else
+       TempFlightData[High(TempFlightData)].nxfact := (TempFlightData[High(TempFlightData)].V - TempFlightData[High(TempFlightData)-1].V) / dt /g_g
    end;
 
 

@@ -12,6 +12,7 @@ object frm_Plot: Tfrm_Plot
   Font.Style = []
   OldCreateOrder = False
   Visible = True
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object cht_plot: TChart
@@ -49,10 +50,9 @@ object frm_Plot: Tfrm_Plot
   object cbb_parameter: TComboBox
     Left = 16
     Top = 16
-    Width = 49
+    Width = 81
     Height = 21
     ItemHeight = 13
-    ItemIndex = 5
     TabOrder = 1
     Text = 'psi'
     OnSelect = cbb_parameterSelect
@@ -64,6 +64,7 @@ object frm_Plot: Tfrm_Plot
       'gamma'
       'psi'
       'V'
-      'ny')
+      'ny'
+      'nxfact')
   end
 end

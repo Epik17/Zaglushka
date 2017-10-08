@@ -8,6 +8,7 @@ x,y,z,{m}
 theta{trajectory slope}, thetaVisual{helicopter pitch}, gamma, psi,{rad}
 V{m/s},
 ny,
+nxfact,
 t{s} : Real;
 end;                     
 
@@ -18,7 +19,7 @@ type TManevrPropsPerebornye = record
 Vmax, Vmin, S, xmin, xmax, ymin, ymax, zmin, zmax : Real;
 end;
 
-type TParametersNames = (x, y, z, theta, gamma, psi, V, ny, nx);
+type TParametersNames = (x, y, z, theta, gamma, psi, V, ny, nx, nxfact);
 
 
 function StateVectorString (state:TStateVector):string;
@@ -59,7 +60,8 @@ begin
    MyFloatToStrF(V*g_mps)+' '+
    MyFloatToStrF(ny)+' '+
    MyFloatToStrF(t)+' '+
-   MyFloatToStrF(RadToDeg(theta))+' '
+   MyFloatToStrF(RadToDeg(theta))+' '+
+   MyFloatToStrF(nxfact)+' '
 end;
 
 function ToXYZ1Array(statevector : TStateVector) : TArrayOfReal; overload;
@@ -255,6 +257,5 @@ begin
   Result.Vmin := Result.Vmin * g_mps;
   Result.Vmax := Result.Vmax * g_mps;
 end;
-
 
 end.

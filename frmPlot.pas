@@ -13,6 +13,7 @@ type
     Series1: TLineSeries;
     cbb_parameter: TComboBox;
     procedure cbb_parameterSelect(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   public
@@ -57,7 +58,10 @@ begin
               Result := V
             else
              if index = 7 then
-               Result := ny;
+               Result := ny
+             else
+             if index = 8 then
+               Result := nxfact;
 end;
 
 procedure plotParameterVsTime (manevrdata : TManevrData; parameter : TParametersNames);
@@ -79,6 +83,7 @@ var i : Integer;
        psi: parametervalue := RadToDeg(manevrdata[i].psi);
        V: parametervalue := manevrdata[i].V * g_mps;
        ny: parametervalue := manevrdata[i].ny;
+       nxfact: parametervalue := manevrdata[i].nxfact;
       end;
 
       frm_Plot.cht_plot.Series[0].AddXY(manevrdata[i].t,{manevrdata[i].psi}parametervalue)
@@ -92,6 +97,11 @@ var i : Integer;
 procedure Tfrm_Plot.cbb_parameterSelect(Sender: TObject);
 begin
  frm_Interface.btn_CalcutateClick(Self)
+end;
+
+procedure Tfrm_Plot.FormCreate(Sender: TObject);
+begin
+ frm_Plot.cbb_parameter.ItemIndex := 0;
 end;
 
 end.

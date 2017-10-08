@@ -393,6 +393,7 @@ begin
  else
    strngrd_ManevrInfo.Visible := False;
 
+
 end;
 
 procedure Tfrm_Interface.DeleteManevrClick(Sender: TObject);
