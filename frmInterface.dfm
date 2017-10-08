@@ -346,9 +346,9 @@ object frm_Interface: Tfrm_Interface
     Left = 408
     Top = 280
     Width = 313
-    Height = 253
+    Height = 281
     ColCount = 3
-    RowCount = 10
+    RowCount = 11
     TabOrder = 17
     Visible = False
   end

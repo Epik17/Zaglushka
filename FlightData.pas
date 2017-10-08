@@ -32,6 +32,7 @@ function Vfinal(Manevr : TManevrData) : Extended;
 function deltaX(Manevr : TManevrData) : Extended;
 function deltaY(Manevr : TManevrData) : Extended;
 function deltaZ(Manevr : TManevrData) : Extended;
+function deltaPsi(Manevr : TManevrData) : Extended;
 function ManevrPropsPerebornye(Manevr : TManevrData) : TManevrPropsPerebornye;
 procedure FindingMax (tempvalue : Real; var max : Real);
 
@@ -189,6 +190,11 @@ end;
 function deltaZ(Manevr : TManevrData) : Extended;
 begin
   Result := Manevr[High(Manevr)].z - Manevr[Low(Manevr)].z
+end;
+
+function deltaPsi(Manevr : TManevrData) : Extended;
+begin
+  Result := Manevr[High(Manevr)].psi - Manevr[Low(Manevr)].psi
 end;
 
 

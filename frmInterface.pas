@@ -2129,6 +2129,7 @@ begin
      Cells[0,7] := 'Максимальная скорость, км/ч';
      Cells[0,8] := 'Минимальная скорость, км/ч';
      Cells[0,9] := 'Конечная скорость, км/ч';
+     Cells[0,10] := 'Изменение курса, град';
 
      Cells[1,0] :='Выделенный маневр';
      Cells[2,0] :='Полетное задание';
@@ -2161,6 +2162,7 @@ begin
     Cells[colNo,7] := Format(props.Vmax);
     Cells[colNo,8] := Format(props.Vmin);
     Cells[colNo,9] := Format(manevr[High(manevr)].V*g_mps);
+    Cells[colNo,10] := Format(RadToDeg(deltaPsi(manevr)));
   end;
 
 end;
