@@ -51,10 +51,10 @@ object frm_Plot: Tfrm_Plot
     Left = 16
     Top = 16
     Width = 81
-    Height = 21
-    ItemHeight = 13
+    Height = 22
+    Style = csOwnerDrawFixed
+    ItemHeight = 16
     TabOrder = 1
-    Text = 'psi'
     OnSelect = cbb_parameterSelect
     Items.Strings = (
       'x'
