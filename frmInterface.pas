@@ -821,7 +821,7 @@ begin
 
   if (ManevrType = mtLeftSpiral) or (ManevrType = mtRightSpiral)then
    begin
-    count :=3;
+    count :=4;
     MySetLength(count);
 
     multipliers[1]:=1;
@@ -838,6 +838,11 @@ begin
     mins[2]:=-50;
     names[2]:='Макс. верт. скор., м/с';
     maxes[2]:=50;
+
+    multipliers[3]:=0.2;
+    mins[3]:=1;
+    names[3]:='Темп ввода, град/c';
+    maxes[3]:=50;
    end;
 
 
@@ -997,6 +1002,8 @@ if lst_Manevry.ItemIndex <>-1 then
            g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+6]/g_Multipliers[i]);
 
          g_TrackBars[2].Position := Round(SelectedManevr.fParameters[9]/g_Multipliers[2]);
+
+         g_TrackBars[3].Position := Round(SelectedManevr.fParameters[12]/g_Multipliers[3]);
        end;
        
 
@@ -1961,7 +1968,7 @@ begin
        ParamArray[9] :=g_Multipliers[2]*g_TrackBars[2].Position;
        ParamArray[10] :=0;
        ParamArray[11] :=0;
-       ParamArray[12] :=g_Multipliers[2]*g_TrackBars[2].Position;
+       ParamArray[12] :=g_Multipliers[3]*g_TrackBars[3].Position;
      end;
 
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Набор высоты по наклонной') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] ='Снижение по наклонной') then
@@ -2054,6 +2061,7 @@ begin
              manevrlist[SelectedIndex].fParameters[i+6] := g_Multipliers[i]*g_TrackBars[i].Position;
 
             manevrlist[SelectedIndex].fParameters[9] := g_Multipliers[2]*g_TrackBars[2].Position;
+            manevrlist[SelectedIndex].fParameters[12] := g_Multipliers[3]*g_TrackBars[3].Position;
            end;
 
          if (manevrlist[SelectedIndex].pType = mtNaklNabor) or (manevrlist[SelectedIndex].pType = mtNaklSnizhenie) then
