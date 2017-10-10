@@ -8,14 +8,14 @@ uses FlightData,Math,HelicoptersDatabase,Kernel,Dialogs, JmGeometry,SysUtils, Gl
 function HorizFlight (initialstate : TStateVector; desiredDistance : Real) : TManevrData;
 function Gorka (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TManevrData;
 function Pikirovanie (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,Vvyvoda : Real) : TManevrData;
-function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
-function Spiral(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}, Vy{m/s}: Real) : TManevrData;
+function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren,tempVvodaVKren{градусы}, deltaPsi{градусы}: Real) : TManevrData;
+function Spiral(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren,tempVvodaVKren{градусы}, deltaPsi{градусы}, Vy{m/s}: Real) : TManevrData;
 function HorizRazgonTormozhenie(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}: Real) : TManevrData;
 function RazgonSnaborom(helicopter : THelicopter; initialstate : TStateVector; icG, icT,Vfinal{км/ч}, Vy{m/s}: Real) : TManevrData;
 function VertVzlet(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
 function VertPosadka(helicopter : THelicopter; initialstate : TStateVector; icG, icT, deltayInterface, Vdesired : Real) : TManevrData;
 function Visenie(initialstate : TStateVector; duration : Real) : TManevrData;
-function ForcedVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
+function ForcedVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren,tempVvodaVKren{градусы}, deltaPsi{градусы}: Real) : TManevrData;
 function Naklon (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nyvvoda,nyvyvoda,thetaSlope,hvyvoda : Real) : TManevrData;
 function PetlyaNesterova (helicopter : THelicopter; initialstate : TStateVector; icG, icT,nySredn: Real) : TManevrData;
 function iBoevoiRazvorot(helicopter : THelicopter; initialstate : TStateVector; icG, icT, kren, tangage, dkurs, greaternyCoeff, smallernyCoeff : Real) : TManevrData;
@@ -378,7 +378,7 @@ begin
 end;
 
 
-function iVirageSpiral(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы},Vy {m/s}: Real; Left, Forced: Boolean) : TManevrData;
+function iVirageSpiral(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren{градусы}, tempVvodaVKren{градусы}, deltaPsi{градусы},Vy {m/s}: Real; Left, Forced: Boolean) : TManevrData;
 var
   tempa, tempny, dpsiVvod, prevgamma, Vytemp, dnxa : Real;
   vvod, constgammaUchastok,vyvod : TManevrData;
@@ -386,15 +386,15 @@ var
   tempomega : TVector3D;
   failed:Boolean;
 
-const
-  vvodVyvodPart = 0.1; // доля от изменения курса, соотв. вводу и выводу
+//const
+ // vvodVyvodPart = 0.1; // доля от изменения курса, соотв. вводу и выводу
 
 procedure SetOmegaAndAcceleration(var omega : TVector3D; var a : Real; tempstate: TStateVector; ny, dnxa : Real; Left, Forced, constKren: Boolean);
 begin
 
    if not constKren then
     begin
-     omega.x:=DegToRad(0.6);  //скорость ввода в крен (вывода из крена), градусов в секунду
+     omega.x:=DegToRad(tempVvodaVKren);  //скорость ввода в крен (вывода из крена), градусов в секунду
      if Left then omega.x := -omega.x
     end
    else
@@ -575,34 +575,34 @@ else
    end;
 end;
 
-function iiVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real; Forced : Boolean) : TManevrData;
+function iiVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, tempVvodaVKren{градусы},deltaPsi{градусы}: Real; Forced : Boolean) : TManevrData;
 begin
   if deltaPsi < 0 then
-    Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, deltaPsi, 0, False, Forced);
+    Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, tempVvodaVKren{градусы},deltaPsi, 0, False, Forced);
 
   if deltaPsi > 0 then
-    Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, deltaPsi, 0, True, Forced);
+    Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, tempVvodaVKren{градусы},deltaPsi, 0, True, Forced);
 
   if deltaPsi = 0 then
    SetLength(Result,0)
 end;                     
 
-function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
+function Virage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren,tempVvodaVKren{градусы}, deltaPsi{градусы}: Real) : TManevrData;
 begin
-  Result := iiVirage(helicopter, initialstate, icG, icT,kren, deltaPsi{градусы}, False)
+  Result := iiVirage(helicopter, initialstate, icG, icT,kren, tempVvodaVKren{градусы},deltaPsi{градусы}, False)
 end;
 
-function ForcedVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}: Real) : TManevrData;
+function ForcedVirage(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, tempVvodaVKren{градусы},deltaPsi{градусы}: Real) : TManevrData;
 begin
-   Result := iiVirage(helicopter, initialstate, icG, icT,kren, deltaPsi{градусы}, True)
+   Result := iiVirage(helicopter, initialstate, icG, icT,kren, tempVvodaVKren{градусы},deltaPsi{градусы}, True)
 end;
 
-function Spiral(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, deltaPsi{градусы}, Vy{m/s}: Real) : TManevrData;
+function Spiral(helicopter : THelicopter; initialstate : TStateVector; icG, icT,kren, tempVvodaVKren{градусы},deltaPsi{градусы}, Vy{m/s}: Real) : TManevrData;
 begin
   if deltaPsi < 0 then
-    Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, deltaPsi, Vy, False, False);
+    Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, tempVvodaVKren{градусы},deltaPsi, Vy, False, False);
   if deltaPsi > 0 then
-    Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, deltaPsi, Vy, True, False);
+    Result:=iVirageSpiral(helicopter, initialstate, icG, icT,kren, tempVvodaVKren{градусы},deltaPsi, Vy, True, False);
   if deltaPsi = 0 then
    SetLength(Result,0)
 end;

@@ -260,15 +260,15 @@ end;
      //   TempManevrData:= iBoevoiRazvorot(g_Helicopter, laststate, g_G,g_T, -45(*kren*), -20(*tangage*), 180(*kurs*), 1.3, 0.5);
 
         mtPikirovanie :
-     //    TempManevrData:=Pikirovanie(g_Helicopter, laststate,g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[5]);
+         TempManevrData:=Pikirovanie(g_Helicopter, laststate,g_G,g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],-tempManevr.fParameters[4],tempManevr.fParameters[5]);
      //   TempManevrData:= iPovorotNaGorke (g_Helicopter, laststate, g_G,g_T, 1.4{nyvvoda}, 1.4{nyvyvoda}, 30(*tangage*), 140{Vvyvoda}, True(*right*));
-          iBochka (g_Helicopter, laststate, g_G,g_T, 1.4{nyvvoda}, 1.4{nyvyvoda}, 20(*tangage*), 180{Vvyvoda}, 360);
+     //     iBochka (g_Helicopter, laststate, g_G,g_T, 1.4{nyvvoda}, 1.4{nyvyvoda}, 20(*tangage*), 180{Vvyvoda}, 360);
 
         mtLeftVirage :
-         TempManevrData:=Virage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[7]);
+         TempManevrData:=Virage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[12], tempManevr.fParameters[7]);
 
         mtRightVirage :
-         TempManevrData:=Virage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7]);
+         TempManevrData:=Virage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[12],-tempManevr.fParameters[7]);
 
         mtHorizRazgonTormozh :
          TempManevrData:=HorizRazgonTormozhenie(g_Helicopter,laststate,g_G, g_T,tempManevr.fParameters[8]);
@@ -286,16 +286,16 @@ end;
          TempManevrData:=Visenie(laststate,tempManevr.fParameters[11]);
 
         mtLeftSpiral :
-         TempManevrData:=Spiral(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[7],tempManevr.fParameters[9]);
+         TempManevrData:=Spiral(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6],tempManevr.fParameters[12], tempManevr.fParameters[7],tempManevr.fParameters[9]);
 
         mtRightSpiral :
-         TempManevrData:=Spiral(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7],tempManevr.fParameters[9]);
+         TempManevrData:=Spiral(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6],tempManevr.fParameters[12], -tempManevr.fParameters[7],tempManevr.fParameters[9]);
 
         mtLeftForcedVirage :
-         TempManevrData:=ForcedVirage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], tempManevr.fParameters[7]);
+         TempManevrData:=ForcedVirage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6],tempManevr.fParameters[12], tempManevr.fParameters[7]);
 
         mtRightForcedVirage :
-         TempManevrData:=ForcedVirage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6], -tempManevr.fParameters[7]);
+         TempManevrData:=ForcedVirage(g_Helicopter,laststate, g_G, g_T,tempManevr.fParameters[6],tempManevr.fParameters[12], -tempManevr.fParameters[7]);
 
         mtNaklNabor:
           TempManevrData:=Naklon(g_Helicopter, laststate,g_G, g_T,tempManevr.fParameters[2],tempManevr.fParameters[3],tempManevr.fParameters[4],tempManevr.fParameters[10]);
@@ -722,7 +722,7 @@ begin
 
   if (ManevrType = mtLeftVirage) or (ManevrType = mtRightVirage) or (ManevrType = mtLeftForcedVirage) or (ManevrType = mtRightForcedVirage) then
  begin
-  count :=2;
+  count :=3;
   MySetLength(count);
 
   multipliers[1]:=1;
@@ -734,11 +734,18 @@ begin
   mins[0]:=5;
   names[0]:='Крен';
   maxes[0]:=100;
+
+
+  multipliers[2]:=0.2;
+  mins[2]:=1;
+  names[2]:='Темп ввода, град/c';
+  maxes[2]:=50;
+
  end;
 
    if (ManevrType = mtLeftForcedVirage) or (ManevrType = mtRightForcedVirage) then
  begin
-  count :=2;
+  count :=3;
   MySetLength(count);
 
   multipliers[1]:=1;
@@ -750,6 +757,12 @@ begin
   mins[0]:=5;
   names[0]:='Крен';
   maxes[0]:=50;
+
+  multipliers[2]:=0.2;
+  mins[2]:=1;
+  names[2]:='Темп ввода, град/c';
+  maxes[2]:=50;
+
  end;
 
   if ManevrType = mtHorizRazgonTormozh then
@@ -956,8 +969,12 @@ if lst_Manevry.ItemIndex <>-1 then
            g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+2]/g_Multipliers[i]);
 
        if (SelectedManevr.pType = mtLeftVirage) or (SelectedManevr.pType = mtRightVirage) or (SelectedManevr.pType = mtLeftForcedVirage) or (SelectedManevr.pType = mtRightForcedVirage) then
+        begin
          for i:=0 to Length(g_TrackBars)-1 do
            g_TrackBars[i].Position := Round(SelectedManevr.fParameters[i+6]/g_Multipliers[i]);
+
+           g_TrackBars[2].Position := Round(SelectedManevr.fParameters[12]/g_Multipliers[2])
+        end;
 
       if (SelectedManevr.pType = mtHorizRazgonTormozh) then
         g_TrackBars[0].Position := Round(SelectedManevr.fParameters[8]/g_Multipliers[0]);
@@ -1868,6 +1885,7 @@ begin
      ParamArray[9] :=0;
      ParamArray[10] :=0;
      ParamArray[11] :=0;
+     ParamArray[12] :=g_Multipliers[2]*g_TrackBars[2].Position;
    end;
 
     if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Разгон/торможение в горизонте')  then
@@ -1943,6 +1961,7 @@ begin
        ParamArray[9] :=g_Multipliers[2]*g_TrackBars[2].Position;
        ParamArray[10] :=0;
        ParamArray[11] :=0;
+       ParamArray[12] :=g_Multipliers[2]*g_TrackBars[2].Position;
      end;
 
   if (cbb_Manevry.Items[cbb_Manevry.ItemIndex] = 'Набор высоты по наклонной') or (cbb_Manevry.Items[cbb_Manevry.ItemIndex] ='Снижение по наклонной') then
@@ -2009,8 +2028,11 @@ begin
            manevrlist[SelectedIndex].fParameters[i+2] := g_Multipliers[i]*g_TrackBars[i].Position;
 
          if (manevrlist[SelectedIndex].pType = mtLeftVirage) or (manevrlist[SelectedIndex].pType = mtRightVirage) or (manevrlist[SelectedIndex].pType = mtLeftForcedVirage) or (manevrlist[SelectedIndex].pType = mtRightForcedVirage) then
+         begin
           for i:=0 to Length(g_TrackBars)-1 do
            manevrlist[SelectedIndex].fParameters[i+6] := g_Multipliers[i]*g_TrackBars[i].Position;
+          manevrlist[SelectedIndex].fParameters[12] := g_Multipliers[2]*g_TrackBars[2].Position;
+         end;
 
          if  (manevrlist[SelectedIndex].pType = mtHorizRazgonTormozh) then
             manevrlist[SelectedIndex].fParameters[8] := g_Multipliers[0]*g_TrackBars[0].Position;
