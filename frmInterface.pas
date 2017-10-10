@@ -841,12 +841,12 @@ begin
 
       multipliers[0]:=0.01;
       multipliers[1]:=0.01;
-      multipliers[2]:=1;
+      multipliers[2]:=0.5;
       multipliers[3]:=1;
 
 
       mins[2]:=1;
-      maxes[2]:=30;
+      maxes[2]:=60;
 
       mins[3]:=100;
       maxes[3]:=1000;
