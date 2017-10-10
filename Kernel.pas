@@ -151,8 +151,8 @@ function HotV(helicopter : THelicopter;icG, icT, V: Real) : Real; overload;
 var
   H1 : Real;
 begin
-  H1 := HotV(helicopter,0);
-
+ // H1 := HotV(helicopter,0);   //эквидистантный сдвиг в рез-те расчета только по стат. потолку
+  H1 := HotV(helicopter,V);     //пересчет для каждой скорости
   Result := HotV(helicopter,V) + HotTyagi(helicopter, icT, Trasp(helicopter,normT, H1)*(icG/helicopter.Gnorm)) - H1
 end;
 
