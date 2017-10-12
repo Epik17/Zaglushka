@@ -218,10 +218,6 @@ var
 
     TempFlightData[High(TempFlightData)].ny := ny;
 
-      if High(TempFlightData) = 0 then
-       TempFlightData[High(TempFlightData)].nxfact := 0
-      else
-       TempFlightData[High(TempFlightData)].nxfact := (TempFlightData[High(TempFlightData)].V - TempFlightData[High(TempFlightData)-1].V) / dt /g_g
    end;
 
 
@@ -303,6 +299,9 @@ if not (nyvvoda > ny(helicopter, icG, icT,initialstate.y,initialstate.V*g_mps)) 
      AppendManevrData(Result,vvod,helicopter);
      AppendManevrData(Result,nakl,helicopter);
      AppendManevrData(Result,vyvod,helicopter);
+
+     //вычисляем фактические nx
+     write_nx_fact(Result);
     end
   else
    ShowMessage(failureMessage);

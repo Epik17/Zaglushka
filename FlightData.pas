@@ -39,6 +39,7 @@ function deltaPsi(Manevr : TManevrData) : Extended;
 function ManevrPropsPerebornye(Manevr : TManevrData) : TManevrPropsPerebornye;
 procedure FindingMax (tempvalue : Real; var max : Real);
 
+procedure write_nx_fact (var Manevr : TManevrData);
 
 implementation
 
@@ -257,5 +258,20 @@ begin
   Result.Vmin := Result.Vmin * g_mps;
   Result.Vmax := Result.Vmax * g_mps;
 end;
+
+
+procedure write_nx_fact (var Manevr : TManevrData);
+var
+  i : Integer;
+begin
+     for i := 0 to High(Manevr) do
+      if i = 0
+      then
+        Manevr[i].nxfact := 0
+      else
+       Manevr[i].nxfact := (Manevr[i].V - Manevr[i-1].V) / dt /g_g
+end;
+
+
 
 end.
