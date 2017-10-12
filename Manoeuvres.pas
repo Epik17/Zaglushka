@@ -476,7 +476,7 @@ begin
          dpsiVvod := tempstate.psi-initialstate.psi;
 
        if not failed then
-         while not (Abs(tempstate.psi-initialstate.psi) >= Abs((DegToRad(deltaPsi))-Abs(dpsiVvod))) do
+         while not (Abs(tempstate.psi-initialstate.psi) >= Abs(Abs(DegToRad(deltaPsi))-Abs(dpsiVvod))) do
           if (tempstate.V > 0) then
              begin
               SetOmegaAndAcceleration(tempomega,tempa,tempstate, tempny, dnxa, Left,Forced,True);
@@ -562,6 +562,8 @@ else
       AppendManevrData(Result,vvod,helicopter);
       AppendManevrData(Result,constgammaUchastok,helicopter);
       AppendManevrData(Result,vyvod,helicopter);
+
+      write_nx_fact(Result);
 
       SetLength(vvod,0);
       SetLength(constgammaUchastok,0);
