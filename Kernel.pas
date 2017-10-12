@@ -297,12 +297,12 @@ function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V : Real) : Real; 
 const
   Cx = 0.0115;
 begin
-  Result := Cx*helicopter.Fomet*AirDensity(hManevraCurrent)*Sqr(V/g_mps/2)/icG
+  Result := Cx*helicopter.Fomet*AirDensity(hManevraCurrent)*Sqr(V/g_mps)/2/icG
 end;
 
 function nxOtXvr(helicopter : THelicopter;hManevraCurrent,icG,V, Cx : Real) : Real;  overload;
 begin
-  Result := Cx*helicopter.Fomet*AirDensity(hManevraCurrent)*Sqr(V/g_mps/2)/icG
+  Result := Cx*helicopter.Fomet*AirDensity(hManevraCurrent)*Sqr(V/g_mps)/2/icG
 end;
   {
 function ny(helicopter : THelicopter;icG, icT,icH0,V : Real): Real;
